@@ -34,7 +34,17 @@
             "inlineStyleLanguage": "scss",
             "assets": [
               "src/favicon.ico",
-              "src/assets"
+              "src/assets",
+              {
+                "glob": "*.{png,svg,jpg,jpeg,gif}",
+                "input": "inicio/teste",
+                "output": "assets/quest"
+              },
+              {
+                "glob": "**/*",
+                "input": "inicio/teste/img",
+                "output": "assets/quest/img"
+              }
             ],
             "styles": [
               "src/styles.scss",
@@ -107,5 +117,8 @@
         }
       }
     }
+  },
+  "cli": {
+    "analytics": "17b17146-096d-41f8-9c64-9fdfc3d88ddd"
   }
 }

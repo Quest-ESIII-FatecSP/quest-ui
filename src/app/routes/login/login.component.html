@@ -1,4 +1,54 @@
-<button type="button" class="btn btn-primary" style="margin-bottom: 30%">Test button</button>
-<div class="col-6 d-flex justify-content-center align-items-center" style="margin-left: 30%">
-  <z-progress-bar [zType]="'accent'"  [progress]="50" [zShape]="'default'" [zIndeterminate]="true" [zSize]="'lg'"></z-progress-bar>
+<div class="login-wrapper">
+  <canvas id="backgroundCanvas"></canvas>
+  <div class="overlay"></div>
+  <div class="login-card container-fluid p-4">
+    <div class="row align-items-center">
+      <div class="col-md-5 bg-light rounded-4 p-4">
+        <h2 class="fw-bold mb-3 text-center">Bem-vindo!</h2>
+        <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Email</label>
+            <input name="email" [(ngModel)]="model.email" type="email" class="form-control" placeholder="Digite seu email" required>
+          </div>
+          <div class="mb-3 position-relative">
+            <label class="form-label fw-semibold">Senha</label>
+            <input name="senha" [(ngModel)]="model.senha" [type]="showPassword ? 'text':'password'" class="form-control" placeholder="Digite sua senha" required>
+            <i class="bi" [ngClass]="showPassword ? 'bi-eye-slash':'bi-eye'" (click)="togglePassword()" style="cursor:pointer; position:absolute; top:50%; right:12px; transform:translateY(-50%)"></i>
+          </div>
+          <div class="form-check mb-3">
+            <input type="checkbox" id="remember" class="form-check-input" [(ngModel)]="model.remember" name="remember">
+            <label for="remember" class="form-check-label">Lembrar-me</label>
+          </div>
+          <button type="submit" class="btn btn-success w-100 mb-2 btn-glow" [disabled]="loginForm.invalid">Login</button>
+          <button type="button" class="btn btn-primary w-100 mb-2 btn-glow" (click)="goTutorial()">Tutorial</button>
+          <button type="button" class="btn btn-warning w-100 btn-glow" (click)="goLobbyGuest()">Jogar como Convidado</button>
+          <button type="button" class="btn btn-outline-dark w-100 mt-2 btn-glow">
+            <i class="bi bi-google"></i> Entrar com Google
+          </button>
+        </form>
+        <div class="text-center mt-3">
+          <small>Não tem uma conta? <a routerLink="/register" class="fw-bold">Cadastre-se aqui</a></small>
+        </div>
+      </div>
+      <div class="col-md-7 text-center text-white p-4">
+        <h1 class="quest-title mb-4">
+          <span class="q">Q</span>
+          <span class="u">U</span>
+          <span class="e">E</span>
+          <span class="s">S</span>
+          <span class="t">T</span>
+        </h1>
+        <p class="fs-5">
+          O <strong>Quest</strong> é um jogo de perguntas e respostas que desafia seu conhecimento
+          em diversas categorias.
+        </p>
+        <div class="category-icons mt-3">
+          <img *ngFor="let c of categoryIcons" [src]="c" alt="Categoria" />
+        </div>
+        <div class="motivacional">{{ frase }}</div>
+        <div class="clock">{{ clock }}</div>
+        <div class="footer-msg">⚡ Prepare-se para o desafio!</div>
+      </div>
+    </div>
+  </div>
 </div>
