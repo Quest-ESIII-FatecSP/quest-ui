@@ -1,0 +1,16 @@
+body, .login-wrapper { height:100%; }
+.login-wrapper { position:relative; min-height:100vh; display:flex; justify-content:center; align-items:center; background:#030f3c; overflow:hidden; }
+#backgroundCanvas { position:fixed; top:0; left:0; width:100%; height:100%; z-index:-2; }
+.overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:linear-gradient(135deg, rgba(3,15,60,0.85), rgba(60,15,90,0.85)); z-index:-1; animation:bgshift 12s ease-in-out infinite alternate; }
+@keyframes bgshift { 0%{background:linear-gradient(135deg, rgba(3,15,60,0.85), rgba(60,15,90,0.85));} 100%{background:linear-gradient(135deg, rgba(10,40,100,0.85), rgba(90,20,120,0.85));}}
+.login-card { max-width:1100px; width:92%; border-radius:20px; background:rgba(44,62,198,0.92); box-shadow:0 6px 30px rgba(0,0,0,0.4); overflow:hidden; }
+.quest-title { font-family:'Luckiest Guy', cursive; font-size:clamp(56px,7vw,120px); letter-spacing:2px; color:white; text-shadow:3px 3px 8px rgba(0,0,0,0.7); }
+.quest-title .q{color:red;} .quest-title .u{color:blue;} .quest-title .e{color:gold;} .quest-title .s{color:purple;} .quest-title .t{color:green;}
+.btn-glow { transition:all .25s ease; }
+.btn-glow:hover { box-shadow:0 0 12px rgba(255,255,255,0.6); transform:translateY(-2px); }
+.category-icons img { width:50px; margin:0 6px; filter:drop-shadow(2px 2px 4px rgba(0,0,0,0.4)); transition:transform .3s; }
+.category-icons img:hover { transform:scale(1.15); }
+.footer-msg { font-size:16px; color:#fff; margin-top:15px; animation:blink 1.8s infinite; }
+@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:.5;} }
+.motivacional { font-size:18px; font-style:italic; margin-top:20px; color:#ffd; }
+.clock { font-size:20px; font-weight:bold; margin-top:10px; color:#fff; }

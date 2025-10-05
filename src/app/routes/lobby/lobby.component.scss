@@ -1,0 +1,11 @@
+.lobby-container { min-height:100vh; color:#fff; font-family:Arial,sans-serif; }
+.lobby-header { background:rgba(0,0,0,0.6); backdrop-filter:blur(8px); padding:15px 30px; position:relative; }
+.player-avatar { width:50px; height:50px; border-radius:50%; border:2px solid #fff; object-fit:cover; cursor:pointer; }
+.profile-dropdown { position:absolute; top:60px; left:0; background:rgba(255,255,255,0.95); border-radius:12px; padding:10px; box-shadow:0 4px 12px rgba(0,0,0,0.3); z-index:20; flex-wrap:wrap; gap:10px; width:220px; }
+.profile-dropdown img { width:50px; height:50px; border-radius:50%; cursor:pointer; transition:transform .2s; object-fit:cover; }
+.profile-dropdown img:hover { transform:scale(1.1); }
+.panel { background:rgba(255,255,255,0.1); border-radius:16px; }
+.player-card { background:rgba(255,255,255,0.15); padding:10px; border-radius:12px; display:flex; align-items:center; gap:12px; }
+.player-card img { width:40px; height:40px; border-radius:50%; border:2px solid #fff; object-fit:cover; }
+.sidebar .card { cursor:pointer; transition:transform .2s; background:rgba(255,255,255,0.1); color:#fff; }
+.sidebar .card:hover { transform:translateY(-5px); background:rgba(255,255,255,0.25); }
