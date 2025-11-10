@@ -1,4 +1,19 @@
-<button type="button" class="btn btn-primary" style="margin-bottom: 30%">Test button</button>
-<div class="col-6 d-flex justify-content-center align-items-center" style="margin-left: 30%">
-  <z-progress-bar [zType]="'accent'"  [progress]="50" [zShape]="'default'" [zIndeterminate]="true" [zSize]="'lg'"></z-progress-bar>
+<div class="login-wrapper">
+  <div class="login-card">
+    <h1 class="quest-title mb-4">
+      <span class="q">Q</span><span class="u">U</span><span class="e">E</span><span class="s">S</span><span class="t">T</span>
+    </h1>
+    <p class="subtitle">Desafie seu conhecimento em diversas categorias!</p>
+    <form (ngSubmit)="enterAsGuest()" #loginForm="ngForm">
+      <button type="submit" class="btn btn-warning w-100 mb-2">Jogar como Convidado</button>
+      <button type="button" class="btn btn-outline-dark w-100" (click)="googleLogin()">
+        <i class="bi bi-google"></i> Entrar com Google
+      </button>
+    </form>
+    <div class="mt-3 text-center">
+      <small>Ainda não tem conta? <a routerLink="/register">Cadastre-se</a></small>
+    </div>
+    <div class="motivacional mt-3">{{ fraseMotivacional }}</div>
+    <div class="clock">{{ clock }}</div>
+  </div>
 </div>

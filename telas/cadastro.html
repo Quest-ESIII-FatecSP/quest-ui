@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quest - Cadastro</title>
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Google Font divertida -->
+  <link href="https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap" rel="stylesheet">
+  <!-- Ícones -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background-color: #030f3c;
+      font-family: Arial, sans-serif;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #backgroundCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -2;
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(135deg, rgba(3,15,60,0.85), rgba(60,15,90,0.85));
+      animation: bgshift 12s ease-in-out infinite alternate;
+      z-index: -1;
+    }
+    @keyframes bgshift {
+      0% { background: linear-gradient(135deg, rgba(3,15,60,0.85), rgba(60,15,90,0.85)); }
+      100% { background: linear-gradient(135deg, rgba(10,40,100,0.85), rgba(90,20,120,0.85)); }
+    }
+
+    .hidden-icons img {
+      position: absolute;
+      left: -9999px;
+      visibility: hidden;
+    }
+
+    .login-card {
+      max-width: 1200px; /* Aumentei a largura máxima */
+      width: 95%;
+      border-radius: 20px;
+      background: rgba(44, 62, 198, 0.92);
+      box-shadow: 0 6px 30px rgba(0,0,0,0.4);
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(40px);
+      animation: fadeInUp 1s ease forwards;
+    }
+    @keyframes fadeInUp {
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .quest-title {
+      font-family: 'Luckiest Guy', cursive;
+      font-size: clamp(56px, 7vw, 120px);
+      letter-spacing: 2px;
+      color: white;
+      text-shadow: 3px 3px 8px rgba(0,0,0,0.7);
+    }
+    .quest-title span.q { color: red; }
+    .quest-title span.u { color: blue; }
+    .quest-title span.e { color: gold; }
+    .quest-title span.s { color: purple; }
+    .quest-title span.t { color: green; }
+
+    .btn-glow {
+      transition: all 0.25s ease;
+    }
+    .btn-glow:hover {
+      box-shadow: 0 0 12px rgba(255,255,255,0.6);
+      transform: translateY(-2px);
+    }
+
+    form label {
+      display: block;
+      margin-bottom: 10px; /* Espaço abaixo do label */
+      font-weight: 600;
+    }
+
+    .login-box input {
+      width: 100%;
+      padding: 16px 18px; /* Mais espaçamento interno */
+      font-size: 18px;
+      margin-bottom: 24px; /* Espaço abaixo do input */
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .btn-cadastrar { 
+      width: 100%; 
+      padding: 16px;
+      border: none; 
+      border-radius: 8px; 
+      font-size: 18px; 
+      cursor: pointer; 
+      transition: all 0.25s ease; 
+      background-color: #5cb85c; 
+      color: white;
+    }
+    .btn-cadastrar:hover { 
+      background-color: #4cae4c; 
+      box-shadow: 0 0 12px rgba(255,255,255,0.6);
+      transform: translateY(-2px);
+    }
+
+    .footer-msg {
+      font-size: 16px;
+      color: #fff;
+      margin-top: 15px;
+      animation: blink 1.8s infinite;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .motivacional {
+      font-size: 18px;
+      font-style: italic;
+      margin-top: 20px;
+      color: #ffd;
+    }
+
+    .clock {
+      font-size: 20px;
+      font-weight: bold;
+      margin-top: 10px;
+      color: #fff;
+    }
+
+    .descricao {
+      font-size: 18px;
+      color: #fff;
+      margin-top: 20px;
+    }
+
+    /* Ajuste para dispositivos menores */
+    @media (max-width: 900px) {
+      .login-card { flex-direction: column; }
+      .col-md-5, .col-md-7 { width: 100%; }
+      .login-box input { margin-bottom: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="backgroundCanvas"></canvas>
+  <div class="overlay"></div>
+
+  <!-- Ícones escondidos -->
+  <div class="hidden-icons">
+    <img id="icon-artes" src="E.png" alt="Artes" />
+    <img id="icon-ciencia" src="CT.png" alt="Ciências" />
+    <img id="icon-esportes" src="EL.png" alt="Esportes" />
+    <img id="icon-mundo" src="M.png" alt="Mundo" />
+    <img id="icon-variedades" src="V.png" alt="Variedades" />
+    <img id="icon-sociedade" src="S.png" alt="Sociedade" />
+  </div>
+
+  <div class="login-card container-fluid p-4">
+    <div class="row align-items-center">
+
+      <!-- Esquerda: Formulário -->
+      <div class="col-md-5 bg-light rounded-4 p-4 login-box">
+        <h2 class="fw-bold mb-4 text-center">Crie sua conta</h2>
+        <form id="cadastroForm">
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="Digite seu email" required>
+
+          <label for="senha">Senha</label>
+          <input type="password" id="senha" placeholder="Digite sua senha" required>
+
+          <label for="confirmarSenha">Confirmar Senha</label>
+          <input type="password" id="confirmarSenha" placeholder="Confirme sua senha" required>
+
+          <button type="submit" class="btn btn-cadastrar btn-glow">Cadastrar</button>
+        </form>
+        <div class="text-center mt-3">
+          <small>Já tem uma conta? <a href="index.html" class="fw-bold">Voltar ao login</a></small>
+        </div>
+      </div>
+
+      <!-- Direita: Título e descrição -->
+      <div class="col-md-7 text-center text-white p-4">
+        <h1 class="quest-title mb-3">
+          <span class="q">Q</span>
+          <span class="u">U</span>
+          <span class="e">E</span>
+          <span class="s">S</span>
+          <span class="t">T</span>
+        </h1>
+        <p class="descricao">
+          Cadastre-se para jogar o <strong>Quest</strong>, um jogo de perguntas e respostas que desafia
+          seu conhecimento em diversas categorias como Artes, Ciências, Esportes, Mundo, Variedades e Sociedade.
+        </p>
+        <div class="motivacional" id="motivacional"></div>
+        <div class="clock" id="clock"></div>
+        <div class="footer-msg">⚡ Prepare-se para o desafio!</div>
+      </div>
+
+    </div>
+  </div>
+
+<script>
+const canvas = document.getElementById('backgroundCanvas');
+const ctx = canvas.getContext('2d');
+
+const iconImages = [
+  document.getElementById('icon-artes'),
+  document.getElementById('icon-ciencia'),
+  document.getElementById('icon-esportes'),
+  document.getElementById('icon-mundo'),
+  document.getElementById('icon-variedades'),
+  document.getElementById('icon-sociedade'),
+];
+
+const iconSize = 40;
+const spacing = 20;
+const icons = [];
+const speed = 0.2;
+
+function initIcons() {
+  const cols = Math.ceil(canvas.width / (iconSize + spacing));
+  const rows = Math.ceil(canvas.height / (iconSize + spacing));
+
+  for (let row = 0; row < rows; row++) {
+    for (let col = 0; col < cols; col++) {
+      const iconIndex = (row + col) % iconImages.length;
+      icons.push({
+        img: iconImages[iconIndex],
+        x: col * (iconSize + spacing) + spacing / 2,
+        y: row * (iconSize + spacing) + spacing / 2
+      });
+    }
+  }
+}
+
+function animate() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  icons.forEach(icon => {
+    icon.x += speed;
+    if (icon.x > canvas.width) icon.x = -iconSize;
+    try { ctx.drawImage(icon.img, icon.x, icon.y, iconSize, iconSize); } catch(e){}
+  });
+  requestAnimationFrame(animate);
+}
+
+function startAnimation() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  icons.length = 0;
+  initIcons();
+  animate();
+}
+
+Promise.all(iconImages.map(img => new Promise(resolve => {
+  if(img.complete) resolve();
+  else { img.onload = resolve; img.onerror = resolve; }
+}))).then(startAnimation);
+
+window.addEventListener('resize', startAnimation);
+
+// Frases motivacionais
+const frases = [
+  "Conhecimento é poder!",
+  "Cada resposta é um passo rumo à vitória!",
+  "Aprender nunca foi tão divertido!",
+  "Mostre que você sabe mais!",
+  "Desafie-se e vá além!"
+];
+const motivacional = document.getElementById('motivacional');
+function trocarFrase() {
+  const frase = frases[Math.floor(Math.random() * frases.length)];
+  motivacional.textContent = frase;
+}
+trocarFrase();
+setInterval(trocarFrase, 5000);
+
+// Relógio
+function atualizarRelogio() {
+  const agora = new Date();
+  const h = String(agora.getHours()).padStart(2, '0');
+  const m = String(agora.getMinutes()).padStart(2, '0');
+  const s = String(agora.getSeconds()).padStart(2, '0');
+  document.getElementById('clock').textContent = `${h}:${m}:${s}`;
+}
+setInterval(atualizarRelogio, 1000);
+atualizarRelogio();
+
+// Evento de cadastro
+document.getElementById('cadastroForm').addEventListener('submit', e => {
+  e.preventDefault();
+  if(document.getElementById('senha').value !== document.getElementById('confirmarSenha').value){
+    alert('As senhas não coincidem!');
+    return;
+  }
+  alert('Cadastro realizado com sucesso!');
+  window.location.href = 'index.html';
+});
+</script>
+</body>
+</html>
+
+</html>
+

@@ -1,1 +1,104 @@
-<p>lobby works!</p>
+<div class="page-container">
+	<div class="content-wrap">
+		<header class="d-flex justify-content-between align-items-center lobby-header">
+			<div class="left-area d-flex align-items-center gap-3 position-relative">
+				<img [src]="player1Pic" alt="Avatar" class="player-avatar" data-bs-toggle="modal" data-bs-target="#avatarModal" (click)="setAvatarTarget(1)">
+				<span class="fw-bold fs-5 ms-2" id="playerName" (click)="mudarNome()">{{ playerName }}</span>
+			</div>
+
+			<h1 class="quest-title mb-0">
+				<span class="q">Q</span><span class="u">U</span><span class="e">E</span><span class="s">S</span><span class="t">T</span>
+			</h1>
+
+			<div class="header-right d-flex gap-4 align-items-center">
+				<div class="d-flex align-items-center">
+					<img [src]="asset('img/moeda.png')" class="resource-icon"><span id="moedas" class="fs-3">{{ moedas }}</span>
+				</div>
+			</div>
+		</header>
+
+		<div class="container-fluid mt-3" style="z-index: 5; position: relative;">
+			<div class="row">
+				<div class="col-lg-8 mb-3">
+					<div class="bg-white bg-opacity-10 p-4 rounded-4 text-center lobby-panel">
+						<h2>Sala de Espera</h2>
+						<p class="loading-text">Aguarde enquanto outros jogadores se conectam</p>
+
+						<div class="mb-3" id="playersBox">
+							<div class="player-card" id="playerCard1">
+								<img [src]="player1Pic" alt="Avatar" id="player1PicEl" (click)="openAvatarModal(1)">
+								<div class="text-start">
+									<h6 class="mb-0">Jogador 1</h6>
+									<small class="text-muted-ghost">Conectado</small>
+								</div>
+							</div>
+
+							<div class="player-card" id="playerCard2">
+								<img [src]="player2Pic" alt="Avatar" id="player2PicEl" (click)="openAvatarModal(2)">
+								<div class="text-start">
+									<h6 class="mb-0">Jogador 2</h6>
+									<small class="text-muted-ghost">Aguardando...</small>
+								</div>
+							</div>
+						</div>
+
+						<button class="btn btn-success w-100 mb-2 btn-energy" (click)="criarSala()">Criar Sala</button>
+						<button class="btn btn-primary w-100 mb-2 btn-energy" (click)="entrarSala()">Entrar na Sala</button>
+						<button class="btn btn-warning w-100 mb-2 btn-energy" (click)="criarPartida()">Jogar</button>
+					</div>
+				</div>
+
+				<div class="col-lg-4 d-flex flex-column gap-3 sidebar">
+					<div class="card p-3 d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#lojaModal">
+						<i class="bi bi-cart fs-3"></i><span class="fs-5">Loja</span>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Avatar Modal -->
+		<div class="modal fade" id="avatarModal" tabindex="-1">
+			<div class="modal-dialog modal-dialog-centered modal-lg">
+				<div class="modal-content bg-dark text-light">
+					<div class="modal-header">
+						<h5 class="modal-title">Escolher Avatar — <span>{{ avatarModalTargetLabel }}</span></h5>
+						<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+					</div>
+					<div class="modal-body d-flex flex-wrap justify-content-center gap-3">
+						<img [src]="asset('img/Artes F.png')" class="player-avatar" (click)="changeProfilePic(asset('img/Artes F.png'))">
+						<img [src]="asset('img/Esportes F.png')" class="player-avatar" (click)="changeProfilePic(asset('img/Esportes F.png'))">
+						<img [src]="asset('img/Ciência M.png')" class="player-avatar" (click)="changeProfilePic(asset('img/Ciência M.png'))">
+						<img [src]="asset('img/Mundo M.png')" class="player-avatar" (click)="changeProfilePic(asset('img/Mundo M.png'))">
+						<img [src]="asset('img/Sociedade M.png')" class="player-avatar" (click)="changeProfilePic(asset('img/Sociedade M.png'))">
+						<img [src]="asset('img/Variedades F.png')" class="player-avatar" (click)="changeProfilePic(asset('img/Variedades F.png'))">
+						<img [src]="asset('img/Musculoso.png')" class="player-avatar" (click)="changeProfilePic(asset('img/Musculoso.png'))">
+						<img [src]="asset('img/Raquel.png')" class="player-avatar" (click)="changeProfilePic(asset('img/Raquel.png'))">
+						<img [src]="asset('img/Bruxa.png')" class="player-avatar" (click)="changeProfilePic(asset('img/Bruxa.png'))">
+						<img [src]="asset('img/Vampiro.png')" class="player-avatar" (click)="changeProfilePic(asset('img/Vampiro.png'))">
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Loja Modal (simplificado) -->
+		<div class="modal fade" id="lojaModal" tabindex="-1">
+			<div class="modal-dialog modal-dialog-centered modal-lg">
+				<div class="modal-content p-4">
+					<div class="modal-header justify-content-center">
+						<h4 class="modal-title text-center">Loja</h4>
+						<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" style="position: absolute; right: 2rem;"></button>
+					</div>
+					<div class="modal-body">
+						<div class="produtos-container">
+							<div class="produto"><img [src]="asset('img/pacote-moedas-pequeno.png')"><h3>100 Moedas</h3><h3>R$ 10,00</h3><button>Comprar</button></div>
+							<div class="produto"><img [src]="asset('img/pacote-moedas-medio.png')"><h3>500 Moedas</h3><h3>R$ 10,00</h3><button>Comprar</button></div>
+							<div class="produto"><img [src]="asset('img/pacote-moedas-grande.png')"><h3>1000 Moedas</h3><h3>R$ 10,00</h3><button>Comprar</button></div>
+							<div class="produto"><img [src]="asset('img/Vampiro.png')"><h3>Avatar Limitado Vampiro</h3><h3>1000 moedas</h3><button>Comprar</button></div>
+							<div class="produto"><img [src]="asset('img/Bruxa.png')"><h3>Avatar Limitado Bruxa</h3><h3>1000 moedas</h3><button>Comprar</button></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

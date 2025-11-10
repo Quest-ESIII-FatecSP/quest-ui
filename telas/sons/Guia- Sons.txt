@@ -1,0 +1,24 @@
+click- Som tocado quando o jogador aperta algum botão (Cadastrar, Entrar em sala, Abrir opções de ajuda, etc.)
+
+musica_inicio- Música que toca nas primeiras telas do jogo, log-in/cadastro, lobby, etc.
+
+aquisicao- Som tocado quando o jogador compra um novo item (Poder, Avatar, etc.)
+
+erro- Som tocado quando uma operação não pode ser realizada por algum motivo (Comprar um item sem saldo suficiente, por exemplo)
+
+musica_quiz- Música de fundo que toca durante a partida. Se repete enquanto ela durar, preferencialmente num volume mais baixo para não tirar a concentração da pergunta
+
+roleta- Som tocado ao se girar a roleta com a categoria sendo escolhida
+
+carta- Som tocado quando o jogador clica para escolher uma das cartas
+
+cronometro- Ideia de som que pode tocar quando o tempo restante for curto
+
+resposta_correta- Som tocado quando o jogador acerta a questão
+
+resposta_errada- Som tocado quando o jogador erra a questão ou não responde a tempo
+
+vencedor- Som tocado na tela pós jogo para o vencedor da partida
+
+derrota- Som tocado na tela pós jogo para o perdedor da partida
+

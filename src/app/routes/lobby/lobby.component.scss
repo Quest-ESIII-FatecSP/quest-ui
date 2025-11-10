@@ -1,0 +1,15 @@
+.page-container { min-height: 100vh; }
+.lobby-header { background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); padding: 20px 24px; }
+.player-avatar { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; cursor: pointer; }
+.resource-icon { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; }
+.quest-title { font-family: 'Luckiest Guy', cursive; letter-spacing: 2px; color: #fff; text-shadow: 3px 3px 8px rgba(0,0,0,0.7); }
+.quest-title .q{ color:red } .quest-title .u{ color:blue } .quest-title .e{ color:gold } .quest-title .s{ color:purple } .quest-title .t{ color:green }
+.player-card { background: rgba(255,255,255,0.06); padding: 16px; border-radius: 14px; display: flex; align-items: center; gap: 16px; width: 320px; margin: 8px auto; }
+.player-card img { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; }
+.lobby-panel { border: 1px solid rgba(255,255,255,0.08); }
+.produtos-container { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+.produto { background: rgba(255,255,255,0.15); border-radius: 16px; text-align: center; padding: 16px; }
+.text-muted-ghost { color: rgba(255,255,255,0.75); }
+.btn-energy { position: relative; overflow: hidden; }
+.btn-energy::before { content: ""; position: absolute; top: -50%; left: -40%; width: 40%; height: 200%; background: linear-gradient(90deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02)); transform: rotate(-20deg); transition: left .6s ease; }
+.btn-energy:hover::before { left: 150%; }

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quest - Loja</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:Arial,sans-serif;background: linear-gradient(135deg, #030f3c, #3a1f5f); color:#fff; display:flex; justify-content:center; padding:40px 0;}
+  .center-wrapper{width:95%; max-width:1200px; background: rgba(255,255,255,0.1); border-radius:20px; padding:30px; display:flex; flex-direction:column; gap:25px;}
+  h1{font-family:'Luckiest Guy', cursive; font-size:clamp(48px,6vw,80px); text-align:center; margin-bottom:10px;}
+  .descricao-loja{font-size:18px;text-align:center;color:#fff;margin-bottom:30px;}
+  .categoria{margin-bottom:30px;}
+  .categoria h2{font-size:24px;color:#fff;margin-bottom:15px; border-left:6px solid #ff4081; padding-left:12px;}
+  .produtos-container{display:grid; grid-template-columns:repeat(3,1fr); gap:20px;}
+  .produto{background: rgba(255,255,255,0.15); border-radius:16px; text-align:center; padding:20px; cursor:pointer; transition:0.3s;}
+  .produto:hover{transform: translateY(-5px); background: rgba(255,255,255,0.25);}
+  .produto img{width:80px;height:80px;margin-bottom:12px;}
+  .produto h3{font-size:18px;margin-bottom:10px;}
+  .produto button{padding:10px 15px;border:none;border-radius:10px;background:#5cb85c;color:#fff; cursor:pointer;}
+  .produto button:hover{background:#4cae4c;}
+  @media(max-width:900px){ .produtos-container{grid-template-columns:repeat(2,1fr);} }
+  @media(max-width:600px){ .produtos-container{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+<div class="center-wrapper">
+  <h1>Loja</h1>
+  <div class="descricao-loja">
+    Compre recursos para se divertir ainda mais no <strong>Quest</strong>! Moedas, energias, poderes e itens especiais.
+  </div>
+
+  <div class="categoria">
+    <h2>Moedas</h2>
+    <div class="produtos-container">
+      <div class="produto"><img src="moedas1.png" alt=""><h3>100 Moedas</h3><button>Comprar</button></div>
+      <div class="produto"><img src="moedas2.png" alt=""><h3>500 Moedas</h3><button>Comprar</button></div>
+      <div class="produto"><img src="moedas3.png" alt=""><h3>1000 Moedas</h3><button>Comprar</button></div>
+    </div>
+  </div>
+
+  <div class="categoria">
+    <h2>Energia</h2>
+    <div class="produtos-container">
+      <div class="produto"><img src="energia1.png" alt=""><h3>+50 Energia</h3><button>Comprar</button></div>
+      <div class="produto"><img src="energia2.png" alt=""><h3>+100 Energia</h3><button>Comprar</button></div>
+      <div class="produto"><img src="energia3.png" alt=""><h3>+200 Energia</h3><button>Comprar</button></div>
+    </div>
+  </div>
+
+  <div class="categoria">
+    <h2>Poderes</h2>
+    <div class="produtos-container">
+      <div class="produto"><img src="poder1.png" alt=""><h3>Poder 1</h3><button>Comprar</button></div>
+      <div class="produto"><img src="poder2.png" alt=""><h3>Poder 2</h3><button>Comprar</button></div>
+      <div class="produto"><img src="poder3.png" alt=""><h3>Poder 3</h3><button>Comprar</button></div>
+    </div>
+  </div>
+
+  <div class="categoria">
+    <h2>Avatar / Cenário / Perguntas</h2>
+    <div class="produtos-container">
+      <div class="produto"><img src="avatar.png" alt=""><h3>Avatar Especial</h3><button>Comprar</button></div>
+      <div class="produto"><img src="cenario.png" alt=""><h3>Cenário Exclusivo</h3><button>Comprar</button></div>
+      <div class="produto"><img src="perguntas.png" alt=""><h3>Perguntas Extras</h3><button>Comprar</button></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

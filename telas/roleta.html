@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Roleta</title>
+  <style>
+    :root{
+      --tam: 420px;
+      --bg: linear-gradient(180deg,#111,#0e0e12); /* igual ao pop-up */
+      --text: #e9eef5;
+      --gold: #ffd23a;
+      --gold-dark: #d4a200;
+    }
+  *{box-sizing:border-box}
+  html,body{height:100%; margin:0; overflow:hidden; min-height:100vh}
+    body{
+      display:grid; place-items:center; color:var(--text); font:500 16px/1.4 system-ui, -apple-system, 'Segoe UI', Roboto, Arial;
+      background: var(--bg); /* fundo mesmo do pop-up */
+      min-height:100vh;
+      padding:0;
+    }
+  #backgroundCanvas { display:none; }
+  .overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: var(--bg); z-index:-1; }
+      @keyframes bgshift { 0%{ background: linear-gradient(135deg, rgba(3,15,60,0.45), rgba(60,15,90,0.45)); } 100%{ background: linear-gradient(135deg, rgba(10,40,100,0.45), rgba(90,20,120,0.45)); } }
+      .hidden-icons img { position:absolute; left:-9999px; visibility:hidden; }
+    .bg-style-intense { background-color: #2a0b2b; background-image: linear-gradient(135deg, rgba(255,255,255,0.07) 25%, transparent 25%), linear-gradient(225deg, rgba(255,255,255,0.05) 25%, transparent 25%), radial-gradient(circle at 10% 10%, rgba(255,255,255,0.04), transparent 18%); background-size: 40px 40px, 40px 40px, 1200px 800px; background-position: 0 0, 20px 20px, center center; background-blend-mode: overlay, overlay, normal; }
+    .bg-style-smooth { background-color: #301033; background-image: linear-gradient(135deg, rgba(255,255,255,0.03) 25%, transparent 25%), linear-gradient(225deg, rgba(255,255,255,0.02) 25%, transparent 25%), radial-gradient(circle at 10% 10%, rgba(255,255,255,0.03), transparent 18%); background-size: 48px 48px, 48px 48px, 1200px 800px; background-position: 0 0, 24px 24px, center center; background-blend-mode: overlay, overlay, normal; }
+
+  .result-display{ display:flex; align-items:center; gap:12px; margin-bottom:18px; }
+
+    .roleta-wrap{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; width:100%; min-height:100vh }
+    .roleta{
+      width:var(--tam); height:var(--tam); position:relative; border-radius:50%; display:grid; place-items:center;
+      filter: drop-shadow(0 28px 50px rgba(0,0,0,.55));
+    }
+  .disco{ width:100%; height:100%; border-radius:50%; background:transparent; display:grid; place-items:center; border:14px solid var(--gold); box-shadow: 0 0 60px rgba(255,210,58,0.45), inset 0 0 0 8px #00000055; transform: scale(1.15) rotate(0deg); transition: transform 6s cubic-bezier(.17,.89,.32,1.49); }
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+    100% { transform: scale(1); }
+  }
+  /* Pulso discreto após 2s parado: 3 repetições (mantém o tamanho/rotação da roleta) */
+  @keyframes discoPulse {
+    0% { transform: scale(1.15); }
+    50% { transform: scale(1.23); }
+    100% { transform: scale(1.15); }
+  }
+  .disco.pulse3 { animation: discoPulse 360ms ease-in-out 3; }
+  /* Sem animação quando ociosa (somente gira no clique) */
+  .disco.idle { animation: none !important; transform-origin: center center; }
+
+  .miolo{ position:absolute; width:140px; height:140px; border-radius:50%; background:radial-gradient(circle at 30% 30%, #2a2b3f, #0b0f1f 60%); border:6px solid rgba(0,0,0,0.5); box-shadow: inset 0 2px 12px #000a, 0 8px 18px rgba(0,0,0,.45); z-index:2}
+
+  .girar-central{ position:absolute; z-index:5; top:50%; left:50%; transform:translate(-50%,-50%); width:92px; height:92px; border-radius:50%; display:grid; place-items:center; font-weight:900; letter-spacing:.6px; text-transform:uppercase; cursor:pointer; border:3px solid rgba(0,0,0,0.18); color:#1a1200; background: radial-gradient(circle at 30% 30%, var(--gold), var(--gold-dark)); box-shadow: 0 10px 24px rgba(218,170,20,0.28), inset 0 1px 3px rgba(255,255,255,0.25); }
+  .girar-central:disabled{opacity:.65; cursor:not-allowed}
+  .girar-central:focus,
+  .girar-central:focus-visible{
+    outline: none;
+    box-shadow: none;
+  }
+
+    .pointer-top{ position:absolute; top:-6px; left:50%; transform:translateX(-50%); width:16px; height:16px; border-radius:50%; background:transparent; z-index:5 }
+
+    @media (max-width:480px){ :root{ --tam:320px } }
+  </style>
+</head>
+<body>
+  <canvas id="backgroundCanvas"></canvas>
+  <div class="overlay"></div>
+  <div class="hidden-icons" aria-hidden="true">
+    <img id="icon-artes" src="E.png" alt="Artes">
+    <img id="icon-ciencia" src="CT.png" alt="Ciências">
+    <img id="icon-esportes" src="EL.png" alt="Esportes">
+    <img id="icon-mundo" src="M.png" alt="Mundo">
+    <img id="icon-variedades" src="V.png" alt="Variedades">
+    <img id="icon-sociedade" src="S.png" alt="Sociedade">
+  </div>
+
+  <div class="roleta-wrap">
+    <div class="result-display" aria-hidden="true"></div>
+
+    <div class="roleta" role="application" aria-label="Roleta">
+      <div class="pointer-top" aria-hidden="true"></div>
+      <div class="disco" id="disco">
+        <svg id="wheel" viewBox="0 0 420 420" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" aria-hidden="false"></svg>
+      </div>
+      <button id="girar" class="girar-central" aria-label="Girar">Girar</button>
+      <div class="miolo" aria-hidden="true"></div>
+    </div>
+  </div>
+
+  <div id="resultModal" style="display:none;position:fixed;inset:0;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);z-index:9999;padding:18px;box-sizing:border-box;">
+    <div style="background:linear-gradient(180deg,#111,#0e0e12);border:6px solid var(--gold);padding:14px 18px;border-radius:20px;min-width:240px;max-width:420px;width:clamp(260px,40vw,420px);display:flex;flex-direction:column;align-items:center;gap:12px;box-shadow:0 12px 40px rgba(0,0,0,0.6)">
+      <img id="modalImg" src="" alt="" style="width:150px;height:150px;object-fit:cover;border-radius:14px;border:4px solid rgba(0,0,0,0.3)">
+      <div id="modalLabel" style="font-weight:800;color:var(--gold);font-size:18px">Resultado</div>
+    </div>
+  </div>
+
+  <script>
+  (function(){
+    const disco = document.getElementById('disco');
+    const svg = document.getElementById('wheel');
+    const btnGirar = document.getElementById('girar');
+  const modal = document.getElementById('resultModal');
+  const modalImg = document.getElementById('modalImg');
+  const modalLabel = document.getElementById('modalLabel');
+
+    const SIZE = 420;
+    const CX = SIZE/2, CY = SIZE/2;
+    const N = 6;
+    const offset = 0;
+    const colors = [
+      '#18a558',
+      '#8b4513',
+      '#0f7bff',
+      '#8b2be2',
+      '#ffd23a',
+      '#ff4d4d'
+    ];
+  const labels = ['Esportes','Aleatório','Ciências','Sociedade','Mundo','Artes'];
+  const pointsMap = [3, 2, 4, 1, 5, 3];
+    const images = ['EL.png','V.png','CT.png','S.png','M.png','E.png'];
+
+    function create(tag, attrs){ const el = document.createElementNS('http://www.w3.org/2000/svg', tag); for(const k in attrs) el.setAttribute(k, attrs[k]); return el }
+
+    function buildWheel(){
+      svg.innerHTML = '';
+      const group = create('g', { id:'wheelGroup', transform:`translate(${CX},${CY})` });
+      const rOuter = CX - 20;
+      const rInner = 40;
+      for(let i=0;i<N;i++){
+        const a1 = (360/N)*i - 90 + offset;
+        const a2 = (360/N)*(i+1) - 90 + offset;
+        const x1 = rOuter * Math.cos(a1 * Math.PI/180);
+        const y1 = rOuter * Math.sin(a1 * Math.PI/180);
+        const x2 = rOuter * Math.cos(a2 * Math.PI/180);
+        const y2 = rOuter * Math.sin(a2 * Math.PI/180);
+        const pathD = `M 0 0 L ${x1} ${y1} A ${rOuter} ${rOuter} 0 0 1 ${x2} ${y2} Z`;
+        const sector = create('path', { d:pathD, fill: colors[i % colors.length], stroke:'#311235', 'stroke-width': '8' });
+        group.appendChild(sector);
+
+  const midA = (a1 + a2)/2;
+  const imgSize = 56;
+  const imgRadius = rOuter - imgSize/2 - 12;
+  const ix = imgRadius * Math.cos(midA * Math.PI/180);
+  const iy = imgRadius * Math.sin(midA * Math.PI/180);
+  const imgEl = create('image', { x: ix - imgSize/2, y: iy - imgSize/2, width: imgSize, height: imgSize });
+        imgEl.setAttributeNS('http://www.w3.org/1999/xlink', 'href', images[i % images.length]);
+        imgEl.setAttribute('preserveAspectRatio','xMidYMid slice');
+        group.appendChild(imgEl);
+      }
+
+      const ring = create('circle', { cx:0, cy:0, r: rOuter + 8, fill:'none', stroke: 'rgba(0,0,0,0.25)', 'stroke-width':4 });
+      group.appendChild(ring);
+
+      svg.appendChild(group);
+    }
+
+  buildWheel();
+  disco.classList.add('idle');
+
+    // --- Pulse após 2s sem girar; repetir enquanto estiver ociosa ---
+    let idlePulseTimeout = null;
+    function stopIdlePulse(){
+      try{ if(idlePulseTimeout){ clearTimeout(idlePulseTimeout); idlePulseTimeout = null; } }catch(e){}
+      try{ disco.classList.remove('pulse3'); }catch(e){}
+    }
+    function triggerIdlePulse(){
+      if(girando) return; // não pulsa se estiver girando
+      try{
+        // Remove estado idle para permitir animação (idle força animation:none)
+        disco.classList.remove('idle');
+        disco.classList.add('pulse3');
+        const onEnd = () => {
+          disco.classList.remove('pulse3');
+          // Retorna ao estado idle após o pulso
+          if(!girando) disco.classList.add('idle');
+          disco.removeEventListener('animationend', onEnd);
+          // Reagendar novo pulso após pequena pausa enquanto continuar ociosa
+          if(!girando) scheduleIdlePulse(2800);
+        };
+        disco.addEventListener('animationend', onEnd);
+      }catch(e){}
+    }
+    function scheduleIdlePulse(delayMs = 2000){
+      stopIdlePulse();
+      idlePulseTimeout = setTimeout(triggerIdlePulse, delayMs);
+    }
+    // Inicia a programação do pulso ao carregar
+    scheduleIdlePulse(2000);
+
+    let girando = false;
+    let alvoGraus = 0;
+
+    function rndInt(max){ const a = new Uint32Array(1); crypto.getRandomValues(a); return a[0] % max }
+    function modulo(a,n){ return ((a % n) + n) % n }
+
+    function indiceParaCentro(k){ return offset + k*(360/N) }
+
+    function girarParaIndice(k){
+      try{ document.documentElement.style.overflow = 'hidden'; document.body.style.overflow = 'hidden'; }catch(e){}
+      // Cancelar qualquer pulso quando iniciar a rotação
+      stopIdlePulse();
+      const voltas = 5 + rndInt(4);
+      const centro = indiceParaCentro(k);
+      const alvo = voltas*360 + modulo(-centro,360);
+      const dur = 5200 + rndInt(1400);
+      disco.classList.remove('idle');
+      svg.style.transition = `transform ${dur}ms cubic-bezier(.17,.89,.32,1.49)`;
+      svg.style.transitionDuration = dur + 'ms';
+      alvoGraus += alvo;
+  girando = true; btnGirar.disabled = true;
+      requestAnimationFrame(()=> svg.style.transform = `rotate(${alvoGraus}deg)` );
+    }
+
+    function girarAleatorio(){ const k = rndInt(N); girarParaIndice(k) }
+
+    let confettiRaf = null;
+    function launchConfetti(duration = 3000){
+      const colors = ['#ffd23a','#ff6b6b','#6bffb3','#6b9bff','#ff9f43'];
+      const canvas = document.createElement('canvas');
+      canvas.style.position = 'fixed'; canvas.style.left='0'; canvas.style.top='0'; canvas.style.width='100%'; canvas.style.height='100%'; canvas.style.pointerEvents='none'; canvas.style.zIndex = 9998;
+      document.body.appendChild(canvas);
+      const ctx = canvas.getContext('2d');
+      function resize(){ canvas.width = window.innerWidth; canvas.height = window.innerHeight }
+      resize(); window.addEventListener('resize', resize);
+      const particles = [];
+      const count = 120;
+      for(let i=0;i<count;i++){
+        particles.push({
+          x: Math.random()*canvas.width,
+          y: -20 - Math.random()*canvas.height*0.2,
+          vx: (Math.random()-0.5)*6,
+          vy: 2 + Math.random()*6,
+          size: 6 + Math.random()*8,
+          rot: Math.random()*360,
+          color: colors[Math.floor(Math.random()*colors.length)],
+        });
+      }
+      const start = performance.now();
+      function frame(t){
+        const dt = 16;
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        for(const p of particles){
+          p.vy += 0.12; p.x += p.vx; p.y += p.vy; p.rot += p.vx*2;
+          ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rot*Math.PI/180);
+          ctx.fillStyle = p.color; ctx.fillRect(-p.size/2, -p.size/2, p.size, p.size*0.6);
+          ctx.restore();
+        }
+        if(t - start < duration){ confettiRaf = requestAnimationFrame(frame); }
+        else{ cancelAnimationFrame(confettiRaf); window.removeEventListener('resize', resize); canvas.remove(); }
+      }
+      confettiRaf = requestAnimationFrame(frame);
+    }
+
+    function showModalForIndex(k){
+      const imgFile = images[k % images.length];
+      modalImg.src = imgFile;
+      modalLabel.textContent = labels[k] || `Resultado ${k}`;
+      modal.style.display = 'flex';
+      launchConfetti(3500);
+      try{
+        parent.postMessage({ type: 'roletaResult', category: labels[k] || `Resultado ${k}`, points: pointsMap[k] || 1, index: k }, '*');
+      }catch(e){}
+    }
+
+    function finalizar(){
+      girando = false; btnGirar.disabled = false;
+      try{ document.documentElement.style.overflow = ''; document.body.style.overflow = ''; }catch(e){}
+      const final = modulo(alvoGraus,360);
+      const idx = Math.round(((-final - offset)/(360/N)));
+  const k = modulo(idx, N);
+      showModalForIndex(k);
+    }
+
+  svg.addEventListener('transitionend', ()=> { if(!girando) return; finalizar(); });
+  // Intercepta clique para permitir sincronização externa: sorteia parâmetros e notifica o parent
+  function girarParaIndiceComParams(kParam, tParam, dParam){
+    try{ document.documentElement.style.overflow = 'hidden'; document.body.style.overflow = 'hidden'; }catch(e){}
+    stopIdlePulse();
+    const voltas = tParam;
+    const centro = indiceParaCentro(kParam);
+    const alvo = voltas*360 + modulo(-centro,360);
+    const dur = dParam;
+    disco.classList.remove('idle');
+    svg.style.transition = `transform ${dur}ms cubic-bezier(.17,.89,.32,1.49)`;
+    svg.style.transitionDuration = dur + 'ms';
+    alvoGraus += alvo;
+    girando = true; btnGirar.disabled = true;
+    requestAnimationFrame(()=> svg.style.transform = `rotate(${alvoGraus}deg)` );
+  }
+
+  btnGirar.addEventListener('click', ()=>{
+    stopIdlePulse();
+    const k = rndInt(N);
+    const turns = 5 + rndInt(4);
+    const duration = 5200 + rndInt(1400);
+    try{ parent.postMessage({ type: 'roletaSpinStarted', index: k, turns, duration }, '*'); }catch(e){}
+    girarParaIndiceComParams(k, turns, duration);
+  });
+
+    svg.setAttribute('viewBox', `0 0 ${SIZE} ${SIZE}`);
+
+  })();
+  // API no mesmo escopo (usa as variáveis e estados corretos)
+  try{
+    window.addEventListener('message', (ev)=>{
+      const d = ev && ev.data || {};
+      if(d && d.type === 'spinNow'){
+        const idx = Number(d.index)||0; const t = Number(d.turns)||6; const ms = Number(d.duration)||6000;
+        girarParaIndiceComParams(idx, t, ms);
+      }
+      if(d && d.type === 'setSpinEnabled'){
+        try{ document.getElementById('girar').disabled = !d.enabled; }catch(e){}
+      }
+      if(d && d.type === 'resetWheel'){
+        try{
+          const svg = document.getElementById('wheel');
+          const btn = document.getElementById('girar');
+          const disco = document.getElementById('disco');
+          const modal = document.getElementById('resultModal');
+          // Hide result modal if visible
+          if(modal) modal.style.display = 'none';
+          // Reset rotation immediately
+          if(svg){
+            svg.style.transition = 'none';
+            svg.style.transform = 'rotate(0deg)';
+            // force reflow then allow transitions again
+            void svg.offsetHeight;
+            svg.style.transition = '';
+          }
+          // reset state
+          try{ window.alvoGraus = 0; }catch(e){}
+          try{ if(btn) btn.disabled = false; }catch(e){}
+          try{ if(disco){ disco.classList.add('idle'); } }catch(e){}
+        }catch(e){}
+      }
+    });
+    window.roletaAPI = { spinTo: (i,t,ms)=> girarParaIndiceComParams(i,t,ms), setSpinEnabled: (enabled)=>{ try{ document.getElementById('girar').disabled = !enabled; }catch(e){} } };
+  }catch(e){}
+  try{
+    const saved = localStorage.getItem('bgStyle');
+    if(saved){ document.documentElement.classList.add(saved); document.body.classList.add(saved); }
+  }catch(e){}
+  </script>
+</body>
+</html>

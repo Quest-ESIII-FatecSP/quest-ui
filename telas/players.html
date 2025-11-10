@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Quest - Lobby</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+
+<style>
+/* ---------------------------
+   BASE
+   --------------------------- */
+html, body { height: 100%; }
+body {
+  background: linear-gradient(135deg, #030f3c, #3a1f5f);
+  color: #fff;
+  margin: 0;
+  min-height: 100vh;
+  font-family: Arial, sans-serif;
+  position: relative;
+  overflow-x: hidden;
+}
+
+.page-container {
+    display: flex; /* Transforma em um contêiner flexível */
+    flex-direction: column; /* Organiza os itens verticalmente */
+    min-height: 100vh; /* Garante que ocupe, no mínimo, 100% da altura visível */
+}
+
+/* 3. O conteúdo principal deve 'crescer' e empurrar o rodapé para baixo */
+.content-wrap {
+  flex-grow: 1; /* Faz com que esta seção ocupe todo o espaço livre */
+  /* espaço de fundo para o rodapé fixo (evita sobreposição e barra de rolagem) */
+  padding-bottom: 240px;
+}
+
+/* ---------------------------
+   HEADER (maior + central title)
+   --------------------------- */
+header {
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(8px);
+  padding: 28px 36px; /* aumentado para ser mais imponente */
+  position: relative;
+  z-index: 10;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.45);
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+
+/* area esquerda (avatar + nome) */
+header .left-area {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* player avatar no header - aumentado */
+.player-avatar {
+  width: 120px;   /* maior */
+  height: 120px;  /* maior */
+  object-fit: cover;
+  cursor: pointer;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+}
+
+/* hover/seleção mais evidente no avatar */
+.player-avatar:hover {
+  transform: scale(1.06);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.55);
+}
+
+/* nome jogador no topo */
+#playerName {
+  font-weight: 700;
+  font-size: 1.15rem;
+  cursor: pointer;
+  user-select: none;
+  letter-spacing: 0.2px;
+}
+
+/* recursos no canto direito do header */
+.resource-icon {
+  width: 70px;   /* ligeiramente maior */
+  height: 70px;
+  margin-right: 8px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* wrapper do header para alinhas os itens corretamente */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  font-weight: 600;
+}
+
+/* ---------------------------
+   TÍTULO CENTRAL "QUEST"
+   --------------------------- */
+/* Centralizado heroicamente */
+#gameTitle {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  color: #ffd700;
+  text-shadow: 0 2px 8px rgba(255,215,0,0.08), 0 8px 26px rgba(0,0,0,0.6);
+  text-transform: uppercase;
+  z-index: 9;
+}
+
+/* leve brilho animado no título */
+@keyframes titleGlow {
+  0% { text-shadow: 0 2px 6px rgba(255,215,0,0.06); transform: translate(-50%,-50%) scale(1); }
+  50% { text-shadow: 0 6px 22px rgba(255,215,0,0.18); transform: translate(-50%,-50%) scale(1.02); }
+  100% { text-shadow: 0 2px 6px rgba(255,215,0,0.06); transform: translate(-50%,-50%) scale(1); }
+}
+#gameTitle { animation: titleGlow 3.6s ease-in-out infinite; }
+
+/* ---------------------------
+   SIDEBAR CARDS (mantidos, apenas ajuste visual)
+   --------------------------- */
+.sidebar .card {
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.04);
+}
+.sidebar .card:hover {
+  transform: translateY(-6px);
+  background: rgba(255,255,255,0.12);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.45);
+}
+
+/* ---------------------------
+   PLAYER CARD (LOBBY) - mais presença + animações
+   --------------------------- */
+.player-card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+  padding: 18px;         /* aumentado */
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  gap: 18px;             /* maior para dar ar */
+  width: 320px;
+  justify-content: flex-start;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 10px 22px rgba(0,0,0,0.45);
+  transition: transform 0.28s cubic-bezier(.2,.9,.3,1), box-shadow 0.28s;
+  opacity: 0;
+  transform: translateY(18px);
+}
+
+/* avatar maior no player-card */
+.player-card img {
+  width: 150px;  /* AVATAR GRANDE */
+  height: 150px; /* AVATAR GRANDE */
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+/* efeito hover nos cards */
+.player-card:hover {
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.6);
+}
+
+/* aparecimento suave sequencial */
+.player-card.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* texto dentro do card */
+.player-card h6 { font-size: 1.05rem; margin: 0; }
+.player-card small { color: rgba(255,255,255,0.75); }
+
+/* ---------------------------
+   LAYOUT DOS JOGADORES: lado-a-lado (responsivo)
+   --------------------------- */
+#playersBox {
+  display: flex;
+  flex-direction: row;           /* lado a lado */
+  gap: 28px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* quando a tela for pequena, empilha verticalmente */
+@media (max-width: 720px) {
+  #playersBox {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .player-card {
+    width: 100%;
+    max-width: 380px;
+    padding: 12px;
+  }
+  .player-card img {
+    width: 80px;
+    height: 80px;
+  }
+}
+
+/* ---------------------------
+   MODAIS (mantidos os estilos, só reuso)
+   --------------------------- */
+.modal-content {
+  background: linear-gradient(135deg, #030f3c, #3a1f5f);
+  color: #fff;
+  border-radius: 20px;
+  border: 2px solid rgba(255,255,255,0.2);
+  box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+.modal-header { border-bottom: none; text-align: center; }
+.btn-close { filter: invert(1); }
+
+/* ---------------------------
+   PASSE DE TEMPORADA
+   --------------------------- */
+#trilhaNiveis {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  overflow-x: auto;
+  padding: 10px;
+}
+.nivel-card {
+  min-width: 250px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  padding: 10px;
+  text-align: center;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+.recompensa {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 8px;
+  padding: 5px;
+  border-radius: 10px;
+  background: rgba(0,0,0,0.25);
+}
+.recompensa.free { border-left: 5px solid #1e90ff; }
+.recompensa.premium { border-left: 5px solid #ffbf00; }
+.recompensa img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.recompensa button {
+  border: none;
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-weight: bold;
+  cursor: pointer;
+}
+.recompensa.free button { background-color: #1e90ff; color: white; }
+.recompensa.premium button { background-color: #ffbf00; color: black; }
+.recompensa button:hover { filter: brightness(1.2); }
+
+/* ---------------------------
+   XP BAR
+   --------------------------- */
+#xpContainer {
+  background: rgba(255,255,255,0.1);
+  border-radius: 10px;
+  padding: 10px;
+  margin-bottom: 15px;
+}
+#xpProgress {
+  height: 20px;
+  background: #1e90ff;
+  border-radius: 8px;
+  transition: width 0.4s ease;
+}
+
+/* efeito de brilho ao ganhar XP */
+@keyframes shineXP {
+  0% { filter: brightness(1); transform: translateY(0); }
+  50% { filter: brightness(1.6); transform: translateY(-2px); }
+  100% { filter: brightness(1); transform: translateY(0); }
+}
+.xp-glow { animation: shineXP 0.9s linear; }
+
+/* ---------------------------
+   LOJA
+   --------------------------- */
+.produtos-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.produto {
+  background: rgba(255,255,255,0.15);
+  border-radius:16px;
+  text-align:center;
+  padding:20px;
+  transition:0.3s;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+.produto:hover { transform: translateY(-5px); background: rgba(255,255,255,0.25); }
+.produto img { width: 80px; height: 80px; margin-bottom:12px; }
+.produto h3 { font-size:18px; margin-bottom:10px; }
+.produto button {
+  padding:10px 15px;
+  border:none;
+  border-radius:10px;
+  background:#5cb85c;
+  color:#fff;
+  cursor:pointer;
+}
+.produto button:hover { background:#4cae4c; }
+
+/* ---------------------------
+   MISSÕES
+   --------------------------- */
+#missoesLista {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+.missao {
+  background: rgba(255,255,255,0.1);
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+.missao h6 { margin: 0 0 5px 0; color: #ffd700; }
+
+/* ---------------------------
+   ANIMAÇÕES ADICIONAIS (FANCY)
+   --------------------------- */
+/* partículas sutis no fundo - efeito visual */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 80px 80px;
+  opacity: 0.7;
+  pointer-events: none;
+  animation: moveGrid 16s linear infinite;
+}
+@keyframes moveGrid {
+  0% { transform: translateY(0); opacity: 0.6; }
+  50% { transform: translateY(-40px); opacity: 0.8; }
+  100% { transform: translateY(0); opacity: 0.6; }
+}
+
+/* botão com "energy sweep" */
+.btn-energy {
+  position: relative;
+  overflow: hidden;
+}
+.btn-energy::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -40%;
+  width: 40%;
+  height: 200%;
+  background: linear-gradient(90deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02));
+  transform: rotate(-20deg);
+  transition: left .6s ease;
+}
+.btn-energy:hover::before { left: 150%; }
+
+/* loading text (pontos animados) */
+.loading-text::after {
+  content: "";
+  display: inline-block;
+  width: 0.75em;
+  text-align: left;
+  animation: dots 1.2s steps(4, end) infinite;
+}
+@keyframes dots {
+  0% { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
+  25% { box-shadow: 0 0 8px 6px rgba(255,255,255,0.02); }
+  50% { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
+  75% { box-shadow: 0 0 6px 4px rgba(255,255,255,0.02); }
+  100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
+}
+
+
+.halloween-footer {
+    /* CAMINHO CORRETO PARA A IMAGEM DE FUNDO (Se img está dentro da pasta do CSS) */
+    background-image: url('img/rodape.png'); 
+    
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center bottom; 
+    
+    /* Use uma altura fixa que se ajuste à sua imagem */
+    height: 220px; 
+    min-height: 120px; /* Garante altura mínima */
+    
+  width: 100%;
+    padding: 0; /* Remove padding que pode atrapalhar o background-image */
+    
+    /* Remova a cor magenta de teste */
+  background-color: transparent; 
+  /* fixa o rodapé na parte inferior da janela para não aumentar a altura do documento */
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 6;
+}
+
+/* Ajuste o texto do copyright */
+.halloween-footer p {
+    margin-bottom: 0; 
+    padding-top: 80px; /* Aumente este valor se a imagem for alta */
+    font-size: 0.8rem;
+}
+
+
+/* util */
+.text-muted-ghost { color: rgba(255,255,255,0.6); font-size: 0.95rem; }
+
+.quest-title {
+      font-family: 'Luckiest Guy', cursive;
+      font-size: clamp(56px, 7vw, 70px);
+      letter-spacing: 2px;
+      color: white;
+      text-shadow: 3px 3px 8px rgba(0,0,0,0.7);
+    }
+    .quest-title span.q { color: red; }
+    .quest-title span.u { color: blue; }
+    .quest-title span.e { color: gold; }
+    .quest-title span.s { color: purple; }
+    .quest-title span.t { color: green; }
+  
+</style>
+<style>
+/* --- Brilho / luz de fundo (estilo semelhante à roleta) --- */
+.player-avatar,
+.player-card img,
+.recompensa img {
+  position: relative;
+  display: inline-block;
+  border-radius: 50%;
+  /* glow similar to roleta */
+  box-shadow: 0 0 60px rgba(255,210,58,0.45), inset 0 0 0 6px rgba(0,0,0,0.35);
+  transition: box-shadow .32s ease, transform .25s ease;
+}
+
+/* soft radial halo behind the icon for extra depth */
+.player-avatar::after,
+.player-card img::after,
+.recompensa img::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 160%;
+  height: 160%;
+  background: radial-gradient(circle at 30% 20%, rgba(255,210,58,0.22), rgba(255,210,58,0.06) 35%, transparent 55%);
+  filter: blur(16px);
+  z-index: -1;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* respect user preference for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .player-avatar, .player-card img { transition: none; }
+  .player-avatar::after, .player-card img::after { filter: blur(6px); }
+}
+</style>
+</head>
+
+<body class="page-container">
+  <div class="content-wrap">
+
+<header class="d-flex justify-content-between align-items-center">
+  <div class="left-area d-flex align-items-center gap-3 position-relative">
+    <img src="img/Variedades F.png" alt="Avatar" class="player-avatar" data-bs-toggle="modal" data-bs-target="#avatarModal">
+    <span class="fw-bold fs-5 ms-2" id="playerName" onclick="mudarNome()">Jogador1</span>
+  </div>
+
+   <h1 class="quest-title mb-3">
+          <span class="q">Q</span>
+          <span class="u">U</span>
+          <span class="e">E</span>
+          <span class="s">S</span>
+          <span class="t">T</span>
+        </h1>
+
+  <div class="header-right d-flex gap-4 align-items-center">
+    <div class="d-flex align-items-center">
+      <img src="img/moeda.png" class="resource-icon"><span id="moedas" style="font-size: 40px;">100</span>
+    </div>
+    <!-- [DESABILITADO TEMPORARIAMENTE] Indicador de Energia (manter para uso futuro)
+    <div class="d-flex align-items-center">
+      <img src="img/energia.png" class="resource-icon"><span id="energia" style="font-size: 40px;">50</span>
+    </div>
+    -->
+  </div>
+</header>
+
+<div class="container-fluid mt-3" style="z-index: 5; position: relative;">
+  <div class="row">
+    <div class="col-lg-8 mb-3">
+      <div class="bg-white bg-opacity-10 p-4 rounded-4 text-center" style="border: 1px solid rgba(255,255,255,0.03);">
+        <h2>Sala de Espera</h2>
+        <p class="loading-text">Aguarde enquanto outros jogadores se conectam</p>
+
+        <div class="mb-3" id="playersBox">
+          <div class="player-card" id="playerCard1">
+            <img src="img/Variedades F.png" alt="Avatar" id="player1Pic">
+            <div class="text-start">
+              <h6 class="mb-0">Jogador 1</h6>
+              <small class="text-muted-ghost">Conectado</small>
+            </div>
+          </div>
+
+          <div class="player-card" id="playerCard2">
+            <img src="img/Mundo M.png" alt="Avatar" id="player2Pic">
+            <div class="text-start">
+              <h6 class="mb-0">Jogador 2</h6>
+              <small class="text-muted-ghost">Aguardando...</small>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn btn-success w-100 mb-2 btn-energy" onclick="criarSala()">Criar Sala</button>
+        <button class="btn btn-primary w-100 mb-2 btn-energy" onclick="entrarSala()">Entrar na Sala</button>
+        <button class="btn btn-warning w-100 mb-2 btn-energy" onclick="criarPartida()">Jogar</button>
+      </div>
+    </div>
+
+    <div class="col-lg-4 d-flex flex-column gap-3 sidebar">
+      <div class="card p-3 d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#lojaModal">
+        <i class="bi bi-cart fs-3"></i><span class="fs-5">Loja</span>
+      </div>
+  
+       <div class="card p-3 d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#TutorialModal">
+        <i class="bi bi-lightbulb-fill fs-3"></i><span class="fs-5">Tutorial</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="avatarModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content bg-dark text-light">
+      <div class="modal-header">
+        <h5 class="modal-title">Escolher Avatar — <span id="avatarModalTarget">Jogador 1</span></h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body d-flex flex-wrap justify-content-center gap-3">
+        <img src="img/Artes F.png" class="player-avatar" onclick="changeProfilePic(this.src)">
+        <img src="img/Esportes F.png" class="player-avatar" onclick="changeProfilePic(this.src)">
+        <img src="img/Ciência M.png" class="player-avatar" onclick="changeProfilePic(this.src)">
+        <img src="img/Mundo M.png" class="player-avatar" onclick="changeProfilePic(this.src)">
+        <img src="img/Sociedade M.png" class="player-avatar" onclick="changeProfilePic(this.src)">
+        <img src="img/Variedades F.png" class="player-avatar" onclick="changeProfilePic(this.src)">
+        <img src="img/Musculoso.png" class="player-avatar" onclick="changeProfilePic(this.src)">
+        <img src="img/Raquel.png" class="player-avatar" onclick="changeProfilePic(this.src)">
+        <img src="img/Bruxa.png" class="player-avatar" onclick="changeProfilePic(this.src)">
+        <img src="img/Vampiro.png" class="player-avatar" onclick="changeProfilePic(this.src)">
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="lojaModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content p-4">
+      <div class="modal-header justify-content-center">
+        <h4 class="modal-title text-center">Loja</h4>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" style="position: absolute; right: 2rem;"></button>
+      </div>
+      <div class="modal-body">
+        <div class="produtos-container">
+          <div class="produto"><img src="img/pacote-moedas-pequeno.png"><h3>100 Moedas</h3><h3>R$ 10,00</h3><button>Comprar</button></div>
+          <div class="produto"><img src="img/pacote-moedas-medio.png"><h3>500 Moedas</h3><h3>R$ 10,00</h3><button>Comprar</button></div>
+          <div class="produto"><img src="img/pacote-moedas-grande.png"><h3>1000 Moedas</h3><h3>R$ 10,00</h3><button>Comprar</button></div>
+          <div class="produto"><img src="img/Vampiro.png"><h3>Avatar Limitado Vampiro</h3><h3>1000 moedas</h3><button>Comprar</button></div>
+          <div class="produto"><img src="img/Bruxa.png"><h3>Avatar Limitado Bruxa</h3><h3>1000 moedas</h3><button>Comprar</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="TutorialModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content p-4">
+      <div class="modal-header justify-content-center">
+        <h4 class="modal-title text-center">Tutorial</h4>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" tyle="position: absolute; right: 2rem;"></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="premiumModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content text-center p-4">
+      <h4 class="mb-3">Plano Premium</h4>
+      <p>Desbloqueie recompensas exclusivas e skins especiais!</p>
+      <button class="btn btn-warning">Adquirir Agora</button>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div class="modal fade" id="criarSalaModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content p-4 text-center">
+      <h4 class="mb-3">Criar Nova Sala</h4>
+      <div class="mb-3 text-start">
+        <label class="form-label">Nome da Sala:</label>
+        <input type="text" id="nomeSala" class="form-control" placeholder="Ex: Desafio Épico">
+      </div>
+      <div class="mb-3 text-start">
+        <label class="form-label">Senha da Sala:</label>
+        <input type="password" id="senhaSala" class="form-control" placeholder="Digite uma senha">
+      </div>
+      <button class="btn btn-success w-100 mb-2" onclick="confirmarCriacaoSala()">Criar e Aguardar Jogador 2</button>
+      <button class="btn btn-secondary w-100" data-bs-dismiss="modal">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="entrarSalaModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content p-4 text-center">
+      <h4 class="mb-3">Entrar em uma Sala</h4>
+      <div id="listaSalas" class="mb-3 text-start"></div>
+      <button class="btn btn-secondary w-100" data-bs-dismiss="modal">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="senhaEntradaModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content p-4 text-center">
+      <h4 class="mb-3" id="tituloSalaEntrada">Entrar na Sala</h4>
+      <input type="password" id="senhaEntrada" class="form-control mb-3" placeholder="Digite a senha da sala">
+      <button class="btn btn-primary w-100 mb-2" onclick="confirmarEntradaSala()">Entrar</button>
+      <button class="btn btn-secondary w-100" data-bs-dismiss="modal">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+
+<footer class="halloween-footer text-center">
+        <div class="container p-2">
+  
+   </div>
+</footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    </body>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+
+  /* ---------------------------
+   SISTEMA DE SALAS (simples local)
+   --------------------------- */
+let salas = [];
+let salaSelecionada = null;
+
+// Abre modal criar sala
+function criarSala() {
+  const modal = new bootstrap.Modal(document.getElementById('criarSalaModal'));
+  modal.show();
+}
+
+// Confirma criação da sala
+function confirmarCriacaoSala() {
+  const nome = document.getElementById('nomeSala').value.trim();
+  const senha = document.getElementById('senhaSala').value.trim();
+
+  if (!nome || !senha) {
+    alert('Por favor, preencha o nome e a senha da sala.');
+    return;
+  }
+
+  // cria objeto sala
+  const novaSala = {
+    nome,
+    senha,
+    jogador1: document.getElementById('playerName').innerText,
+    jogador2: null
+  };
+  salas.push(novaSala);
+
+  // fecha modal
+  bootstrap.Modal.getInstance(document.getElementById('criarSalaModal')).hide();
+
+  // feedback visual
+  document.getElementById('playerCard2').querySelector('small').innerText = 'Aguardando Jogador 2...';
+  alert(`Sala "${nome}" criada com sucesso! Aguardando outro jogador...`);
+}
+
+// Abre modal entrar em sala
+function entrarSala() {
+  const lista = document.getElementById('listaSalas');
+  lista.innerHTML = '';
+
+  if (salas.length === 0) {
+    lista.innerHTML = '<p class="text-muted">Nenhuma sala disponível no momento.</p>';
+  } else {
+    salas.forEach((s, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'btn btn-outline-light w-100 mb-2';
+      btn.textContent = `${s.nome} (Criada por ${s.jogador1})`;
+      btn.onclick = () => solicitarSenha(i);
+      lista.appendChild(btn);
+    });
+  }
+
+  const modal = new bootstrap.Modal(document.getElementById('entrarSalaModal'));
+  modal.show();
+}
+
+// Solicita senha para entrar
+function solicitarSenha(index) {
+  salaSelecionada = salas[index];
+  document.getElementById('tituloSalaEntrada').innerText = `Entrar na Sala "${salaSelecionada.nome}"`;
+  document.getElementById('senhaEntrada').value = '';
+  bootstrap.Modal.getInstance(document.getElementById('entrarSalaModal')).hide();
+
+  const modal = new bootstrap.Modal(document.getElementById('senhaEntradaModal'));
+  modal.show();
+}
+
+// Confirma entrada na sala
+function confirmarEntradaSala() {
+  const senhaDigitada = document.getElementById('senhaEntrada').value.trim();
+
+  if (senhaDigitada !== salaSelecionada.senha) {
+    alert('Senha incorreta!');
+    return;
+  }
+
+  // Atualiza status jogador 2
+  salaSelecionada.jogador2 = document.getElementById('playerName').innerText;
+  bootstrap.Modal.getInstance(document.getElementById('senhaEntradaModal')).hide();
+
+  document.getElementById('playerCard2').querySelector('small').innerText = `Conectado (${salaSelecionada.jogador2})`;
+
+  alert(`Você entrou na sala "${salaSelecionada.nome}"!`);
+}
+
+/* ---------------------------
+   FUNÇÕES BÁSICAS (mantidas e estendidas)
+   --------------------------- */
+
+// alvo de seleção do modal (1 ou 2) - usado para escolher qual jogador será alterado
+let avatarTarget = 1;
+
+function setAvatarTarget(n){ avatarTarget = n === 2 ? 2 : 1; }
+// update modal header label when target changes
+function setAvatarTarget(n){
+  avatarTarget = n === 2 ? 2 : 1;
+  try{ const el = document.getElementById('avatarModalTarget'); if(el) el.textContent = `Jogador ${avatarTarget}`; }catch(e){}
+}
+
+/* Criar / entrar na sala (mantive os alerts originais e adicionei animação visual) */
+function criarPartida(){
+  // efeito visual: destacar card 1 por 1 segundo
+  pulseCard('playerCard1');
+
+  // garante que os avatares atuais estejam persistidos antes de abrir as abas
+  try{
+    const p1 = document.getElementById('player1Pic');
+    const p2 = document.getElementById('player2Pic');
+    if(p1) localStorage.setItem('selectedAvatar1', p1.src);
+    if(p2) localStorage.setItem('selectedAvatar2', p2.src);
+  }catch(e){ /* storage não disponível */ }
+
+  // Sinaliza nova partida e limpa estado antigo para evitar ficar preso no fim da partida
+  try{
+    localStorage.setItem('newMatch', String(Date.now()));
+    const keys = ['sync_roleta','sync_roleta_spin','sync_card','sync_question','sync_answer','matchResult','goLobbyNow','rematchNow'];
+    keys.forEach(k => localStorage.removeItem(k));
+  }catch(e){}
+
+  // abre APENAS UMA nova aba (Jogador 2) e navega esta aba para (Jogador 1)
+  // isso evita bloqueadores que normalmente permitem apenas 1 window.open por clique
+  const p1Url = 'partida.html?p=1';
+  const p2Url = 'partida.html?p=2';
+  const win2 = window.open(p2Url, '_blank');
+
+  // mesmo que o win2 seja bloqueado, seguimos para p=1 nesta aba
+  window.location.href = p1Url;
+}
+function entrarSalada(){
+  // efeito visual: destacar card 2 por 1s
+  pulseCard('playerCard2');
+}
+
+/* Função utilitária para pulsar um card (animação visual) */
+function pulseCard(cardId){
+  const el = document.getElementById(cardId);
+  if(!el) return;
+  el.classList.add('pulse-temp');
+  // aplica estilo via class temporária
+  el.style.transition = 'transform 0.25s ease, box-shadow 0.25s ease';
+  el.style.transform = 'scale(1.03)';
+  el.style.boxShadow = '0 26px 48px rgba(0,0,0,0.6)';
+  setTimeout(() => {
+    el.style.transform = '';
+    el.style.boxShadow = '';
+    el.classList.remove('pulse-temp');
+  }, 900);
+}
+
+/* ---------------------------
+   ALTERAR AVATAR / NOME
+   --------------------------- */
+function changeProfilePic(src){
+  try{
+    if(avatarTarget === 2){
+      const p2 = document.getElementById('player2Pic');
+      if(p2) p2.src = src;
+      // persist for player2
+      localStorage.setItem('selectedAvatar2', src);
+    } else {
+      // default -> player1 / header
+      const p1 = document.getElementById('player1Pic');
+      if(p1) p1.src = src;
+      const headerAvatar = document.querySelector('.player-avatar[data-bs-target="#avatarModal"]');
+      if(headerAvatar) headerAvatar.src = src;
+      // persist selection for other pages
+      localStorage.setItem('selectedAvatar', src);
+      localStorage.setItem('selectedAvatar1', src);
+    }
+  }catch(e){ /* storage não disponível */ }
+}
+
+function mudarNome(){
+  let novoNome = prompt("Digite o novo nome do jogador:", document.getElementById("playerName").textContent);
+  if(novoNome) document.getElementById("playerName").textContent = novoNome;
+}
+
+/* ---------------------------
+   ANIMAÇÃO NA ENTRADA: adicionar a classe 'show' sequencialmente
+   --------------------------- */
+function revealPlayerCards(){
+  const cards = document.querySelectorAll('.player-card');
+  cards.forEach((card, idx) => {
+    setTimeout(() => card.classList.add('show'), 120 * (idx + 1));
+  });
+}
+
+/* inicialização quando DOM pronto */
+document.addEventListener('DOMContentLoaded', () => {
+  // animação de entrada dos cards
+  revealPlayerCards();
+
+  // exemplo: se quiser demonstrar "jogador 2 entrou" após 2,5s (apenas demonstração visual)
+  // (você pode remover essa simulação)
+  setTimeout(() => {
+    // altera o texto do Jogador 2 para conectado e aplica pulso
+    const j2small = document.querySelectorAll('#playerCard2 small')[0];
+    if(j2small) j2small.textContent = 'Conectado';
+    pulseCard('playerCard2');
+  }, 2500);
+});
+// Ao carregar a sala, garanta que as imagens atuais dos cards estejam em localStorage
+try{
+  const p1 = document.getElementById('player1Pic');
+  const p2 = document.getElementById('player2Pic');
+  if(p1) localStorage.setItem('selectedAvatar1', p1.src);
+  if(p2) localStorage.setItem('selectedAvatar2', p2.src);
+}catch(e){ /* storage indisponível */ }
+
+// configurar comportamento do modal de avatar para saber qual jogador estamos editando
+document.addEventListener('DOMContentLoaded', () => {
+  try{
+    const p1 = document.getElementById('player1Pic');
+    const p2 = document.getElementById('player2Pic');
+    const headerAvatar = document.querySelector('.player-avatar[data-bs-target="#avatarModal"]');
+    const avatarModalEl = document.getElementById('avatarModal');
+    if(p1){
+      p1.style.cursor = 'pointer';
+      p1.addEventListener('click', ()=>{ setAvatarTarget(1); const m = new bootstrap.Modal(avatarModalEl); m.show(); });
+    }
+    if(p2){
+      p2.style.cursor = 'pointer';
+      p2.addEventListener('click', ()=>{ setAvatarTarget(2); const m = new bootstrap.Modal(avatarModalEl); m.show(); });
+    }
+    if(headerAvatar){
+      headerAvatar.addEventListener('click', ()=> setAvatarTarget(1));
+    }
+  }catch(e){ /* ignore if bootstrap not present */ }
+});
+
+
+</script>
+</body>
+</html>
