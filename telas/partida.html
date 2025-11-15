@@ -710,7 +710,8 @@ if (backBtn) {
 
 (function initFreezePower(){
   try{
-    const freezeBtn = document.getElementById('btn-freeze');
+    const freezeBtns = document.querySelectorAll(`.power-btn.power-btn--freeze.local-only[data-player="${localPlayerId}"]`);
+    freezeBtns.forEach((freezeBtn)=>{
       if (freezeBtn) {
         freezeBtn.addEventListener('click', () => {
           try {
@@ -722,13 +723,17 @@ if (backBtn) {
             localStorage.setItem('power_freeze', JSON.stringify(payload));
           } catch (e) {}
         });
-    }
+      }
+    });
   }catch(e){}
 })();
 
 (function initRunawayPower(){
   try{
-    const btn = document.querySelector('.power-row .power-btn.local-only:not(#btn-freeze)');
+    const localBtns = Array.from(document.querySelectorAll(`.powers-group .power-btn.local-only[data-player="${localPlayerId}"]`));
+    const freeze = localBtns.find(b=> b.classList.contains('power-btn--freeze'));
+    const others = localBtns.filter(b=> b !== freeze);
+    const btn = others[0];
     if (btn) {
       if (!btn.id) btn.id = 'btn-runaway';
       btn.title = 'Questões fogem do mouse';
@@ -750,9 +755,10 @@ if (backBtn) {
 
 (function initJumpScarePower(){
   try{
-    const btns = Array.from(document.querySelectorAll('.power-row .power-btn.local-only'))
-      .filter(b => b.id !== 'btn-freeze' && b.id !== 'btn-steal' && b.id !== 'btn-runaway');
-    const btn = btns[0];
+    const localBtns = Array.from(document.querySelectorAll(`.powers-group .power-btn.local-only[data-player="${localPlayerId}"]`));
+    const freeze = localBtns.find(b=> b.classList.contains('power-btn--freeze'));
+    const others = localBtns.filter(b=> b !== freeze);
+    const btn = others[1];
     if(btn){
       if(!btn.id) btn.id = 'btn-jumpscare';
       if(!btn.title) btn.title = 'Jump Scare (5s)';
@@ -774,9 +780,10 @@ if (backBtn) {
 
 (function initXBlockPower(){
   try{
-    const btns = Array.from(document.querySelectorAll('.power-row .power-btn.local-only'))
-      .filter(b => b.id !== 'btn-freeze' && b.id !== 'btn-steal' && b.id !== 'btn-runaway' && b.id !== 'btn-jumpscare');
-    const btn = btns[0];
+    const localBtns = Array.from(document.querySelectorAll(`.powers-group .power-btn.local-only[data-player="${localPlayerId}"]`));
+    const freeze = localBtns.find(b=> b.classList.contains('power-btn--freeze'));
+    const others = localBtns.filter(b=> b !== freeze);
+    const btn = others[2];
     if(btn){
       if(!btn.id) btn.id = 'btn-xmask';
       if(!btn.title) btn.title = 'X (5s)';
@@ -793,6 +800,33 @@ if (backBtn) {
         }catch(e){}
       });
     }
+  }catch(e){}
+})();
+
+(function initStealPower(){
+  try{
+    const btn = document.getElementById('btn-steal');
+    if(!btn) return;
+    btn.addEventListener('click', ()=>{
+      try{
+        const qa = document.getElementById('question-area');
+        const isQuestionVisible = qa ? (window.getComputedStyle(qa).display !== 'none') : false;
+        if(!isQuestionVisible) return;
+        // Somente o oponente pode roubar
+        if(localPlayerId === currentPlayer) return;
+        const raw = localStorage.getItem('sync_question');
+        if(!raw) return;
+        const q = JSON.parse(raw||'{}');
+        if(!q || !q.category) return;
+        if(q.stolenFrom){ return; } // já houve roubo nesta pergunta
+        if(q.by === localPlayerId) return;
+        // Marcar roubo único: de quem era, por quem foi roubado, sem alterar o tempo
+        q.stolenFrom = q.by;
+        q.stolenBy = localPlayerId;
+        q.by = localPlayerId;
+        localStorage.setItem('sync_question', JSON.stringify(q));
+      }catch(e){}
+    });
   }catch(e){}
 })();
 
@@ -947,6 +981,7 @@ function renderQuestionPayload(payload){
         tray.classList.remove('center','left','right');
         tray.classList.add('center');
         const isOpponentView = (localPlayerId !== by);
+        const stealUsed = !!payload.stolenFrom;
         const localOnlyButtons = tray.querySelectorAll('.power-btn.local-only');
         localOnlyButtons.forEach(btn=>{
           try{
@@ -963,7 +998,8 @@ function renderQuestionPayload(payload){
         const stealBtn = tray.querySelector('#btn-steal');
         if(stealBtn){
           stealBtn.style.display = '';
-          stealBtn.disabled = isOpponentView; // habilitado somente para quem responde
+          // Habilitar somente para o oponente e apenas se ainda não foi usado nesta pergunta
+          stealBtn.disabled = (!isOpponentView) || stealUsed;
         }
       }
     }catch(e){}
@@ -1021,7 +1057,7 @@ function renderQuestionPayload(payload){
     const elapsed = Math.max(0, Math.floor((Date.now() - startedAt)/1000));
     const remaining = Math.max(0, 15 - elapsed);
   
-  try{ window._currentQuestionCtx = { correct, pointsValue, category, by, at: startedAt }; }catch(e){}
+  try{ window._currentQuestionCtx = { correct, pointsValue, category, by, at: startedAt, stolenFrom: payload.stolenFrom, stolenBy: payload.stolenBy }; }catch(e){}
 
   if(localPlayerId === by){
       try{ clearInterval(timer); }catch(e){}
@@ -1919,10 +1955,24 @@ function answerQuestion(isCorrect, pointsValue = 0, category = "", selectedIndex
 
   const next = (currentPlayer === 1) ? 2 : 1;
   const newPoints = { 1: points[1], 2: points[2] };
-  if(isCorrect){ newPoints[currentPlayer] += pointsValue; }
+  try{
+    const ctx = window._currentQuestionCtx || {};
+    let awardTo = null;
+    if(isCorrect){
+      // resposta correta: quem respondeu leva (se foi roubo, o ladrão pontua)
+      awardTo = currentPlayer;
+    } else {
+      // resposta errada ou tempo: se houve roubo, pontos voltam para o original
+      if(ctx && ctx.stolenFrom && currentPlayer === ctx.stolenBy){
+        awardTo = ctx.stolenFrom;
+      }
+    }
+    if(awardTo){ newPoints[awardTo] += pointsValue; }
+  }catch(e){ if(isCorrect){ newPoints[currentPlayer] += pointsValue; } }
 
   try{
-    localStorage.setItem('sync_answer', JSON.stringify({ by: currentPlayer, correct: isCorrect, pointsValue, category, newPoints, nextPlayer: next, at: Date.now(), selectedIndex, correctIndex }));
+    const ctx = window._currentQuestionCtx || {};
+    localStorage.setItem('sync_answer', JSON.stringify({ by: currentPlayer, correct: isCorrect, pointsValue, category, newPoints, nextPlayer: next, at: Date.now(), selectedIndex, correctIndex, stolenFrom: ctx.stolenFrom, stolenBy: ctx.stolenBy }));
   }catch(e){}
 
   setTimeout(()=>{
@@ -1977,7 +2027,8 @@ function setPowerTrayVisible(show){
       }
       try{
         let answering2 = currentPlayer;
-        try{ const qraw2 = localStorage.getItem('sync_question'); const q2 = JSON.parse(qraw2||'{}'); if(q2 && typeof q2.by === 'number') answering2 = q2.by; }catch(e){}
+        let stealUsed2 = false;
+        try{ const qraw2 = localStorage.getItem('sync_question'); const q2 = JSON.parse(qraw2||'{}'); if(q2 && typeof q2.by === 'number') answering2 = q2.by; stealUsed2 = !!(q2 && q2.stolenFrom); }catch(e){}
         const isOpponentView = (localPlayerId !== answering2);
         const localOnlyButtons = tray.querySelectorAll('.power-btn.local-only');
         localOnlyButtons.forEach(btn=>{
@@ -1995,10 +2046,9 @@ function setPowerTrayVisible(show){
         try{
           const stealBtn = tray.querySelector('#btn-steal');
           if(stealBtn){
-            // always show the steal button in the footer when a question is visible;
-            // enable it only for the answering player (preserve functionality)
+            // Mostrar sempre durante a pergunta e habilitar só para o oponente
             stealBtn.style.display = isQuestionVisible ? '' : 'none';
-            try{ stealBtn.disabled = !(isQuestionVisible && !isOpponentView); }catch(e){}
+            try{ stealBtn.disabled = !(isQuestionVisible && isOpponentView) || stealUsed2; }catch(e){}
           }
         }catch(e){}
       }catch(e){}
