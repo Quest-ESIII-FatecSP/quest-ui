@@ -502,7 +502,10 @@
   #roletaIframe.dim{ filter: brightness(0.6) saturate(0.9); }
 
   
-  .power-tray{ position:fixed; left:0; right:0; bottom:18px; display:none; z-index:5000; width:100%; }
+  /* Barra de poderes sempre visível (z-index menor que roleta) */
+  .power-tray{ position:fixed; left:0; right:0; bottom:18px; display:flex; z-index:3000; width:100%; }
+  /* Roleta acima dos botões */
+  #roleta-area{ position:relative; z-index:6000; }
   .power-tray.center, .power-tray.left, .power-tray.right{ left:0; right:0; transform:none; }
   .power-row{ display:flex; align-items:center; justify-content:center; gap:42px; width:100%; }
   .powers-group{ display:flex; align-items:center; gap:14px }
@@ -708,6 +711,11 @@ if (backBtn) {
   });
 }
 
+// Definir localPlayerId antes de inicializar poderes para evitar ausência na primeira rodada
+const localPlayerId = (() => {
+  try { return Math.max(1, Math.min(2, parseInt(new URLSearchParams(location.search).get('p')||'1', 10))); } catch(e){ return 1; }
+})();
+
 (function initFreezePower(){
   try{
     const freezeBtns = document.querySelectorAll(`.power-btn.power-btn--freeze.local-only[data-player="${localPlayerId}"]`);
@@ -825,14 +833,16 @@ if (backBtn) {
         q.stolenBy = localPlayerId;
         q.by = localPlayerId;
         localStorage.setItem('sync_question', JSON.stringify(q));
+        // Re-render local (mesma aba não recebe evento storage)
+        try{ currentPlayer = localPlayerId; }catch(e){}
+        try{ renderQuestionPayload(q); }catch(e){}
+        try{ updateTurnUI(); }catch(e){}
+        try{ setPowerTrayVisible(true); }catch(e){}
       }catch(e){}
     });
   }catch(e){}
 })();
 
-const localPlayerId = (() => {
-  try { return Math.max(1, Math.min(2, parseInt(new URLSearchParams(location.search).get('p')||'1', 10))); } catch(e){ return 1; }
-})();
 
 try{
   const stored1 = localStorage.getItem('selectedAvatar1') || localStorage.getItem('selectedAvatar');
@@ -1114,6 +1124,22 @@ document.addEventListener('DOMContentLoaded', ()=>{
   try{ applyNewMatchSignal(); }catch(e){}
   updateTurnUI();
   try{ hydrateFromStorage(); }catch(e){}
+  // Monitor para garantir que poderes apareçam para p=2 (corrige casos de corrida).
+  try{
+    if(!window._powerTrayWatch){
+      window._powerTrayWatch = setInterval(()=>{
+        if(window._gameEnded) return; // não reexibir após fim de jogo
+        try{
+          const tray = document.getElementById('power-tray');
+          const qa = document.getElementById('question-area');
+          const isQuestionVisible = qa && window.getComputedStyle(qa).display !== 'none';
+          if(isQuestionVisible && tray && tray.style.display === 'none'){
+            setPowerTrayVisible(true);
+          }
+        }catch(e){}
+      }, 600);
+    }
+  }catch(e){}
 });
 
 (function(){
@@ -2002,57 +2028,52 @@ function answerQuestion(isCorrect, pointsValue = 0, category = "", selectedIndex
 }
 
 function setPowerTrayVisible(show){
+  // Mantém a barra sempre visível durante a partida; apenas oculta em estados finais.
   try{
     const tray = document.getElementById('power-tray');
     if(!tray) return;
     const qa = document.getElementById('question-area');
     const isQuestionVisible = qa ? (window.getComputedStyle(qa).display !== 'none') : false;
-    tray.style.display = (show && isQuestionVisible) ? 'flex' : 'none';
-    if(show){
-      tray.classList.remove('center');
-      tray.classList.remove('right');
-      tray.classList.remove('left');
-      if(!isQuestionVisible){
-        tray.classList.add('center');
-      } else {
+    // Se jogo terminou, força ocultar
+    if(window._gameEnded){ tray.style.display = 'none'; return; }
+    // Exibir sempre quando solicitado, mesmo que o question ainda não tenha atualizado (evita corrida em p=2)
+    tray.style.display = show ? 'flex' : 'none';
+    if(!show) return; // se solicitado esconder (fim de jogo), respeita
+
+    tray.classList.remove('center','right','left');
+    try{
+      let answering = currentPlayer;
+      try{ const qraw = localStorage.getItem('sync_question'); const q = JSON.parse(qraw||'{}'); if(q && typeof q.by === 'number') answering = q.by; }catch(e){}
+      tray.classList.add('right'); // layout consistente
+    }catch(e){ tray.classList.add(localPlayerId === 2 ? 'right' : 'left'); }
+
+    try{
+      let answering2 = currentPlayer;
+      let stealUsed2 = false;
+      try{ const qraw2 = localStorage.getItem('sync_question'); const q2 = JSON.parse(qraw2||'{}'); if(q2 && typeof q2.by === 'number') answering2 = q2.by; stealUsed2 = !!(q2 && q2.stolenFrom); }catch(e){}
+      const isOpponentView = (localPlayerId !== answering2);
+      const localOnlyButtons = tray.querySelectorAll('.power-btn.local-only');
+      localOnlyButtons.forEach(btn=>{
         try{
-          let answering = currentPlayer;
-          try{ const qraw = localStorage.getItem('sync_question'); const q = JSON.parse(qraw||'{}'); if(q && typeof q.by === 'number') answering = q.by; }catch(e){}
-          const isOpponentView = (localPlayerId !== answering);
-          // Usar sempre 'right' para reproduzir layout correto (steal central) independentemente de quem responde
-          tray.classList.add('right');
-        }catch(e){
-          if(localPlayerId === 2) tray.classList.add('right'); else tray.classList.add('left');
-        }
-      }
-      try{
-        let answering2 = currentPlayer;
-        let stealUsed2 = false;
-        try{ const qraw2 = localStorage.getItem('sync_question'); const q2 = JSON.parse(qraw2||'{}'); if(q2 && typeof q2.by === 'number') answering2 = q2.by; stealUsed2 = !!(q2 && q2.stolenFrom); }catch(e){}
-        const isOpponentView = (localPlayerId !== answering2);
-        const localOnlyButtons = tray.querySelectorAll('.power-btn.local-only');
-        localOnlyButtons.forEach(btn=>{
-          try{
-            const btnPlayer = btn.getAttribute('data-player');
-            btn.classList.remove('hidden-remote');
-            btn.style.display = isQuestionVisible ? '' : 'none';
-            if(isQuestionVisible && isOpponentView && btnPlayer === String(localPlayerId)){
-              btn.disabled = false;
-            } else {
-              btn.disabled = true;
-            }
-          }catch(e){}
-        });
-        try{
-          const stealBtn = tray.querySelector('#btn-steal');
-          if(stealBtn){
-            // Mostrar sempre durante a pergunta e habilitar só para o oponente
-            stealBtn.style.display = isQuestionVisible ? '' : 'none';
-            try{ stealBtn.disabled = !(isQuestionVisible && isOpponentView) || stealUsed2; }catch(e){}
+          const btnPlayer = btn.getAttribute('data-player');
+          btn.classList.remove('hidden-remote');
+          btn.style.display = '';
+          // Ativo somente quando pergunta visível e é visão do oponente
+          if(isQuestionVisible && isOpponentView && btnPlayer === String(localPlayerId)){
+            btn.disabled = false;
+          } else {
+            btn.disabled = true;
           }
         }catch(e){}
+      });
+      try{
+        const stealBtn = tray.querySelector('#btn-steal');
+        if(stealBtn){
+          stealBtn.style.display = '';
+          stealBtn.disabled = !(isQuestionVisible && isOpponentView) || stealUsed2;
+        }
       }catch(e){}
-    }
+    }catch(e){}
   }catch(e){}
 }
 
@@ -2099,6 +2120,7 @@ function checkForWinner(){
 function showFinalWinner(winner){
   clearInterval(timer);
   try{ if(spectatorTimer){ clearInterval(spectatorTimer); spectatorTimer = null; } }catch(e){}
+  try{ window._gameEnded = true; }catch(e){}
   document.getElementById('roleta-area').style.display = 'none';
   document.getElementById('question-area').style.display = 'none';
   document.getElementById('cards').style.display = 'none';
@@ -2171,6 +2193,7 @@ function showLoserModal(result){
   if(document.getElementById('loserModal')) return;
   try{ if(timer){ clearInterval(timer); } }catch(e){}
   try{ if(spectatorTimer){ clearInterval(spectatorTimer); spectatorTimer = null; } }catch(e){}
+  try{ window._gameEnded = true; }catch(e){}
   const overlay = document.createElement('div');
   overlay.id = 'loserModal';
   overlay.style.position = 'fixed';
