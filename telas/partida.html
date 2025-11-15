@@ -1,24 +1,27 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Jogo de Quiz — Jogador vs Jogador</title>
-<style>
-  body {
-    margin: 0;
-    font-family: 'Poppins', sans-serif;
-    color: white;
-    overflow: hidden;
-    background: #000 url('Fundo.jpeg') center center / cover no-repeat fixed;
-  }
-
-  .bg-style-intense {
-    background-color: #2a0b2b;
-    background-image:
-      linear-gradient(135deg, rgba(255,255,255,0.07) 25%, transparent 25%),
-      linear-gradient(225deg, rgba(255,255,255,0.05) 25%, transparent 25%),
-      radial-gradient(circle at 10% 10%, rgba(255,255,255,0.04), transparent 18%);
+    try{
+      const tray = document.getElementById('power-tray');
+      if(tray){
+        tray.style.display = 'flex';
+        tray.classList.remove('center','left','right');
+        tray.classList.add('center');
+        const isOpponentView = (localPlayerId !== by);
+        const localOnlyButtons = tray.querySelectorAll('.power-btn.local-only');
+        localOnlyButtons.forEach(btn=>{
+          try{
+            btn.classList.remove('hidden-remote');
+            btn.style.display = '';
+            btn.disabled = !isOpponentView;
+          }catch(e){}
+        });
+        const stealBtn = tray.querySelector('#btn-steal');
+        if(stealBtn){
+          stealBtn.style.display = '';
+          stealBtn.disabled = !isOpponentView; // habilitado somente para oponente
+        }
+      }
+    }catch(e){}
     background-size: 40px 40px, 40px 40px, 1000px 600px;
     background-position: 0 0, 20px 20px, center center;
     background-blend-mode: overlay, overlay, normal;
@@ -75,7 +78,7 @@
     object-fit: cover;
   }
 
-  /* --- Brilho / luz de fundo (estilo semelhante à roleta) --- */
+  
   .player-info img,
   #player1-icon,
   #player2-icon {
@@ -223,7 +226,7 @@
   @media (max-height: 860px){ .cards-side .card{ width:92px; height:138px; } }
   @media (max-height: 760px){ .cards-side .card{ width:86px; height:129px; } }
   @media (max-height: 680px){ .cards-side .card{ width:82px; height:124px; } }
-  /* Título centralizado no topo */
+  
   #category.centered-title{ width: 100%; text-align: center; font-weight: 700; }
 
   .card {
@@ -241,7 +244,7 @@
   }
   .card.card-used{
     background: linear-gradient(145deg, #fff1a8, #ffd23a);
-    color: #000 !important; /* força texto preto quando usada */
+    color: #000 !important;
     cursor: not-allowed;
     filter: saturate(1.05);
   }
@@ -277,17 +280,17 @@
     align-items: center;
     gap: 15px;
     max-width: 720px;
-    /* subir ainda mais a janela da pergunta/alternativas */
+    
     margin-top: -90px;
   }
 
-  /* Caixa de pergunta com o mesmo visual do popup da roleta */
+  
   #question-box.fw-modal-like { width: clamp(480px, 85vw, 860px); padding-left:24px; padding-right:24px; }
   .qp-header{ display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px; margin-bottom:10px }
   .turn-title{ font-weight:700; color:#FFD700 }
   .current-player-title{ font-weight:600; color:#ddd }
 
-  /* Badge de categoria dentro da caixa de pergunta */
+  
   .cat-badge{
     display:inline-block;
     align-self:flex-start;
@@ -328,7 +331,7 @@
   }
 
   .answers button:hover { background-color: #163eb3; }
-  /* Destaque visual ao responder */
+  
   .answers button.ans-correct{ background-color:#28a745 !important; color:#fff !important; }
   .answers button.ans-wrong{ background-color:#c0392b !important; color:#fff !important; }
 
@@ -382,10 +385,10 @@
     display: block;
     background: transparent;
     transform-origin: 50% 50%;
-    animation: none !important; /* sem pulso no iframe */
+    animation: none !important;
     transform: none !important;
   }
-  /* removido o pulso visual do iframe para manter estático */
+  
 
   .confetti-container {
     position: fixed;
@@ -404,7 +407,7 @@
     100% { transform: translateY(-110vh) rotate(720deg); opacity: 0; }
   }
 
-  /* Fireworks visuals (DOM + CSS animated) */
+  
   .fireworks-container{
     position: fixed;
     left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10010; overflow: visible;
@@ -429,7 +432,7 @@
     100% { transform: translate(var(--dx,0px), var(--dy,0px)) scale(0.6); opacity: 0 }
   }
 
-  /* Final winner modal styles: larger card, aligned icon and roleta-like glow */
+  
   .fw-modal-content {
     background: linear-gradient(180deg,#111,#0e0e12);
     padding: 20px 22px;
@@ -464,13 +467,13 @@
     flex-shrink: 0;
     box-shadow: 0 0 60px rgba(255,210,58,0.45), inset 0 0 0 6px rgba(0,0,0,0.35);
   }
-  /* make modal responsive: stack vertically on narrow screens */
+  
   @media (max-width:520px){
     .fw-modal-content{ flex-direction: column; padding:16px; }
     .fw-modal-icon{ width:120px; height:120px; }
   }
 
-  /* Roleta modal visual igual ao do fim da partida (apenas largura maior p/ iframe) */
+  
   .fw-modal-like{
     background: linear-gradient(180deg,#111,#0e0e12);
     padding: 16px 18px 20px;
@@ -492,27 +495,36 @@
     z-index: -1;
     pointer-events: none;
   }
-  /* Overlay para o observador (não é a vez) sobre a roleta */
+  
   #roletaOverlay{
     position:absolute; inset:0; display:none; align-items:center; justify-content:center;
     background: rgba(0,0,0,0.45); color:#fff; font-weight:800;
     font-size: clamp(16px, 2.8vw, 24px); text-align:center; text-shadow:0 2px 6px #000;
-    z-index: 20; /* acima do iframe */
+    z-index: 20;
   }
   #roletaIframe.dim{ filter: brightness(0.6) saturate(0.9); }
 
-  /* Barra de poderes na parte inferior, mesma estética das cartas */
-  .power-tray{ position:fixed; bottom:16px; display:none; z-index:5000 }
-  .power-tray.center{ left:50%; transform:translateX(-50%); }
-  .power-tray.right{ right:16px; left:auto; transform:none; }
-  .power-tray.left{ left:16px; right:auto; transform:none; }
-  .power-row{ display:flex; align-items:center; justify-content:center; gap:12px }
+  
+  .power-tray{ position:fixed; left:0; right:0; bottom:18px; display:none; z-index:5000; width:100%; }
+  .power-tray.center, .power-tray.left, .power-tray.right{ left:0; right:0; transform:none; }
+  .power-row{ display:flex; align-items:center; justify-content:center; gap:42px; width:100%; }
+  .powers-group{ display:flex; align-items:center; gap:14px }
   .power-btn{
-    width:84px; height:84px; border-radius:50%;
-    border:2px solid #FFD700; color:#fff; cursor:pointer;
+    width:84px;
+    height:84px;
+    position: relative;
+    border-radius:12px;
+    border:2px solid #FFD700;
+    color:#fff;
+    cursor:pointer;
     background: linear-gradient(145deg, #1a1f4b, #0b0f30);
     box-shadow: 0 0 16px rgba(255, 215, 0, 0.25);
-    display:grid; place-items:center; font-weight:900; font-size:22px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-weight:900;
+    font-size:22px;
+    overflow:hidden;
     transition: transform .22s ease, box-shadow .22s ease, filter .22s ease;
   }
   .power-btn:hover{ transform: translateY(-6px); box-shadow: 0 0 20px rgba(255, 215, 0, 0.38); filter: brightness(1.06) }
@@ -520,17 +532,24 @@
   .power-btn--freeze{ font-size:24px }
   .power-btn--steal{ background: linear-gradient(145deg, #fff1a8, #ffd23a); color:#1a1200; border-width:3px; box-shadow: 0 0 24px rgba(255,210,58,0.45); font-size:15px; line-height:1.15; font-weight:800; padding:6px 12px; text-align:center; }
   .power-btn--steal span{ display:block; text-align:center; }
-    /* Classe para botões que NÃO sincronizam visualmente entre jogadores (só local) */
-    .power-btn.local-only.hidden-remote{ display:none !important; }
-  /* Fixar apenas o botão "Roubar Pergunta" no centro inferior da tela */
-  #btn-steal{
-    position: fixed;
-    left: 50%;
-    bottom: 24px;
-    transform: translateX(-50%);
-    z-index: 6000; /* acima da barra de poderes */
+  .power-btn img.power-icon{
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    box-shadow: none;
+    border-radius: inherit;
+    transform: translateZ(0);
   }
-  /* aumentar tamanho do botão roubar pergunta sem afetar os outros */
+    
+    .power-btn.local-only.hidden-remote{ display:none !important; }
+  
+  #btn-steal{ position:relative; left:auto; bottom:auto; transform:none; z-index:1; }
+  
   #btn-steal.power-btn{ width: 100px; height: 100px; }
   @media (max-height: 760px){
     .power-btn{ width:72px; height:72px; font-size:20px }
@@ -539,6 +558,25 @@
   @media (max-height: 680px){
     .power-btn{ width:66px; height:66px; font-size:18px }
     .power-btn--steal{ font-size:11px }
+  }
+
+  /* Position the power-row near the central steal button.
+     For player 1 (tray.left) the row is moved left of center;
+     for player 2 (tray.right) the row is moved right of center.
+     The steal button (#btn-steal) remains fixed centered. */
+  /* Nova disposição: grupos flanqueando botão roubar, tudo centralizado */
+  .power-tray.center .power-row,
+  .power-tray.left .power-row,
+  .power-tray.right .power-row{ position:static; left:auto; bottom:auto; transform:none; }
+
+  @media (max-width: 900px){
+    .power-tray.left .power-row{ left: calc(50% - 160px); }
+    .power-tray.right .power-row{ left: calc(50% + 100px); }
+  }
+
+  @media (max-width: 560px){
+    .power-tray.left .power-row{ left: calc(50% - 120px); }
+    .power-tray.right .power-row{ left: calc(50% + 80px); }
   }
 </style>
 </head>
@@ -604,20 +642,58 @@
 
 <div id="result-animation" class="result-animation"></div>
 
-<!-- Barra de poderes (UI) -->
 <div id="power-tray" class="power-tray center" aria-label="Poderes disponíveis">
   <div class="power-row">
-    <button class="power-btn power-btn--freeze local-only" id="btn-freeze" title="Congelar questão">🧊</button>
-    <button class="power-btn local-only" title="Poder">P</button>
-    <button class="power-btn local-only" title="Poder">P</button>
-    <button class="power-btn local-only" title="Poder">P</button>
-    <button class="power-btn local-only" title="Poder">P</button>
-    <button class="power-btn power-btn--steal" id="btn-steal" title="Roubar Pergunta"><span>Roubar<br>Pergunta</span></button>
+    <div class="powers-group powers-left" data-side="left">
+      <button class="power-btn power-btn--freeze local-only" id="btn-freeze" data-player="1" title="Congelar questão">
+        <img src="img/congelar.jpeg" alt="Congelar" class="power-icon" />
+      </button>
+      <button class="power-btn local-only" data-player="1" title="Trocar alternativa correta">
+        <img src="img/4cliques.jpeg" alt="4 Cliques" class="power-icon" />
+      </button>
+      <button class="power-btn local-only" data-player="1" title="Jump Scare">
+        <img src="img/jumpscare.jpeg" alt="Jump Scare" class="power-icon" />
+      </button>
+      <button class="power-btn local-only" data-player="1" title="X Mask">
+        <img src="img/x.jpeg" alt="X Mask" class="power-icon" />
+      </button>
+    </div>
+    <button class="power-btn power-btn--steal" id="btn-steal" title="Roubar Pergunta" data-power="steal">
+      <img src="img/roubarpergunta.jpeg" alt="Roubar Pergunta" class="power-icon" />
+    </button>
+    <div class="powers-group powers-right" data-side="right">
+      <button class="power-btn power-btn--freeze local-only" data-player="2" title="Congelar questão (Jogador 2)">
+        <img src="img/congelar.jpeg" alt="Congelar" class="power-icon" />
+      </button>
+      <button class="power-btn local-only" data-player="2" title="Trocar alternativa correta (Jogador 2)">
+        <img src="img/4cliques.jpeg" alt="4 Cliques" class="power-icon" />
+      </button>
+      <button class="power-btn local-only" data-player="2" title="Jump Scare (Jogador 2)">
+        <img src="img/jumpscare.jpeg" alt="Jump Scare" class="power-icon" />
+      </button>
+      <button class="power-btn local-only" data-player="2" title="X Mask (Jogador 2)">
+        <img src="img/x.jpeg" alt="X Mask" class="power-icon" />
+      </button>
+    </div>
   </div>
-  <!-- Observação: apenas UI/estética. Lógica funcional poderá ser adicionada depois. -->
-  </div>
+</div>
 
 <script>
+const SFX = {};
+function loadAudio(id, src, loop=false, volume=1){ try{ const a = new Audio(src); a.loop = loop; a.volume = volume; SFX[id]=a; }catch(e){} }
+function playSFX(id){ try{ const a = SFX[id]; if(!a) return; a.currentTime = 0; a.play().catch(()=>{}); }catch(e){} }
+function stopSFX(id){ try{ const a = SFX[id]; if(!a) return; a.pause(); }catch(e){} }
+loadAudio('musica_quiz','sons/musica_quiz.m4a', true, 0.32);
+loadAudio('roleta','sons/roleta.m4a', false, 0.85);
+loadAudio('carta','sons/carta.m4a', false, 0.9);
+loadAudio('resposta_correta','sons/resposta_correta.m4a', false, 0.9);
+loadAudio('resposta_errada','sons/resposta_errada.m4a', false, 0.9);
+loadAudio('cronometro','sons/cronometro.m4a', true, 0.5);
+loadAudio('vencedor','sons/vencedor.m4a', false, 0.95);
+loadAudio('derrota','sons/derrota.m4a', false, 0.95);
+loadAudio('click','sons/click.m4a', false, 0.9);
+loadAudio('erro','sons/erro.m4a', false, 0.9);
+document.addEventListener('DOMContentLoaded',()=>{ playSFX('musica_quiz'); });
 const helpBtn = document.getElementById('help-btn');
 const helpPopup = document.getElementById('help-popup');
 helpBtn.addEventListener('click', () => {
@@ -630,62 +706,129 @@ document.addEventListener('click', (e) => {
 const backBtn = document.getElementById('backBtn');
 if (backBtn) {
   backBtn.addEventListener('click', () => {
+    playSFX('click');
     window.location.href = 'players.html';
   });
 }
 
-// Poder: Congelar (🧊) — o oponente congela o jogador da vez por 5s
 (function initFreezePower(){
   try{
     const freezeBtn = document.getElementById('btn-freeze');
-    if(freezeBtn){
-      freezeBtn.addEventListener('click', ()=>{
-        try{
-          // Só o oponente pode usar durante a pergunta
+      if (freezeBtn) {
+        freezeBtn.addEventListener('click', () => {
+          try {
+            const qa = document.getElementById('question-area');
+            const isQuestionVisible = qa ? (window.getComputedStyle(qa).display !== 'none') : false;
+            if (!isQuestionVisible) return;
+            if (localPlayerId === currentPlayer) return;
+            const payload = { by: localPlayerId, target: currentPlayer, at: Date.now(), durationMs: 5000 };
+            localStorage.setItem('power_freeze', JSON.stringify(payload));
+          } catch (e) {}
+        });
+    }
+  }catch(e){}
+})();
+
+(function initRunawayPower(){
+  try{
+    const btn = document.querySelector('.power-row .power-btn.local-only:not(#btn-freeze)');
+    if (btn) {
+      if (!btn.id) btn.id = 'btn-runaway';
+      btn.title = 'Questões fogem do mouse';
+      btn.addEventListener('click', () => {
+        try {
           const qa = document.getElementById('question-area');
           const isQuestionVisible = qa ? (window.getComputedStyle(qa).display !== 'none') : false;
-          if(!isQuestionVisible) return;
-          if(localPlayerId === currentPlayer) return;
-          const payload = { by: localPlayerId, target: currentPlayer, at: Date.now(), durationMs: 5000 };
-          localStorage.setItem('power_freeze', JSON.stringify(payload));
-        }catch(e){}
+          if (!isQuestionVisible) return;
+          if (localPlayerId === currentPlayer) return;
+          const ctx = window._currentQuestionCtx || {};
+          if (!ctx || !ctx.at) return;
+          const payload = { by: localPlayerId, target: currentPlayer, qAt: ctx.at, at: Date.now(), clicks: 4 };
+          localStorage.setItem('power_runaway', JSON.stringify(payload));
+        } catch (e) {}
       });
     }
   }catch(e){}
 })();
 
-// Poder: Trocar alternativa correta de lugar (button ao lado do gelo)
-(function initShufflePower(){
+(function initJumpScarePower(){
   try{
-    // Pegar o primeiro botão 'P' local-only que não é o freeze
-    const btn = document.querySelector('.power-row .power-btn.local-only:not(#btn-freeze)');
+    const btns = Array.from(document.querySelectorAll('.power-row .power-btn.local-only'))
+      .filter(b => b.id !== 'btn-freeze' && b.id !== 'btn-steal' && b.id !== 'btn-runaway');
+    const btn = btns[0];
     if(btn){
-      if(!btn.id) btn.id = 'btn-shuffle-correct';
-      btn.title = 'Trocar alternativa correta de lugar';
+      if(!btn.id) btn.id = 'btn-jumpscare';
+      if(!btn.title) btn.title = 'Jump Scare (5s)';
       btn.addEventListener('click', ()=>{
         try{
           const qa = document.getElementById('question-area');
           const isQuestionVisible = qa ? (window.getComputedStyle(qa).display !== 'none') : false;
           if(!isQuestionVisible) return;
-          if(localPlayerId === currentPlayer) return; // somente o oponente usa
+          if(localPlayerId === currentPlayer) return;
           const ctx = window._currentQuestionCtx || {};
           if(!ctx || !ctx.at) return;
-          const payload = { by: localPlayerId, target: currentPlayer, qAt: ctx.at, at: Date.now() };
-          localStorage.setItem('power_shuffle', JSON.stringify(payload));
+          const payload = { by: localPlayerId, target: currentPlayer, qAt: ctx.at, at: Date.now(), durationMs: 5000 };
+          localStorage.setItem('power_jumpscare', JSON.stringify(payload));
         }catch(e){}
       });
     }
   }catch(e){}
 })();
 
-// Identidade local do jogador (para simulação de 2 telas): use ?p=1 ou ?p=2
+(function initXBlockPower(){
+  try{
+    const btns = Array.from(document.querySelectorAll('.power-row .power-btn.local-only'))
+      .filter(b => b.id !== 'btn-freeze' && b.id !== 'btn-steal' && b.id !== 'btn-runaway' && b.id !== 'btn-jumpscare');
+    const btn = btns[0];
+    if(btn){
+      if(!btn.id) btn.id = 'btn-xmask';
+      if(!btn.title) btn.title = 'X (5s)';
+      btn.addEventListener('click', ()=>{
+        try{
+          const qa = document.getElementById('question-area');
+          const isQuestionVisible = qa ? (window.getComputedStyle(qa).display !== 'none') : false;
+          if(!isQuestionVisible) return;
+          if(localPlayerId === currentPlayer) return;
+          const ctx = window._currentQuestionCtx || {};
+          if(!ctx || !ctx.at) return;
+          const payload = { by: localPlayerId, target: currentPlayer, qAt: ctx.at, at: Date.now(), durationMs: 5000 };
+          localStorage.setItem('power_xmask', JSON.stringify(payload));
+        }catch(e){}
+      });
+    }
+  }catch(e){}
+})();
+
+(function initStealPower(){
+  try{
+    const btn = document.getElementById('btn-steal');
+    if(btn){
+      btn.addEventListener('click', ()=>{
+        try{
+          const qa = document.getElementById('question-area');
+          const isQuestionVisible = qa ? (window.getComputedStyle(qa).display !== 'none') : false;
+          if(!isQuestionVisible) return;
+          if(localPlayerId === currentPlayer) return; // só o oponente pode roubar
+          const raw = localStorage.getItem('sync_question');
+          if(!raw) return;
+          const q = JSON.parse(raw||'{}');
+          if(!q || !q.category) return;
+          if(typeof q.by !== 'number') q.by = currentPlayer;
+          if(q.by === localPlayerId) return; // já é do ladrão
+          q.by = localPlayerId; // transferir turno da questão
+          try{ playSFX('click'); }catch(e){}
+          localStorage.setItem('sync_question', JSON.stringify(q));
+        }catch(e){}
+      });
+    }
+  }catch(e){}
+})();
+
 const localPlayerId = (() => {
   try { return Math.max(1, Math.min(2, parseInt(new URLSearchParams(location.search).get('p')||'1', 10))); } catch(e){ return 1; }
 })();
 
-// Carregar avatar selecionado do localStorage (se houver)
 try{
-  // Prefer explicit per-player keys; fallback to legacy 'selectedAvatar'
   const stored1 = localStorage.getItem('selectedAvatar1') || localStorage.getItem('selectedAvatar');
   const stored2 = localStorage.getItem('selectedAvatar2');
   if(stored1){
@@ -696,9 +839,8 @@ try{
     const p2 = document.getElementById('player2-icon');
     if(p2) p2.src = stored2;
   }
-}catch(e){ /* localStorage indisponível */ }
+}catch(e){ }
 
-// Atualizar em tempo real caso o avatar seja alterado em outra aba/janela
 try{
   window.addEventListener('storage', (ev) => {
     if(!ev) return;
@@ -715,25 +857,23 @@ try{
       }
     }catch(e){}
   });
-}catch(e){ /* ignore */ }
+}catch(e){ }
 
 let currentPlayer = 1;
 let points = {1: 0, 2: 0};
 let timer, timeLeft = 15;
-let spectatorTimer = null; // contador visual para o oponente (não autoritativo)
-// Cache local de cartas usadas por jogador (valores 1..5), separado por player
+let spectatorTimer = null;
+ 
 let usedCardsCache = { 1: [], 2: [] };
-// Contador obrigatório de rodadas (máximo 5)
+ 
 let roundCount = 0;
 
 function finalizeIfRoundLimitOrWinner(){
-  // Se já houve vencedor pelos pontos (>=15), nada a fazer extra
-  if(points[1] >= 15 || points[2] >= 15) return; // checkForWinner já será chamado em fluxo normal
+  if(points[1] >= 15 || points[2] >= 15) return;
   if(roundCount >= 5){
-    // Decide vencedor por maior pontuação após 5 rodadas
     let winnerId;
     if(points[1] === points[2]){
-      winnerId = 1; // critério mínimo em caso de empate
+      winnerId = 1;
     } else {
       winnerId = (points[1] > points[2]) ? 1 : 2;
     }
@@ -750,7 +890,7 @@ const questions = {
   Movies: [{question: "Em qual filme aparece a frase 'I'll be back'?", answers: ["Rocky", "Predador", "Exterminador do Futuro", "Matrix", "Rambo"], correct: 2}]
 };
 
-// Limpa todas as chaves de estado de partida no localStorage
+ 
 function clearMatchState(){
   try{
     const keys = ['sync_roleta','sync_roleta_spin','sync_card','sync_question','sync_answer','matchResult','goLobbyNow','rematchNow','rematchRequest','rematchResponse','used_cards','used_cards_1','used_cards_2'];
@@ -758,10 +898,10 @@ function clearMatchState(){
   }catch(e){}
 }
 
-// Se houver estado final antigo e nenhum estado ativo recente, limpa para evitar ficar preso no fim
+ 
 function maybeClearStaleState(){
   try{
-    // Evitar limpar repetidamente em reloads desta aba
+    
     if(sessionStorage.getItem('freshBoot') === '1') return;
     sessionStorage.setItem('freshBoot','1');
     const now = Date.now();
@@ -779,7 +919,7 @@ function maybeClearStaleState(){
   }catch(e){}
 }
 
-// Ao iniciar nova partida pelo lobby, detectar sinal e limpar estado antigo (uma vez por aba)
+ 
 function applyNewMatchSignal(){
   try{
     const nm = localStorage.getItem('newMatch');
@@ -792,33 +932,31 @@ function applyNewMatchSignal(){
   }catch(e){}
 }
 
-// Map English category keys to Portuguese labels for display
+ 
 function englishToPt(cat){
   const map = { 'Science':'Ciências', 'History':'Sociedade', 'Sports':'Esportes', 'Art':'Artes', 'Movies':'Mundo' };
   return map[cat] || cat;
 }
 
-// Renderiza a pergunta para ambas as telas; desabilita respostas para o oponente
+ 
 function renderQuestionPayload(payload){
   try{
     if(!payload) return;
     const { category, question, answers, correct, pointsValue, by } = payload;
+    try{ currentPlayer = by || currentPlayer; }catch(e){}
 
-  // Esconde a roleta enquanto a pergunta está visível
   try{ const ro = document.getElementById('roleta-area'); if(ro) ro.style.display = 'none'; }catch(e){}
-  // Mantém as cartas visíveis durante a pergunta (interação desabilitada abaixo)
   try{ const cd = document.getElementById('cards'); if(cd) cd.style.display = 'block'; }catch(e){}
-    // Mantém as cartas visíveis, mas desabilita interação durante a pergunta
     try{ const cd = document.getElementById('cards'); if(cd) cd.style.pointerEvents = 'none'; }catch(e){}
 
-  // Mostra a caixa de pergunta para todos
     const qa = document.getElementById('question-area');
     if(qa) qa.style.display = 'flex';
+    playSFX('click');
   try{ setPowerTrayVisible(true); }catch(e){}
-  // Reafirma exibição dos poderes do oponente (defensivo contra toggles assíncronos)
   try{ setTimeout(()=>{ try{ setPowerTrayVisible(true); }catch(e){} }, 0); }catch(e){}
+  try{ setTimeout(()=>{ try{ setPowerTrayVisible(true); }catch(e){} }, 60); }catch(e){}
+  try{ setTimeout(()=>{ try{ setPowerTrayVisible(true); }catch(e){} }, 240); }catch(e){}
 
-    // Título superior (vez ou oponente) e nome do jogador da vez
     const turnTitle = document.getElementById('turn-title');
     const curTitle = document.getElementById('current-player-title');
     const nameEl = document.getElementById(`player${by}-name`);
@@ -830,7 +968,34 @@ function renderQuestionPayload(payload){
     }
     if(curTitle) curTitle.textContent = `Jogador da vez: ${byName}`;
 
-    // Categoria opcional no título de categoria já existente
+    try{
+      const tray = document.getElementById('power-tray');
+      if(tray){
+        tray.style.display = 'flex';
+        tray.classList.remove('center','left','right');
+        tray.classList.add('center');
+        const isOpponentView = (localPlayerId !== by);
+        const localOnlyButtons = tray.querySelectorAll('.power-btn.local-only');
+        localOnlyButtons.forEach(btn=>{
+          try{
+            const btnPlayer = btn.getAttribute('data-player');
+            btn.classList.remove('hidden-remote');
+            btn.style.display = '';
+            if(isOpponentView && btnPlayer === String(localPlayerId)){
+              btn.disabled = false;
+            } else {
+              btn.disabled = true;
+            }
+          }catch(e){}
+        });
+        const stealBtn = tray.querySelector('#btn-steal');
+        if(stealBtn){
+          stealBtn.style.display = '';
+          stealBtn.disabled = isOpponentView; // habilitado somente para quem responde
+        }
+      }
+    }catch(e){}
+
   try{
     const catEl = document.getElementById('category');
     if(catEl){ catEl.classList.remove('centered-title'); catEl.innerText = ''; }
@@ -838,7 +1003,6 @@ function renderQuestionPayload(payload){
     if(badge){ badge.style.display = 'inline-block'; badge.textContent = `Categoria: ${englishToPt(category)}`; }
   }catch(e){}
 
-    // Pergunta e respostas
     const qEl = document.getElementById('question');
     const ansDiv = document.getElementById('answers');
     if(qEl) qEl.textContent = question || '';
@@ -849,13 +1013,12 @@ function renderQuestionPayload(payload){
         btn.innerText = ans;
         btn.dataset.idx = String(idx);
         if(localPlayerId !== by){
-          btn.disabled = true; // oponente vê, mas não responde
+          btn.disabled = true;
         } else {
           btn.onclick = () => { if(localPlayerId !== currentPlayer) return; answerQuestion(idx === correct, pointsValue, category, idx, correct); };
         }
         ansDiv.appendChild(btn);
       });
-      // Se houver congelamento aplicado antes de re-render (ex: hidratação), respeitar storage
       try{
         const freezeRaw = localStorage.getItem('power_freeze');
         if(freezeRaw){
@@ -881,11 +1044,11 @@ function renderQuestionPayload(payload){
       }catch(e){}
     }
 
-    // Timer com base no timestamp da pergunta
+    
     const startedAt = payload.at || Date.now();
     const elapsed = Math.max(0, Math.floor((Date.now() - startedAt)/1000));
     const remaining = Math.max(0, 15 - elapsed);
-  // Guarda contexto da pergunta atual (para timeout e sync)
+  
   try{ window._currentQuestionCtx = { correct, pointsValue, category, by, at: startedAt }; }catch(e){}
 
   if(localPlayerId === by){
@@ -893,29 +1056,24 @@ function renderQuestionPayload(payload){
       try{ if(spectatorTimer) { clearInterval(spectatorTimer); spectatorTimer = null; } }catch(e){}
       startTimerRemaining(remaining);
     } else {
-      // Exibe contagem restante ao oponente com um timer apenas visual
       try{ if(timer) { clearInterval(timer); } }catch(e){}
       startSpectatorTimerRemaining(remaining);
     }
   }catch(e){ console.warn('renderQuestionPayload error', e); }
 }
 
-// Atualiza UI conforme o turno atual
 function updateTurnUI(){
   try{
     const qa = document.getElementById('question-area');
     const isQuestionVisible = qa ? (window.getComputedStyle(qa).display !== 'none') : false;
     const ro = document.getElementById('roleta-area');
     if(ro){
-      // Se há pergunta visível, oculta roleta; caso contrário mostra
       if(isQuestionVisible){ ro.style.display = 'none'; } else { ro.style.display = 'flex'; }
     }
-    // Ajusta permissão de giro conforme o turno, mantendo roleta visível para ambos
     try{
       const iframe = document.getElementById('roletaIframe');
       if(iframe && iframe.contentWindow){
         iframe.contentWindow.postMessage({ type:'setSpinEnabled', enabled: (localPlayerId === currentPlayer) }, '*');
-        // Overlay apenas informativo quando não é minha vez
         const overlay = document.getElementById('roletaOverlay');
         if(overlay) overlay.style.display = (localPlayerId === currentPlayer) ? 'none' : 'flex';
         if(iframe){ if(localPlayerId !== currentPlayer) iframe.classList.add('dim'); else iframe.classList.remove('dim'); }
@@ -926,7 +1084,6 @@ function updateTurnUI(){
     const waiting = document.getElementById('waiting-screen');
     const oppCat = document.getElementById('opponent-category');
     if(isQuestionVisible){
-      // Não exibir barra inferior durante pergunta
       if(waiting) waiting.style.display = 'none';
       if(oppCat) oppCat.innerText = '';
       try{ setPowerTrayVisible(true); }catch(e){}
@@ -944,9 +1101,7 @@ function updateTurnUI(){
   }catch(e){}
 }
 
-// Estado inicial: configura UI de turno
 document.addEventListener('DOMContentLoaded', ()=>{
-  // Limpar estados antigos se necessário e aplicar novo sinal de partida
   try{ maybeClearStaleState(); }catch(e){}
   try{ applyNewMatchSignal(); }catch(e){}
   updateTurnUI();
@@ -960,14 +1115,11 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
   function showModal(){
     try{ iframe.setAttribute('scrolling','no'); iframe.style.overflow = 'hidden'; }catch(e){}
-    // Dim/overlay para quem não está na vez e bloqueio de interação
     try{
       const isMyTurn = (localPlayerId === currentPlayer);
       if(overlay){ overlay.style.display = isMyTurn ? 'none' : 'flex'; }
       if(iframe){ if(isMyTurn) iframe.classList.remove('dim'); else iframe.classList.add('dim'); }
-      // Habilita/desabilita botão Girar dentro da roleta
       try{ iframe.contentWindow.postMessage({ type:'setSpinEnabled', enabled: isMyTurn }, '*'); }catch(e){}
-      // Reseta o estado visual interno da roleta (evita mostrar resultado da rodada anterior)
       try{ iframe.contentWindow.postMessage({ type:'resetWheel' }, '*'); }catch(e){}
     }catch(e){}
   }
@@ -984,29 +1136,22 @@ document.addEventListener('DOMContentLoaded', ()=>{
     });
   }
 
-  window.openRoletaModal = function(){
-    try{ if(typeof window.ensureRoletaOpenIfIdle === 'function') window.ensureRoletaOpenIfIdle(); }catch(e){ console.warn('openRoletaModal failed', e); }
-  };
-
   window.addEventListener('message', (e)=>{
     try{
       const data = e.data || {};
-      // Giro iniciado dentro do iframe (somente na aba do jogador da vez)
       if(data && data.type === 'roletaSpinStarted'){
-        if(localPlayerId !== currentPlayer) return; // ignore se não for minha vez
+        if(localPlayerId !== currentPlayer) return;
         try{ window._spinInProgress = true; }catch(e){}
-        // Esconde as cartas durante o giro da roleta
         try{ const cd = document.getElementById('cards'); if(cd) cd.style.display = 'none'; }catch(e){}
         try{ localStorage.setItem('sync_roleta_spin', JSON.stringify({ index: data.index, turns: data.turns, duration: data.duration, by: currentPlayer, at: Date.now() })); }catch(err){}
+        playSFX('roleta');
         return;
       }
       if(data && data.type === 'roletaResult'){
         try{ window._spinInProgress = false; }catch(e){}
         const category = data.category || '';
         const pointsValue = (typeof data.points === 'number' && data.points > 0) ? data.points : (Math.floor(Math.random()*5) + 1);
-        // Mantém o resultado visível por 3s antes de seguir para a seleção de carta
         setTimeout(()=>{
-          // Após 3s, fecha a roleta e mostra a seleção de cartas
           try{ const ro = document.getElementById('roleta-area'); if(ro) ro.style.display = 'none'; }catch(e){}
           try{ const cd = document.getElementById('cards'); if(cd) cd.style.display = 'block'; }catch(e){}
           hideModal();
@@ -1014,13 +1159,10 @@ document.addEventListener('DOMContentLoaded', ()=>{
           const mapped = categoryMap[category] || category;
           const cats = Object.keys(questions);
           const chosen = cats.includes(mapped) ? mapped : (cats[Math.floor(Math.random()*cats.length)]);
-          // Sincroniza com a outra aba: resultado da roleta (apenas na aba do jogador da vez)
           if(localPlayerId === currentPlayer){
             try{ localStorage.setItem('sync_roleta', JSON.stringify({ category: chosen, wheelPoints: pointsValue, by: currentPlayer, at: Date.now() })); }catch(e){}
           }
-          // Render localmente
           showCardSelection(chosen, pointsValue);
-          // Desabilita o botão até a próxima rodada
           try{ const btn = document.getElementById('openRoletaBtn'); if(btn) btn.disabled = true; }catch(e){}
         }, 3000);
       }
@@ -1028,16 +1170,16 @@ document.addEventListener('DOMContentLoaded', ()=>{
   });
 
   function showCardSelection(category, wheelPoints){
-    // Esconde a roleta durante a seleção de cartas
+    
     try{ const ro = document.getElementById('roleta-area'); if(ro) ro.style.display = 'none'; }catch(e){}
     try{ setPowerTrayVisible(false); }catch(e){}
-    // Garante ocultar o badge de categoria enquanto escolhe carta
+    
     try{ const badge = document.getElementById('cat-badge'); if(badge){ badge.style.display='none'; badge.textContent=''; } }catch(e){}
     const cardsDiv = document.getElementById('cards');
     cardsDiv.innerHTML = '';
     cardsDiv.style.pointerEvents = 'auto';
   try{ cardsDiv.style.display = 'block'; }catch(e){}
-    // Containers para cada lado (mostrados para ambos jogadores)
+    
     const sideLeft = document.createElement('div');
     sideLeft.className = 'cards-side left';
     const sideRight = document.createElement('div');
@@ -1062,22 +1204,20 @@ document.addEventListener('DOMContentLoaded', ()=>{
     sideRight.appendChild(stackRight);
     cardsDiv.appendChild(sideLeft);
     cardsDiv.appendChild(sideRight);
-    // Ajustes de posição solicitados: as 2 cartas internas do lado esquerdo mais para baixo,
-    // e no lado direito 3 cartas na borda (coluna externa) e 2 na interna alinhadas ao deslocamento.
+    
     try{
-      leftCol2.style.marginTop = '28px'; // desloca as 2 cartas internas do lado esquerdo para baixo
-      rightCol.style.marginTop = '28px';  // alinha as 2 cartas internas do lado direito
+      leftCol2.style.marginTop = '28px';
+      rightCol.style.marginTop = '28px';
     }catch(e){}
 
-
-    // Resetar estado do poder de embaralhar para esta pergunta
-    try{ window._shuffleClicks = 0; window._shuffleQAt = payload.at; }catch(e){}
-    // Mantém o título na posição ANTERIOR (fora do container das cartas)
+    
+  try{ window._shuffleClicks = 0; window._shuffleQAt = Date.now(); }catch(e){}
+    
     try{
       const titleEl = document.getElementById('category');
       if(titleEl){
         titleEl.classList.add('centered-title');
-        // Prompt destacado para seleção de carta com seta adaptativa
+        
         const arrow = (currentPlayer === 1) ? '⬅' : '➡';
         titleEl.innerText = `Jogador ${currentPlayer}, escolha uma carta  ${arrow}`;
         titleEl.style.fontSize = '28px';
@@ -1087,16 +1227,16 @@ document.addEventListener('DOMContentLoaded', ()=>{
       }
     }catch(e){}
 
-    let cardChosen = false; // evita dupla seleção (manual x automática)
+    let cardChosen = false;
     let autoPickTimer = null;
 
-    // Valores fixos 1..5; cartas já usadas ficam visíveis porém desabilitadas (amarelas)
+    
   const myUsed = Array.isArray(usedCardsCache[currentPlayer]) ? usedCardsCache[currentPlayer] : [];
   const values = [1,2,3,4,5];
   const availableValues = values.filter(v => !myUsed.includes(v));
     const cardEls = [];
 
-  // Distribuição: valores 1..5 replicados em ambos os lados para visibilidade mútua
+  
     for(let i=0;i<values.length;i++){
       const makeCard = (val, forPlayer)=>{
         const c = document.createElement('div');
@@ -1114,18 +1254,18 @@ document.addEventListener('DOMContentLoaded', ()=>{
       const val = values[i];
   const cardLeft = makeCard(val,1);
   const cardRight = makeCard(val,2);
-  // Lado esquerdo: 3 na borda (coluna externa = primeira), 2 na coluna interna (deslocada)
+  
   if(i < 3){ leftCol.appendChild(cardLeft); }
   else { leftCol2.appendChild(cardLeft); }
-  // Lado direito: 3 na borda (coluna externa = segunda), 2 na coluna interna (primeira)
+  
   if(i < 3){ rightCol2.appendChild(cardRight); }
   else { rightCol.appendChild(cardRight); }
-      // Interação só em um conjunto (lado dependente do jogador local)
+      
       const interactiveCard = (localPlayerId === 2) ? cardRight : cardLeft;
       cardEls.push(interactiveCard);
     }
 
-    // Se nenhuma carta restar disponível, segue direto usando o wheelPoints para não travar a rodada
+    
     if(availableValues.length === 0){
       try{
         const payload = { category: category, pointsValue: wheelPoints || 1, by: currentPlayer, at: Date.now(), noCardAvailable: true };
@@ -1135,21 +1275,28 @@ document.addEventListener('DOMContentLoaded', ()=>{
       return;
     }
 
-    // Habilitar clique
+    
     cardsDiv.addEventListener('click', function onCardsClick(e){
       const card = e.target.closest('.card');
       if(!card) return;
-      if (localPlayerId !== currentPlayer) return; // só quem está na vez pode escolher
-      if(card.classList.contains('card-used')) return; // carta já usada não pode ser selecionada
+      if (localPlayerId !== currentPlayer) return;
+      
+      try{
+        const inLeftSide = !!card.closest('.cards-side.left');
+        if(currentPlayer === 1 && !inLeftSide) return;
+        if(currentPlayer === 2 && inLeftSide) return;
+      }catch(err){}
+      if(card.classList.contains('card-used')) return;
       if(cardChosen) return;
       cardChosen = true;
       try{ if(autoPickTimer){ clearTimeout(autoPickTimer); autoPickTimer = null; } }catch(e){}
 
       const cardValue = parseInt(card.dataset.value,10);
       const pts = cardValue || wheelPoints || 1;
-      // Marca visual imediata (amarelo) no lado do jogador local
+      playSFX('carta');
+      
   try{ card.classList.add('card-used'); card.style.color = '#000'; }catch(e){}
-      // Marca local e persiste como usada
+      
       try{
         const arr = Array.isArray(usedCardsCache[currentPlayer]) ? usedCardsCache[currentPlayer] : [];
         if(!arr.includes(cardValue)) arr.push(cardValue);
@@ -1157,20 +1304,20 @@ document.addEventListener('DOMContentLoaded', ()=>{
         localStorage.setItem('used_cards_'+currentPlayer, JSON.stringify(arr));
       }catch(e){}
       try{ localStorage.setItem('sync_card', JSON.stringify({ category: category, pointsValue: pts, by: currentPlayer, at: Date.now(), cardValue: cardValue })); }catch(e){}
-      // mantém cartas na tela, mas desabilita clicks
+      
       cardsDiv.style.pointerEvents = 'none';
       cardsDiv.removeEventListener('click', onCardsClick);
       chooseCard(pts, category);
     });
 
-    // Seleção automática após 5s se o jogador da vez não escolher
+    
     if(localPlayerId === currentPlayer){
       autoPickTimer = setTimeout(()=>{
         try{
           if(cardChosen) return;
           const available = cardEls.filter(el => !el.classList.contains('card-used'));
           if(available.length === 0){
-            // fallback: não há cartas, segue direto pelo valor da roleta
+            
             const pts = wheelPoints || 1;
             try{ localStorage.setItem('sync_card', JSON.stringify({ category: category, pointsValue: pts, by: currentPlayer, at: Date.now(), noCardAvailable: true })); }catch(e){}
             chooseCard(pts, category);
@@ -1180,16 +1327,17 @@ document.addEventListener('DOMContentLoaded', ()=>{
           cardChosen = true;
           const cardValue = parseInt(picked.dataset.value,10);
           const pts = cardValue || wheelPoints || 1;
+          playSFX('carta');
           try{
             const arr = Array.isArray(usedCardsCache[currentPlayer]) ? usedCardsCache[currentPlayer] : [];
             if(!arr.includes(cardValue)) arr.push(cardValue);
             usedCardsCache[currentPlayer] = arr;
             localStorage.setItem('used_cards_'+currentPlayer, JSON.stringify(arr));
           }catch(e){}
-          // Marca visual imediata também na seleção automática
+          
           try{ picked.classList.add('card-used'); picked.style.color = '#000'; }catch(e){}
           try{ localStorage.setItem('sync_card', JSON.stringify({ category: category, pointsValue: pts, by: currentPlayer, at: Date.now(), cardValue: cardValue })); }catch(e){}
-          // mantém cartas na tela, mas desabilita clicks
+          
           cardsDiv.style.pointerEvents = 'none';
           chooseCard(pts, category);
         }catch(e){}
@@ -1197,10 +1345,10 @@ document.addEventListener('DOMContentLoaded', ()=>{
     }
   }
 
-  // Torna a função disponível globalmente para outras partes do script (ex.: listeners fora deste bloco)
+  
   try{ window.showCardSelection = showCardSelection; }catch(e){}
 
-  // Garante abrir a roleta automaticamente quando for a hora de girar
+  
   function ensureRoletaOpenIfIdle(){
     try{
       const qa = document.getElementById('question-area');
@@ -1208,11 +1356,11 @@ document.addEventListener('DOMContentLoaded', ()=>{
       const isQ = qa && window.getComputedStyle(qa).display !== 'none';
       const isC = cards && window.getComputedStyle(cards).display !== 'none';
       if(!isQ && !isC){
-        // Força recarregar o iframe a cada rodada para limpar estado interno
+        
         try{ iframe.src = 'roleta.html?_=' + Date.now(); }catch(e){}
-        // Configura roleta para ambas as telas sem modal (exposta inline)
+        
         showModal();
-        // Habilita/desabilita o botão girar conforme o turno após o load
+        
         const sendSetup = ()=>{
           try{ iframe.contentWindow.postMessage({ type:'setSpinEnabled', enabled: (localPlayerId === currentPlayer) }, '*'); }catch(e){}
           try{ iframe.contentWindow.postMessage({ type:'resetWheel' }, '*'); }catch(e){}
@@ -1229,12 +1377,12 @@ document.addEventListener('DOMContentLoaded', ()=>{
   }
   try{ window.ensureRoletaOpenIfIdle = ensureRoletaOpenIfIdle; }catch(e){}
 
-  // Garante que a roleta esteja pronta para um novo giro (sem recarregar iframe)
+  
   function setupRoletaForTurn(){
     try{
       const iframe = document.getElementById('roletaIframe');
       if(!iframe) return;
-      // Garante visibilidade da roleta quando não há pergunta
+      
       try{
         const qa = document.getElementById('question-area');
         const ro = document.getElementById('roleta-area');
@@ -1242,13 +1390,13 @@ document.addEventListener('DOMContentLoaded', ()=>{
         if(ro && !isQuestionVisible){ ro.style.display = 'flex'; }
       }catch(e){}
 
-      // Recarrega o iframe a cada novo turno para evitar estados travados
+      
       try{ iframe.src = 'roleta.html?_=' + Date.now(); }catch(e){}
 
       const sendSetup = ()=>{
         try{ iframe.contentWindow.postMessage({ type:'setSpinEnabled', enabled: (localPlayerId === currentPlayer) }, '*'); }catch(e){}
         try{ iframe.contentWindow.postMessage({ type:'resetWheel' }, '*'); }catch(e){}
-        // Ajusta overlay/dim coerente com a vez
+        
         try{
           const overlay = document.getElementById('roletaOverlay');
           if(overlay) overlay.style.display = (localPlayerId === currentPlayer) ? 'none' : 'flex';
@@ -1265,7 +1413,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
   try{ window.setupRoletaForTurn = setupRoletaForTurn; }catch(e){}
 })();
 
-// Hidrata a tela atual com base no último evento salvo no localStorage
 function hydrateFromStorage(){
   try{
     const parse = (k)=>{ try{ return JSON.parse(localStorage.getItem(k)||'{}'); }catch(e){ return null; } };
@@ -1274,14 +1421,12 @@ function hydrateFromStorage(){
     const r = parse('sync_roleta');
     const s = parse('sync_roleta_spin');
     const m = parse('matchResult');
-    // Hidratar cartas usadas separadas por jogador
     const uc1 = (()=>{ try{ return JSON.parse(localStorage.getItem('used_cards_1')||'[]'); }catch(e){ return []; } })();
     const uc2 = (()=>{ try{ return JSON.parse(localStorage.getItem('used_cards_2')||'[]'); }catch(e){ return []; } })();
     usedCardsCache = { 1: Array.isArray(uc1) ? uc1 : [], 2: Array.isArray(uc2) ? uc2 : [] };
     const getAt = (o)=> (o && typeof o.at === 'number') ? o.at : 0;
     const latest = [q,a,r,s,m].filter(Boolean).sort((x,y)=> getAt(y)-getAt(x))[0] || null;
 
-    // Pontos: se houver sync_answer, aplique a pontuação mais recente
     if(a && a.newPoints){
       points[1] = a.newPoints[1]||0; points[2] = a.newPoints[2]||0;
       const p1El = document.getElementById('player1-points'); if(p1El) p1El.textContent = `${points[1]} pts`;
@@ -1289,7 +1434,6 @@ function hydrateFromStorage(){
     }
 
     if(latest === m && m && m.winnerId){
-      // Se a partida já terminou, mostra o estado final apropriado
       const winner = { id: m.winnerId, name: document.getElementById(`player${m.winnerId}-name`).textContent, pts: m.pts };
       if(localPlayerId === m.winnerId){
         showFinalWinner(winner);
@@ -1300,17 +1444,17 @@ function hydrateFromStorage(){
     }
 
     if(latest === q && q && q.category){
-      // Estamos no meio de uma pergunta
       currentPlayer = q.by || currentPlayer;
       renderQuestionPayload(q);
       updateTurnUI();
+      try{ setPowerTrayVisible(true); }catch(e){}
+      try{ setTimeout(()=>{ try{ setPowerTrayVisible(true); }catch(e){} }, 50); }catch(e){}
+      try{ setTimeout(()=>{ try{ setPowerTrayVisible(true); }catch(e){} }, 200); }catch(e){}
       return;
     }
 
     if(latest === r && r && r.category){
-      // Seleção de cartas em andamento
       currentPlayer = r.by || currentPlayer;
-      // Não ocultar roleta durante seleção
       try{ setPowerTrayVisible(false); }catch(e){}
       showCardSelection(r.category, r.wheelPoints || 1);
       updateTurnUI();
@@ -1318,19 +1462,16 @@ function hydrateFromStorage(){
     }
 
     if(latest === s && s && typeof s.index === 'number'){
-      // Giro da roleta em andamento: abrir modal e sincronizar giro
       currentPlayer = s.by || currentPlayer;
       try{
         try{ window._spinInProgress = true; }catch(e){}
         try{ if(typeof window.ensureRoletaOpenIfIdle === 'function') window.ensureRoletaOpenIfIdle(); }catch(e){}
         const iframe = document.getElementById('roletaIframe');
-        // aplica overlay se não for minha vez
         try{
           const overlay = document.getElementById('roletaOverlay');
           if(overlay) overlay.style.display = (localPlayerId === currentPlayer) ? 'none' : 'flex';
           if(iframe){ if(localPlayerId !== currentPlayer) iframe.classList.add('dim'); else iframe.classList.remove('dim'); }
         }catch(e){}
-        // dispara o giro (pode ocorrer pequeno atraso)
         try{ iframe.contentWindow.postMessage({ type:'spinNow', index: s.index, turns: s.turns, duration: s.duration }, '*'); }catch(e){}
       }catch(e){}
       updateTurnUI();
@@ -1339,20 +1480,17 @@ function hydrateFromStorage(){
     }
 
     if(a && a.nextPlayer){
-      // Após resposta, define próximo jogador
       currentPlayer = a.nextPlayer;
       updateTurnUI();
       return;
     }
 
-    // Estado inicial padrão: Jogador 1 abre a roleta
     currentPlayer = 1;
     updateTurnUI();
     try{ if(typeof window.ensureRoletaOpenIfIdle === 'function') window.ensureRoletaOpenIfIdle(); }catch(e){}
   }catch(e){ console.warn('hydrateFromStorage error', e); }
 }
 
-// Sincronização entre telas: ouça vencedor e rematch via localStorage
 try{
   window.addEventListener('storage', (ev) => {
     if(!ev) return;
@@ -1361,14 +1499,12 @@ try{
         const data = JSON.parse(ev.newValue||'{}');
         if(data && data.winnerId && data.loserId){
           if(localPlayerId === data.loserId){
-            // Mostra modal de derrota sem animações
             showLoserModal(data);
           }
         }
       }catch(e){}
     }
     if(ev.key === 'rematchNow'){
-      // Reinicia ambas as telas
       try{ stopConfettiLoop(); }catch(e){}
       try{ stopFireworksLoop(); }catch(e){}
       try{ clearRematchTimeout(); }catch(e){}
@@ -1379,7 +1515,6 @@ try{
       try{
         const data = JSON.parse(ev.newValue||'{}');
         if(!data || !data.from) return;
-        // Se eu solicitei, mostra aguardando; se fui solicitado, mostra prompt
         if(localPlayerId === data.from){
           const oppId = (data.to) ? data.to : (localPlayerId === 1 ? 2 : 1);
           showRematchWaitingModal(oppId);
@@ -1404,31 +1539,25 @@ try{
       }catch(e){}
     }
     if(ev.key === 'goLobbyNow'){
-      // Volta ao lobby em ambas as telas
       try{ stopConfettiLoop(); }catch(e){}
       try{ stopFireworksLoop(); }catch(e){}
       try{ clearRematchTimeout(); }catch(e){}
       try{ localStorage.removeItem('used_cards_1'); localStorage.removeItem('used_cards_2'); localStorage.removeItem('used_cards'); }catch(e){}
       location.href = 'players.html';
     }
-    // Giro iniciado na outra aba: sincroniza o giro nesta
     if(ev.key === 'sync_roleta_spin'){
       try{
         const data = JSON.parse(ev.newValue||'{}');
         if(!data || typeof data.index !== 'number') return;
-        // Abre a roleta e mostra overlay conforme o turno
         try{ window._spinInProgress = true; }catch(e){}
         try{ if(typeof window.ensureRoletaOpenIfIdle === 'function') window.ensureRoletaOpenIfIdle(); }catch(e){}
-        // Esconde as cartas durante o giro da roleta
         try{ const cd = document.getElementById('cards'); if(cd) cd.style.display = 'none'; }catch(e){}
         const iframe = document.getElementById('roletaIframe');
-        // Como não é a nossa vez, garante overlay e desabilita o botão
         try{
           const overlay = document.getElementById('roletaOverlay');
           if(overlay) overlay.style.display = (localPlayerId === currentPlayer) ? 'none' : 'flex';
           if(iframe){ if(localPlayerId !== currentPlayer) iframe.classList.add('dim'); }
         }catch(e){}
-        // Dispara o giro com os mesmos parâmetros (aguarda iframe pronto, se necessário)
         const postSpin = ()=>{ try{ iframe.contentWindow.postMessage({ type:'spinNow', index: data.index, turns: data.turns, duration: data.duration }, '*'); }catch(e){} };
         try{
           if(!iframe.contentWindow || iframe.contentDocument.readyState !== 'complete'){
@@ -1439,13 +1568,11 @@ try{
         }catch(e){}
       }catch(e){}
     }
-    // Resultado da roleta vindo da outra aba
     if(ev.key === 'sync_roleta'){
       try{
         const data = JSON.parse(ev.newValue||'{}');
         if(!data || !data.category) return;
         try{ window._spinInProgress = false; }catch(e){}
-        // Mantém resultado visível por 3s antes de fechar a roleta e mostrar cartas
         setTimeout(()=>{
           try{ const ro = document.getElementById('roleta-area'); if(ro) ro.style.display = 'none'; }catch(e){}
           try{ const cd = document.getElementById('cards'); if(cd) cd.style.display = 'block'; }catch(e){}
@@ -1454,18 +1581,14 @@ try{
         }, 3000);
       }catch(e){}
     }
-    // Seleção de carta confirmada na outra aba
     if(ev.key === 'sync_card'){
       try{
         const data = JSON.parse(ev.newValue||'{}');
         if(!data || !data.category) return;
-        // Desabilita interação local das cartas, mas mantém visíveis
         try{ const cd = document.getElementById('cards'); if(cd) cd.style.pointerEvents = 'none'; }catch(e){}
-        // Marca a carta como usada também neste cliente, atualiza cache e visual
         try{
           const cardValue = (typeof data.cardValue === 'number') ? data.cardValue : (typeof data.pointsValue === 'number' ? data.pointsValue : null);
           const by = data.by;
-          // só marca se valor válido 1..5 e não for um avanço sem carta
           if(by === 1 || by === 2){
             if(cardValue != null && cardValue >= 1 && cardValue <= 5 && !data.noCardAvailable){
               const arr = Array.isArray(usedCardsCache[by]) ? usedCardsCache[by] : [];
@@ -1487,24 +1610,23 @@ try{
             }
           }
         }catch(e){}
-        // Aguardamos 'sync_question' para renderizar a pergunta
       }catch(e){}
     }
-    // NOVO: mesma pergunta para ambas telas
     if(ev.key === 'sync_question'){
       try{
         const data = JSON.parse(ev.newValue||'{}');
         if(!data || !data.category) return;
+        try{ currentPlayer = data.by || currentPlayer; }catch(e){}
         renderQuestionPayload(data);
         updateTurnUI();
+        try{ setTimeout(()=>{ try{ setPowerTrayVisible(true); }catch(e){} }, 50); }catch(e){}
+        try{ setTimeout(()=>{ try{ setPowerTrayVisible(true); }catch(e){} }, 200); }catch(e){}
       }catch(e){}
     }
-    // Resposta confirmada na outra aba
     if(ev.key === 'sync_answer'){
       try{
         const data = JSON.parse(ev.newValue||'{}');
         if(!data) return;
-        // Destaca alternativas por 2s no lado do oponente também
         try{
           const ansDiv = document.getElementById('answers');
           if(ansDiv){
@@ -1524,7 +1646,6 @@ try{
             }
           }
         }catch(e){}
-        // Após 2s aplica pontos e segue fluxo
         setTimeout(()=>{
           try{
             if(data.newPoints){
@@ -1535,6 +1656,7 @@ try{
             if(checkForWinner()) return;
             try{ if(spectatorTimer){ clearInterval(spectatorTimer); spectatorTimer = null; } }catch(e){}
             try{ document.getElementById('question-area').style.display = 'none'; }catch(e){}
+            try{ const cd = document.getElementById('cards'); if(cd){ cd.style.display = 'none'; cd.style.pointerEvents = 'none'; } }catch(e){}
             try{ document.getElementById('category').innerText = ''; }catch(e){}
             try{ document.getElementById('waiting-screen').style.display = 'none'; }catch(e){}
             try{ setPowerTrayVisible(false); }catch(e){}
@@ -1551,16 +1673,13 @@ try{
       try{
         const data = JSON.parse(ev.newValue||'{}');
         if(!data || typeof data.target !== 'number') return;
-        // Aplica somente na aba do jogador alvo (currentPlayer === target)
         if(currentPlayer === data.target){
-          // Desabilita respostas por 5s
           const ansDiv = document.getElementById('answers');
           if(ansDiv){
             const btns = Array.from(ansDiv.querySelectorAll('button'));
             btns.forEach(b=> b.disabled = true);
             setTimeout(()=>{
               try{
-                // Reabilita apenas se a pergunta ainda está ativa e ainda é a vez deste jogador
                 const qa = document.getElementById('question-area');
                 const isQuestionVisible = qa ? (window.getComputedStyle(qa).display !== 'none') : false;
                 if(isQuestionVisible && currentPlayer === data.target){
@@ -1576,28 +1695,23 @@ try{
       try{
         const data = JSON.parse(ev.newValue||'{}');
         if(!data || typeof data.target !== 'number') return;
-        // Aplica somente na aba do jogador alvo (quem responde) e na mesma pergunta
         const ctx = window._currentQuestionCtx || {};
         if(currentPlayer === data.target && ctx && ctx.at && ctx.at === data.qAt){
-          // Limita a 3 embaralhamentos; no 4º click (evento extra) ignora para deixar responder
           window._shuffleClicks = (window._shuffleClicks||0) + 1;
-          if(window._shuffleClicks > 3) return; // já atingiu limite de embaralhes
+          if(window._shuffleClicks > 3) return;
           const ansDiv = document.getElementById('answers');
           if(ansDiv){
             const btns = Array.from(ansDiv.querySelectorAll('button'));
             if(btns.length > 1){
-              // Captura texto da correta atual
               const correctIndex = typeof ctx.correct === 'number' ? ctx.correct : null;
               if(correctIndex != null && correctIndex >=0 && correctIndex < btns.length){
-                // Embaralhar: escolher posição nova diferente
+                
                 let newPos;
                 do{ newPos = Math.floor(Math.random()*btns.length); }while(newPos === correctIndex);
                 if(newPos !== correctIndex){
-                  // Swap visual: trocar apenas os textos para não perder handlers
                   const tmp = btns[newPos].innerText;
                   btns[newPos].innerText = btns[correctIndex].innerText;
                   btns[correctIndex].innerText = tmp;
-                  // Atualiza índice correto interno
                   ctx.correct = newPos;
                   try{ window._currentQuestionCtx.correct = newPos; }catch(e){}
                 }
@@ -1607,13 +1721,114 @@ try{
         }
       }catch(e){}
     }
+    if(ev.key === 'power_runaway'){
+      try{
+        const data = JSON.parse(ev.newValue||'{}');
+        if(!data || typeof data.target !== 'number') return;
+        const ctx = window._currentQuestionCtx || {};
+        if(currentPlayer !== data.target || !ctx || !ctx.at || ctx.at !== data.qAt) return;
+        const ansDiv = document.getElementById('answers');
+        if(!ansDiv) return;
+        let remaining = Number(data.clicks)||4;
+        const parent = ansDiv;
+        const originalStyles = new Map();
+        parent.style.position = parent.style.position || 'relative';
+        const btns = Array.from(parent.querySelectorAll('button'));
+        btns.forEach(b=>{
+          originalStyles.set(b, { position: b.style.position||'', top: b.style.top||'', left: b.style.left||'', transform: b.style.transform||'' });
+        });
+        function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
+        function scatter(){
+          const rect = parent.getBoundingClientRect();
+          btns.forEach(b=>{
+            const br = b.getBoundingClientRect();
+            const w = br.width || 100, h = br.height || 40;
+            const maxLeft = Math.max(0, rect.width - w);
+            const maxTop = Math.max(0, rect.height - h);
+            const left = clamp(Math.floor(Math.random()*maxLeft), 0, maxLeft);
+            const top = clamp(Math.floor(Math.random()*maxTop), 0, maxTop);
+            b.style.position = 'absolute';
+            b.style.left = left+'px';
+            b.style.top = top+'px';
+            b.style.transform = 'translate(0,0)';
+          });
+        }
+        function restore(){
+          btns.forEach(b=>{
+            const st = originalStyles.get(b)||{};
+            b.style.position = st.position; b.style.top = st.top; b.style.left = st.left; b.style.transform = st.transform;
+          });
+          parent.removeEventListener('click', handler, true);
+          try{ window._runawayActive = false; }catch(e){}
+        }
+        function handler(ev){
+          try{
+            const targetBtn = ev.target && ev.target.closest && ev.target.closest('button');
+            if(!targetBtn) return;
+            ev.stopImmediatePropagation(); ev.stopPropagation(); ev.preventDefault();
+            remaining -= 1;
+            scatter();
+            if(remaining <= 0){ restore(); }
+          }catch(e){}
+        }
+        try{ window._runawayActive = true; }catch(e){}
+        scatter();
+        parent.addEventListener('click', handler, true);
+      }catch(e){}
+    }
+    if(ev.key === 'power_jumpscare'){
+      try{
+        const data = JSON.parse(ev.newValue||'{}');
+        if(!data || typeof data.target !== 'number') return;
+        const ctx = window._currentQuestionCtx || {};
+        if(currentPlayer !== data.target || !ctx || !ctx.at || ctx.at !== data.qAt) return;
+        const ansDiv = document.getElementById('answers'); if(!ansDiv) return;
+        const deadline = Date.now() + (data.durationMs || 5000);
+        function ensureShakeCSS(){
+          if(document.getElementById('scare-shake-style')) return;
+          const st = document.createElement('style'); st.id='scare-shake-style';
+          st.textContent = '@keyframes scareShake{0%{transform:translate(0,0)}20%{transform:translate(-6px,4px)}40%{transform:translate(6px,-4px)}60%{transform:translate(-4px,6px)}80%{transform:translate(4px,-6px)}100%{transform:translate(0,0)}} .shake-anim{animation:scareShake 120ms linear infinite}';
+          document.head.appendChild(st);
+        }
+        ensureShakeCSS();
+        const jumpImgs = ['sons/audios/jump1.jpg','sons/audios/jump2.jpg','sons/audios/jump3.jpg'];
+        const jumpSounds = ['sons/audios/audios/jumpscare 1.m4a','sons/audios/audios/jumpscare 2.m4a','sons/audios/audios/jumpscare 3.m4a'];
+        function showJump(){
+          const old = document.getElementById('jumpscareOverlay'); if(old && old.parentNode) old.parentNode.removeChild(old);
+          const ov = document.createElement('div'); ov.id='jumpscareOverlay';
+          ov.style.position='fixed'; ov.style.inset='0'; ov.style.zIndex=10020; ov.style.display='flex'; ov.style.alignItems='center'; ov.style.justifyContent='center'; ov.style.background='rgba(0,0,0,0.2)'; ov.style.pointerEvents='none';
+          const img = document.createElement('img'); img.src = jumpImgs[Math.floor(Math.random()*jumpImgs.length)]; img.alt=''; img.style.maxWidth='90%'; img.style.maxHeight='90%'; img.style.borderRadius='12px'; img.style.boxShadow='0 10px 40px rgba(0,0,0,0.6)';
+          ov.appendChild(img); document.body.appendChild(ov);
+          document.body.classList.add('shake-anim');
+          const audio = new Audio(jumpSounds[Math.floor(Math.random()*jumpSounds.length)]); audio.volume = 1.0; audio.play().catch(()=>{});
+          setTimeout(()=>{ try{ document.body.classList.remove('shake-anim'); if(ov && ov.parentNode) ov.parentNode.removeChild(ov); }catch(e){} }, (data.durationMs||5000));
+        }
+        try{ showJump(); }catch(e){}
+      }catch(e){}
+    }
+    if(ev.key === 'power_xmask'){
+      try{
+        const data = JSON.parse(ev.newValue||'{}');
+        if(!data || typeof data.target !== 'number') return;
+        const ctx = window._currentQuestionCtx || {};
+        if(currentPlayer !== data.target || !ctx || !ctx.at || ctx.at !== data.qAt) return;
+        const qEl = document.getElementById('question');
+        const ansDiv = document.getElementById('answers'); if(!qEl || !ansDiv) return;
+        const btns = Array.from(ansDiv.querySelectorAll('button'));
+        const original = { q: qEl.textContent, a: btns.map(b=>b.textContent) };
+        function maskText(s){ if(!s) return s; return s.replace(/[AEIOUÁÉÍÓÚÂÊÎÔÛÃÕaeiouáéíóúâêîôûãõ]/g,'X').replace(/[02468]/g,'X'); }
+        qEl.textContent = maskText(original.q);
+        btns.forEach((b,i)=>{ b.textContent = maskText(original.a[i]||''); });
+        setTimeout(()=>{
+          try{ qEl.textContent = original.q; btns.forEach((b,i)=>{ b.textContent = original.a[i]||''; }); }catch(e){}
+        }, data.durationMs || 5000);
+      }catch(e){}
+    }
   });
-}catch(e){ /* ignore */ }
+}catch(e){ }
 
 function chooseCard(pointsValue, category) {
-  // Mantém a roleta visível sempre
   try{ document.getElementById('openRoletaBtn').disabled = true; }catch(e){}
-  // Limpa qualquer título anterior e waiting-screen
   try{ const catEl = document.getElementById('category'); if(catEl) { catEl.classList.remove('centered-title'); catEl.innerText = ''; } }catch(e){}
   try{ const badge = document.getElementById('cat-badge'); if(badge){ badge.style.display='none'; badge.textContent=''; } }catch(e){}
   try{ const ws = document.getElementById('waiting-screen'); if(ws) ws.style.display = 'none'; }catch(e){}
@@ -1629,7 +1844,6 @@ function chooseCard(pointsValue, category) {
     at: Date.now()
   };
 
-  // Envia a pergunta para a outra tela e renderiza localmente para ambos
   try{ localStorage.setItem('sync_question', JSON.stringify(payload)); }catch(e){}
   renderQuestionPayload(payload);
 }
@@ -1642,17 +1856,18 @@ function startTimer() {
   timer = setInterval(() => {
     timeLeft--;
     updateTimer();
+    if(timeLeft === 5){ playSFX('cronometro'); }
     if (timeLeft <= 0) {
       clearInterval(timer);
       try{
         const ctx = window._currentQuestionCtx || {};
         answerQuestion(false, ctx.pointsValue||0, ctx.category||'', null, typeof ctx.correct==='number'?ctx.correct:null);
       }catch(e){ answerQuestion(false); }
+      stopSFX('cronometro');
     }
   }, 1000);
 }
 
-// Inicia o timer com tempo restante específico (para sincronizar entre abas)
 function startTimerRemaining(remaining) {
   clearInterval(timer);
   try{ if(spectatorTimer){ clearInterval(spectatorTimer); spectatorTimer = null; } }catch(e){}
@@ -1669,17 +1884,18 @@ function startTimerRemaining(remaining) {
   timer = setInterval(() => {
     timeLeft--;
     updateTimer();
+    if(timeLeft === 5){ playSFX('cronometro'); }
     if (timeLeft <= 0) {
       clearInterval(timer);
       try{
         const ctx = window._currentQuestionCtx || {};
         answerQuestion(false, ctx.pointsValue||0, ctx.category||'', null, typeof ctx.correct==='number'?ctx.correct:null);
       }catch(e){ answerQuestion(false); }
+      stopSFX('cronometro');
     }
   }, 1000);
 }
 
-// Timer apenas visual para o oponente acompanhar a contagem regressiva
 function startSpectatorTimerRemaining(remaining){
   try{ if(spectatorTimer){ clearInterval(spectatorTimer); } }catch(e){}
   try{ if(timer){ clearInterval(timer); } }catch(e){}
@@ -1707,7 +1923,6 @@ function answerQuestion(isCorrect, pointsValue = 0, category = "", selectedIndex
   clearInterval(timer);
   try{ if(spectatorTimer){ clearInterval(spectatorTimer); spectatorTimer = null; } }catch(e){}
 
-  // Destacar alternativas por 2s
   try{
     const ansDiv = document.getElementById('answers');
     if(ansDiv){
@@ -1721,46 +1936,40 @@ function answerQuestion(isCorrect, pointsValue = 0, category = "", selectedIndex
         const corBtn = ansDiv.querySelector(`button[data-idx="${correctIndex}"]`);
         if(corBtn){ corBtn.classList.add('ans-correct'); }
       }
-      // Se tempo acabou e ninguém escolheu, ainda destacamos a correta
       if(selectedIndex == null && correctIndex != null){
         const corBtn = ansDiv.querySelector(`button[data-idx="${correctIndex}"]`);
         if(corBtn){ corBtn.classList.add('ans-correct'); }
       }
     }
+    playSFX(isCorrect ? 'resposta_correta' : 'resposta_errada');
+    stopSFX('cronometro');
   }catch(e){}
 
-  // Calcula pontuação resultante e próximo jogador
   const next = (currentPlayer === 1) ? 2 : 1;
   const newPoints = { 1: points[1], 2: points[2] };
   if(isCorrect){ newPoints[currentPlayer] += pointsValue; }
 
-  // Envia sync imediatamente para oponente aplicar destaque também
   try{
     localStorage.setItem('sync_answer', JSON.stringify({ by: currentPlayer, correct: isCorrect, pointsValue, category, newPoints, nextPlayer: next, at: Date.now(), selectedIndex, correctIndex }));
   }catch(e){}
 
-  // Após 2s (tempo do destaque), aplica efeitos e segue o jogo
   setTimeout(()=>{
-    // aplica pontos localmente
     points = newPoints;
     try{ document.getElementById(`player1-points`).innerText = `${points[1]} pts`; }catch(e){}
     try{ document.getElementById(`player2-points`).innerText = `${points[2]} pts`; }catch(e){}
 
-    // Checa vencedor após aplicar pontuação
-    // Incrementa rodada e verifica limite ou vencedor
     roundCount += 1;
     if(checkForWinner()) return;
     finalizeIfRoundLimitOrWinner();
-    if(roundCount >= 5) return; // já finalizado
+    if(roundCount >= 5) return;
 
-    // Esconde pergunta e limpa UI
     try{ document.getElementById("question-area").style.display = "none"; }catch(e){}
+    try{ const cd = document.getElementById('cards'); if(cd){ cd.style.display = 'none'; cd.style.pointerEvents = 'none'; } }catch(e){}
     try{ document.getElementById("category").innerText = ""; }catch(e){}
     try{ const badge = document.getElementById('cat-badge'); if(badge){ badge.style.display='none'; badge.textContent=''; } }catch(e){}
     try{ setPowerTrayVisible(false); }catch(e){}
 
     currentPlayer = next;
-    // Prepara próxima roleta imediatamente (o delay já foi o destaque de 2s)
     try{ const ro = document.getElementById('roleta-area'); if(ro) ro.style.display = 'none'; }catch(e){}
     try{
       updateTurnUI();
@@ -1770,37 +1979,51 @@ function answerQuestion(isCorrect, pointsValue = 0, category = "", selectedIndex
   }, 2000);
 }
 
-// Controle simples da visibilidade da barra de poderes (apenas estética por enquanto)
 function setPowerTrayVisible(show){
   try{
     const tray = document.getElementById('power-tray');
     if(!tray) return;
-    // Exibe poderes do oponente em todas as perguntas (sempre que show=true e pergunta visível)
     const qa = document.getElementById('question-area');
     const isQuestionVisible = qa ? (window.getComputedStyle(qa).display !== 'none') : false;
     tray.style.display = (show && isQuestionVisible) ? 'flex' : 'none';
-    // Ajusta posição para jogador 2 (lado direito) ou jogador 1 (centro)
     if(show){
-      // Limpa classes anteriores de posicionamento
       tray.classList.remove('center');
       tray.classList.remove('right');
       tray.classList.remove('left');
-      if(localPlayerId === 2){
-        tray.classList.add('right');
+      if(!isQuestionVisible){
+        tray.classList.add('center');
       } else {
-        // Jogador 1: poderes no canto inferior esquerdo
-        tray.classList.add('left');
+        try{
+          let answering = currentPlayer;
+          try{ const qraw = localStorage.getItem('sync_question'); const q = JSON.parse(qraw||'{}'); if(q && typeof q.by === 'number') answering = q.by; }catch(e){}
+          const isOpponentView = (localPlayerId !== answering);
+          // Usar sempre 'right' para reproduzir layout correto (steal central) independentemente de quem responde
+          tray.classList.add('right');
+        }catch(e){
+          if(localPlayerId === 2) tray.classList.add('right'); else tray.classList.add('left');
+        }
       }
-      // Esconde poderes (local-only) no oponente: apenas o jogador da vez vê os 5 poderes na sua aba
       try{
-        // Durante a pergunta: o jogador da vez NÃO vê; o oponente vê todos
-        const isOpponentView = (localPlayerId !== currentPlayer);
-        const showLocalPowers = isQuestionVisible && isOpponentView;
+        let answering2 = currentPlayer;
+        try{ const qraw2 = localStorage.getItem('sync_question'); const q2 = JSON.parse(qraw2||'{}'); if(q2 && typeof q2.by === 'number') answering2 = q2.by; }catch(e){}
+        const isOpponentView = (localPlayerId !== answering2);
         const localOnlyButtons = tray.querySelectorAll('.power-btn.local-only');
         localOnlyButtons.forEach(btn=>{
-          if(showLocalPowers){ btn.classList.remove('hidden-remote'); }
-          else { btn.classList.add('hidden-remote'); }
+          try{
+            btn.classList.remove('hidden-remote');
+            btn.style.display = isQuestionVisible ? '' : 'none';
+            btn.disabled = !(isQuestionVisible && isOpponentView);
+          }catch(e){}
         });
+        try{
+          const stealBtn = tray.querySelector('#btn-steal');
+          if(stealBtn){
+            // always show the steal button in the footer when a question is visible;
+            // enable it only for the opponent now
+            stealBtn.style.display = isQuestionVisible ? '' : 'none';
+            try{ stealBtn.disabled = !(isQuestionVisible && isOpponentView); }catch(e){}
+          }
+        }catch(e){}
       }catch(e){}
     }
   }catch(e){}
@@ -1819,11 +2042,10 @@ function opponentTurn() {
     if (correct) points[2] += earned;
     document.getElementById("player2-points").innerText = `${points[2]} pts`;
     if(checkForWinner()) return;
-            // Incrementa rodada e verifica vencedor / limite
             roundCount += 1;
             if(checkForWinner()) return;
             finalizeIfRoundLimitOrWinner();
-            if(roundCount >= 5) return; // finalizou
+            if(roundCount >= 5) return;
     document.getElementById("waiting-screen").style.display = "none";
     document.getElementById("opponent-category").innerText = "";
     document.getElementById("roleta-area").style.display = "flex";
@@ -1855,6 +2077,8 @@ function showFinalWinner(winner){
   document.getElementById('cards').style.display = 'none';
   document.getElementById('waiting-screen').style.display = 'none';
   try{ setPowerTrayVisible(false); }catch(e){}
+  playSFX('vencedor');
+  stopSFX('musica_quiz');
 
   let modal = document.getElementById('finalWinnerModal');
   if(!modal){
@@ -1881,7 +2105,6 @@ function showFinalWinner(winner){
         </div>
       </div>`;
     document.body.appendChild(modal);
-    // set icon src from the corresponding player icon if available
     try{
       const fwIconEl = document.getElementById('fw-icon');
       const srcEl = document.getElementById(`player${winner.id}-icon`);
@@ -1892,7 +2115,6 @@ function showFinalWinner(winner){
       const loserId = (winner && winner.id === 1) ? 2 : 1;
       const payload = { from: localPlayerId, to: loserId, at: Date.now() };
       localStorage.setItem('rematchRequest', JSON.stringify(payload));
-      // mostra "aguardando oponente" enquanto espera a resposta
       showRematchWaitingModal(loserId);
       try{ startRematchTimeout(); }catch(e){}
     }catch(e){}
@@ -1906,24 +2128,19 @@ function showFinalWinner(winner){
   }
   document.getElementById('fw-name').textContent = winner.name || `Jogador ${winner.id}`;
   document.getElementById('fw-pts').textContent = winner.pts;
-  // ensure icon is up to date (in case player icons changed earlier)
   try{
     const fwIconEl2 = document.getElementById('fw-icon');
     const srcEl2 = document.getElementById(`player${winner.id}-icon`);
     if(fwIconEl2 && srcEl2 && srcEl2.src) fwIconEl2.src = srcEl2.src;
   }catch(e){}
-  // Broadcast resultado para a outra tela (varia pelo timestamp para disparar 'storage')
   try{ localStorage.setItem('matchResult', JSON.stringify({ winnerId: winner.id, loserId: winner.id === 1 ? 2 : 1, pts: winner.pts, at: Date.now() })); }catch(e){}
-  // Animações somente na tela do vencedor
   if(localPlayerId === winner.id){
     try{ startConfettiLoop(); }catch(e){ console.warn('confetti failed', e); }
     try{ startFireworksLoop(); }catch(e){ console.warn('fireworks failed', e); }
   }
 }
 
-// Modal de derrota (sem animações) com opção de revanche
 function showLoserModal(result){
-  // Evita múltiplos
   if(document.getElementById('loserModal')) return;
   try{ if(timer){ clearInterval(timer); } }catch(e){}
   try{ if(spectatorTimer){ clearInterval(spectatorTimer); spectatorTimer = null; } }catch(e){}
@@ -1953,6 +2170,8 @@ function showLoserModal(result){
   overlay.appendChild(content);
   document.body.appendChild(overlay);
   try{ setPowerTrayVisible(false); }catch(e){}
+  playSFX('derrota');
+  stopSFX('musica_quiz');
   try{
     const winnerId = (result && result.winnerId) || 1;
     const nameEl = document.getElementById('loser-winner-name');
@@ -1966,7 +2185,6 @@ function showLoserModal(result){
       const toId = (result && result.winnerId) ? result.winnerId : (localPlayerId === 1 ? 2 : 1);
       const payload = { from: localPlayerId, to: toId, at: Date.now() };
       localStorage.setItem('rematchRequest', JSON.stringify(payload));
-      // Mostra modal de aguardando resposta
       showRematchWaitingModal(toId);
       try{ startRematchTimeout(); }catch(e){}
     }catch(e){}
@@ -1979,7 +2197,6 @@ function showLoserModal(result){
   });
 }
 
-// Modal aguardando resposta do oponente
 function showRematchWaitingModal(opponentId){
   try{ hideRematchModals(); }catch(e){}
   const overlay = document.createElement('div');
@@ -2004,7 +2221,6 @@ function showRematchWaitingModal(opponentId){
   document.body.appendChild(overlay);
 }
 
-// Modal para o oponente aceitar/recusar
 function showRematchPromptModal(requesterId){
   try{ hideRematchModals(); }catch(e){}
   const overlay = document.createElement('div');
@@ -2131,21 +2347,20 @@ function stopConfettiLoop(){
   }catch(e){ console.warn('stopConfettiLoop error', e); }
 }
 
-/* Fireworks: DOM-based fireworks animation (non-blocking) */
+
 function launchFireworks(count = 6, ascentDuration = 900){
   const container = document._fireworksContainer || document.createElement('div');
   if(!document._fireworksContainer){ container.className = 'fireworks-container'; document.body.appendChild(container); document._fireworksContainer = container; }
   const colors = ['#FFD700','#FF5E5E','#5EE0FF','#8AFF8A','#C686FF','#FFB86B','#FF9F43'];
 
   for(let i=0;i<count;i++){
-    const leftPct = 8 + Math.random() * 84; // keep within 8%..92%
+    const leftPct = 8 + Math.random() * 84;
     const rocket = document.createElement('div');
     rocket.className = 'firework-rocket';
     rocket.style.left = leftPct + '%';
     rocket.style.animation = `fw-rocketUp ${ascentDuration}ms ease-out forwards`;
     document._fireworksContainer.appendChild(rocket);
 
-    // explode after most of ascent
     setTimeout(()=>{
       try{
         const rect = rocket.getBoundingClientRect();
@@ -2159,20 +2374,17 @@ function launchFireworks(count = 6, ascentDuration = 900){
           part.style.width = size + 'px'; part.style.height = size + 'px';
           const color = colors[Math.floor(Math.random()*colors.length)];
           part.style.background = color;
-          // place at explosion center (convert to page coords)
           part.style.left = (cx - size/2) + 'px';
           part.style.top = (cy - size/2) + 'px';
-          // random direction and distance
           const angle = Math.random()*Math.PI*2;
-          const dist = 80 + Math.random()*220; // px
+          const dist = 80 + Math.random()*220;
           const dx = Math.cos(angle) * dist;
-          const dy = Math.sin(angle) * dist * -1; // upward bias
+          const dy = Math.sin(angle) * dist * -1;
           part.style.setProperty('--dx', dx + 'px');
           part.style.setProperty('--dy', dy + 'px');
           const dur = 700 + Math.floor(Math.random()*900);
           part.style.animation = `fw-particleFly ${dur}ms cubic-bezier(.2,.6,.2,1) forwards`;
           document._fireworksContainer.appendChild(part);
-          // remove after animation
           setTimeout(()=>{ try{ if(part && part.parentNode) part.parentNode.removeChild(part); }catch(e){} }, dur + 80);
         }
       }catch(e){ console.warn('firework explode error', e); }
