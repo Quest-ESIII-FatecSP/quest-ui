@@ -1,27 +1,24 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-    try{
-      const tray = document.getElementById('power-tray');
-      if(tray){
-        tray.style.display = 'flex';
-        tray.classList.remove('center','left','right');
-        tray.classList.add('center');
-        const isOpponentView = (localPlayerId !== by);
-        const localOnlyButtons = tray.querySelectorAll('.power-btn.local-only');
-        localOnlyButtons.forEach(btn=>{
-          try{
-            btn.classList.remove('hidden-remote');
-            btn.style.display = '';
-            btn.disabled = !isOpponentView;
-          }catch(e){}
-        });
-        const stealBtn = tray.querySelector('#btn-steal');
-        if(stealBtn){
-          stealBtn.style.display = '';
-          stealBtn.disabled = !isOpponentView; // habilitado somente para oponente
-        }
-      }
-    }catch(e){}
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Jogo de Quiz — Jogador vs Jogador</title>
+<style>
+  body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    color: white;
+    overflow: hidden;
+    background: #000 url('Fundo.jpeg') center center / cover no-repeat fixed;
+  }
+
+  .bg-style-intense {
+    background-color: #2a0b2b;
+    background-image:
+      linear-gradient(135deg, rgba(255,255,255,0.07) 25%, transparent 25%),
+      linear-gradient(225deg, rgba(255,255,255,0.05) 25%, transparent 25%),
+      radial-gradient(circle at 10% 10%, rgba(255,255,255,0.04), transparent 18%);
     background-size: 40px 40px, 40px 40px, 1000px 600px;
     background-position: 0 0, 20px 20px, center center;
     background-blend-mode: overlay, overlay, normal;
@@ -793,31 +790,6 @@ if (backBtn) {
           if(!ctx || !ctx.at) return;
           const payload = { by: localPlayerId, target: currentPlayer, qAt: ctx.at, at: Date.now(), durationMs: 5000 };
           localStorage.setItem('power_xmask', JSON.stringify(payload));
-        }catch(e){}
-      });
-    }
-  }catch(e){}
-})();
-
-(function initStealPower(){
-  try{
-    const btn = document.getElementById('btn-steal');
-    if(btn){
-      btn.addEventListener('click', ()=>{
-        try{
-          const qa = document.getElementById('question-area');
-          const isQuestionVisible = qa ? (window.getComputedStyle(qa).display !== 'none') : false;
-          if(!isQuestionVisible) return;
-          if(localPlayerId === currentPlayer) return; // só o oponente pode roubar
-          const raw = localStorage.getItem('sync_question');
-          if(!raw) return;
-          const q = JSON.parse(raw||'{}');
-          if(!q || !q.category) return;
-          if(typeof q.by !== 'number') q.by = currentPlayer;
-          if(q.by === localPlayerId) return; // já é do ladrão
-          q.by = localPlayerId; // transferir turno da questão
-          try{ playSFX('click'); }catch(e){}
-          localStorage.setItem('sync_question', JSON.stringify(q));
         }catch(e){}
       });
     }
@@ -2010,18 +1982,23 @@ function setPowerTrayVisible(show){
         const localOnlyButtons = tray.querySelectorAll('.power-btn.local-only');
         localOnlyButtons.forEach(btn=>{
           try{
+            const btnPlayer = btn.getAttribute('data-player');
             btn.classList.remove('hidden-remote');
             btn.style.display = isQuestionVisible ? '' : 'none';
-            btn.disabled = !(isQuestionVisible && isOpponentView);
+            if(isQuestionVisible && isOpponentView && btnPlayer === String(localPlayerId)){
+              btn.disabled = false;
+            } else {
+              btn.disabled = true;
+            }
           }catch(e){}
         });
         try{
           const stealBtn = tray.querySelector('#btn-steal');
           if(stealBtn){
             // always show the steal button in the footer when a question is visible;
-            // enable it only for the opponent now
+            // enable it only for the answering player (preserve functionality)
             stealBtn.style.display = isQuestionVisible ? '' : 'none';
-            try{ stealBtn.disabled = !(isQuestionVisible && isOpponentView); }catch(e){}
+            try{ stealBtn.disabled = !(isQuestionVisible && !isOpponentView); }catch(e){}
           }
         }catch(e){}
       }catch(e){}
