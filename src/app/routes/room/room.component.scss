@@ -1,10 +1,9 @@
-body {
-      margin: 0;
-      font-family: 'Poppins', sans-serif;
-      color: white;
-      overflow: hidden;
-      background: #000 url('Fundo.jpeg') center center / cover no-repeat fixed;
-    }
+:host {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  background: #000 url('/assets/img/Fundo.jpeg') center center / cover no-repeat fixed;
+}
 
     .bg-style-intense {
       background-color: #2a0b2b;
