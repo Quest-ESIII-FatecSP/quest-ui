@@ -11,8 +11,16 @@ import {
 } from '@angular/core';
 import {StompService} from "../../services/stomp.service";
 import {Router} from "@angular/router";
+import { LobbyService, RankingJogador } from '../../services/lobby.service';
 
 declare const bootstrap: any; // bootstrap bundle (Modal) — incluído globalmente no index.html
+
+interface Player {
+  position: number;
+  name: string;
+  score: number;
+  avatar: string;
+}
 
 interface Sala {
   nome: string;
@@ -41,6 +49,8 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
     name: 'Jogador 2',
     avatar: 'assets/img/Mundo M.png', status: 'Aguardando...',
     active: false };
+
+  playersRanking: RankingJogador[] = [];
 
   // salas / sistema local
   salas: Sala[] = [];
@@ -98,10 +108,16 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
   // timers / subscriptions
   private timeouts: any[] = [];
 
-  constructor(private renderer: Renderer2, private stompService: StompService, private router: Router) {}
+  constructor(
+    private renderer: Renderer2,
+    private stompService: StompService,
+    private router: Router,
+    private lobbyService: LobbyService
+  ) {}
 
   ngOnInit(): void {
     this.stompLobbySubscription();
+    this.ObterRanking();
     // tenta restaurar avatares de localStorage
     try {
       const sa = localStorage.getItem('selectedAvatar');
@@ -313,34 +329,34 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   // ---------- PARTIDA / UTIL ----------
-  criarPartida() {
-    // efeito visual: destacar card 1
-    this.pulseCard(this.playerCard1Ref);
-
-    // persiste avatares
-    try {
-      localStorage.setItem('selectedAvatar1', this.player1.avatar);
-      localStorage.setItem('selectedAvatar2', this.player2.avatar);
-      localStorage.setItem('newMatch', String(Date.now()));
-
-      // limpa chaves antigas (compat com original)
-      const keys = [
-        'sync_roleta', 'sync_roleta_spin', 'sync_card', 'sync_question',
-        'sync_answer', 'matchResult', 'goLobbyNow', 'rematchNow'
-      ];
-      keys.forEach(k => localStorage.removeItem(k));
-    } catch (e) {}
-    // abre nova aba para jogador 2 e navega atual para jogador 1
-    try {
-      const p2Url = 'partida.html?p=2';
-      const p1Url = 'partida.html?p=1';
-      const win2 = window.open(p2Url, '_blank');
-      // mesmo que bloqueado, redireciona atual
-      window.location.href = p1Url;
-    } catch (e) {
-      console.warn('Tentativa de abrir partida falhou', e);
-    }
-  }
+  // criarPartida() {
+  //   // efeito visual: destacar card 1
+  //   this.pulseCard(this.playerCard1Ref);
+  //
+  //   // persiste avatares
+  //   try {
+  //     localStorage.setItem('selectedAvatar1', this.player1.avatar);
+  //     localStorage.setItem('selectedAvatar2', this.player2.avatar);
+  //     localStorage.setItem('newMatch', String(Date.now()));
+  //
+  //     // limpa chaves antigas (compat com original)
+  //     const keys = [
+  //       'sync_roleta', 'sync_roleta_spin', 'sync_card', 'sync_question',
+  //       'sync_answer', 'matchResult', 'goLobbyNow', 'rematchNow'
+  //     ];
+  //     keys.forEach(k => localStorage.removeItem(k));
+  //   } catch (e) {}
+  //   // abre nova aba para jogador 2 e navega atual para jogador 1
+  //   try {
+  //     const p2Url = 'partida.html?p=2';
+  //     const p1Url = 'partida.html?p=1';
+  //     const win2 = window.open(p2Url, '_blank');
+  //     // mesmo que bloqueado, redireciona atual
+  //     window.location.href = p1Url;
+  //   } catch (e) {
+  //     console.warn('Tentativa de abrir partida falhou', e);
+  //   }
+  // }
 
   entrarSalada() {
     this.pulseCard(this.playerCard2Ref);
@@ -398,9 +414,10 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
 
   pulseCard(cardRef: ElementRef | undefined) {
     if (!cardRef || !cardRef.nativeElement) return;
+
     const el = cardRef.nativeElement;
+
     try {
-      // aplica estilos temporários
       this.renderer.setStyle(el, 'transition', 'transform 0.25s ease, box-shadow 0.25s ease');
       this.renderer.setStyle(el, 'transform', 'scale(1.03)');
       this.renderer.setStyle(el, 'boxShadow', '0 26px 48px rgba(0,0,0,0.6)');
@@ -416,5 +433,44 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
     } catch (e) {
       // fallback silencioso
     }
+  }
+
+  getMedalIcon(position: number): string {
+    switch(position) {
+      case 1:
+        return '🏆';
+      case 2:
+        return '🥈';
+      case 3:
+        return '🥉';
+      default:
+        return '';
+    }
+  }
+
+  getPositionClass(position: number): string {
+    switch(position) {
+      case 1:
+        return 'position-1';
+      case 2:
+        return 'position-2';
+      case 3:
+        return 'position-3';
+      default:
+        return '';
+    }
+  }
+
+  ObterRanking() {
+    this.lobbyService.ObterRanking().subscribe({
+      next: (data) => {
+        this.playersRanking = data;
+
+        this.playersRanking = this.playersRanking.map((player, index) => {
+          player.posicao = index + 1;
+          return player;
+        });
+      }
+    })
   }
 }

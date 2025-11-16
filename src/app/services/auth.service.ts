@@ -2,16 +2,18 @@ import { Injectable } from '@angular/core';
 import {Observable, tap} from "rxjs";
 import {HttpClient} from "@angular/common/http";
 import {StompService} from "./stomp.service";
+import { environment } from '../../environments/environment';
 
 export interface AuthResponse {
   token: string;
   isSuccess: boolean;
 }
+
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private baseUrl = 'http://localhost:8080';
+  private baseUrl = environment.apiUrl;
 
   constructor(private http: HttpClient, private stompService: StompService) {}
 
