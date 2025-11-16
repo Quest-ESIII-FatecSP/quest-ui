@@ -9,12 +9,12 @@ import {
   ViewChild,
   ViewChildren
 } from '@angular/core';
-import { StompService } from "../../services/stomp.service";
 import { Router } from "@angular/router";
-import { JogadorService, RankingJogador } from '../../services/jogador.service';
-import { ItemLoja, LojaService, Pacote, TipoItemEnum } from '../../services/loja.service';
 import { BlockUI, NgBlockUI } from 'ng-block-ui';
 import { switchMap } from 'rxjs';
+import { JogadorService, RankingJogador } from '../../services/jogador.service';
+import { ItemLoja, LojaService, Pacote, TipoItemEnum } from '../../services/loja.service';
+import { StompService } from "../../services/stomp.service";
 declare const bootstrap: any;
 
 interface Sala {
@@ -64,6 +64,7 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
   requestedRoomCode = '';
 
   avataresInventario: ItemLoja[] = [];
+  poderesInventario: ItemLoja[] = [];
 
   // modal control / refs
   @ViewChild('avatarModal', { read: ElementRef }) avatarModalRef!: ElementRef;
@@ -74,6 +75,7 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('criarSalaModal', { read: ElementRef }) criarSalaModalRef!: ElementRef;
   @ViewChild('entrarSalaModal', { read: ElementRef }) entrarSalaModalRef!: ElementRef;
   @ViewChild('senhaEntradaModal', { read: ElementRef }) senhaEntradaModalRef!: ElementRef;
+  @ViewChild('inventarioModal', { read: ElementRef }) inventarioModalRef!: ElementRef;
 
   @ViewChild('playerCard1', { read: ElementRef }) playerCard1Ref!: ElementRef;
   @ViewChild('playerCard2', { read: ElementRef }) playerCard2Ref!: ElementRef;
@@ -128,6 +130,7 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
     this.safeCreateModal('criarSalaModal', this.criarSalaModalRef);
     this.safeCreateModal('entrarSalaModal', this.entrarSalaModalRef);
     this.safeCreateModal('senhaEntradaModal', this.senhaEntradaModalRef);
+    this.safeCreateModal('InventarioModal', this.inventarioModalRef);
 
     // animação inicial dos cards
     this.revealPlayerCards();
@@ -448,6 +451,7 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
     this.lojaService.ObterItensInventario(filtroTipo).subscribe({
       next: (data) => {
         this.avataresInventario = data.filter(item => item.tipo === TipoItemEnum.avatar);
+        this.poderesInventario = data.filter(item => item.tipo === TipoItemEnum.poder);
       }
     });
   }
@@ -515,8 +519,12 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
     this.lojaService.ComprarItemLoja(item.tipo, item.id, 1).pipe(
       switchMap(() => this.lojaService.ObterItensInventario())
     ).subscribe({
-      next: (inventario) => {
-        this.avataresInventario = inventario.filter(item => item.tipo === TipoItemEnum.avatar);
+      next: (data) => {
+
+        this.avataresInventario = data.filter(item => item.tipo === TipoItemEnum.avatar);
+        this.poderesInventario = data.filter(item => item.tipo === TipoItemEnum.poder);
+
+        this.player1.moeda -= item.preco ?? 0;
 
         this.ObterItensLoja();
       },

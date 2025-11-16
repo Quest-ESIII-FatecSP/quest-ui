@@ -144,7 +144,7 @@
                   <button (click)="ComprarMoedas(pacote)">Comprar</button>
                 </div>
                 <div class="produto" *ngFor="let item of itensCompra">
-                  <img class="img-item" [src]="item.avatarImagem" />
+                  <img class="img-item" [src]="item.avatarImagem" [style.border-radius]="item.tipo === 'AVATAR' ? '50% !important' : '4px !important'" />
                   <h3>{{ item.nome }}</h3>
                   <h3>{{ item.preco }} moedas</h3>
                   <button (click)="ComprarItemLoja(item)">Comprar</button>
@@ -231,6 +231,42 @@
             <h4 class="mb-3">Plano Premium</h4>
             <p>Desbloqueie recompensas exclusivas e skins especiais!</p>
             <button class="btn btn-warning" (click)="adquirirPremium()">Adquirir Agora</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Inventário de Poderes Modal -->
+      <div class="modal fade" id="InventarioModal" tabindex="-1" #inventarioModal>
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+          <div class="modal-content p-4">
+            <div class="modal-header justify-content-center">
+              <h4 class="modal-title text-center">Inventário de Poderes</h4>
+              <button type="button" class="btn-close btn-close-white" (click)="closeBootstrapModal('InventarioModal')"
+                style="position: absolute; right: 2rem;"></button>
+            </div>
+            <div class="modal-body">
+              <div class="text-center mb-4" *ngIf="poderesInventario.length === 0">
+                <p class="text-muted-ghost fs-5">Você ainda não possui poderes no seu inventário.</p>
+                <p class="text-muted-ghost">Visite a loja para adquirir poderes especiais!</p>
+                <button class="btn btn-primary mt-3" (click)="closeBootstrapModal('InventarioModal'); openModal('lojaModal')">
+                  <i class="bi bi-cart"></i> Ir para a Loja
+                </button>
+              </div>
+              <div class="produtos-container" *ngIf="poderesInventario.length > 0">
+                <div class="produto" *ngFor="let poder of poderesInventario">
+                  <img class="img-item" [src]="poder.avatarImagem" style="border-radius: 12px !important;" />
+                  <h3>{{ poder.nome }}</h3>
+                  <p class="text-muted-ghost" style="font-size: 0.9rem;">{{ poder.descricao || 'Poder especial' }}</p>
+                  <div class="quantity-display">
+                    <span class="quantity-badge">{{ poder.quantidadeInventario || 1 }}</span>
+                    <span class="quantity-label">disponível(is)</span>
+                  </div>
+                  <!-- <button class="btn btn-outline-light mt-2" disabled>
+                    <i class="bi bi-check-circle"></i> No Inventário
+                  </button> -->
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

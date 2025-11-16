@@ -20,7 +20,7 @@ export interface ItemLoja {
 
 export enum TipoItemEnum {
   avatar = 'AVATAR',
-  moeda = 'MOEDA',
+  poder = 'PODER',
   interface = 'INTERFACE' // nao tem interface
 }
 
