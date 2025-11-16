@@ -69,10 +69,10 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
     { img: 'assets/img/pacote-moedas-grande.png', title: '1000 Moedas', priceText: 'R$ 80,00', cost: 80 },
     { img: 'assets/img/Vampiro.png', title: 'Avatar Limitado Vampiro', priceText: '1000 moedas', cost: 1000 },
     { img: 'assets/img/Bruxa.png', title: 'Avatar Limitado Bruxa', priceText: '1000 moedas', cost: 1000 },
-    { img: 'assets/img/congelar.jpeg', title: 'Congelar', priceText: '100 moedas', cost: 100 },
-    { img: 'assets/img/4cliques.jpeg', title: 'Alternativas Fujonas', priceText: '100 moedas', cost: 100 },
-    { img: 'assets/img/jumpscare.jpeg', title: 'Susto', priceText: '100 moedas', cost: 100 },
-    { img: 'assets/img/x.jpeg', title: 'Poder X', priceText: '100 moedas', cost: 100 }
+    { img: 'assets/img/congelar.png', title: 'Congelar', priceText: '100 moedas', cost: 100 },
+    { img: 'assets/img/4cliques.png', title: 'Alternativas Fujonas', priceText: '100 moedas', cost: 100 },
+    { img: 'assets/img/jumpscare.png', title: 'Susto', priceText: '100 moedas', cost: 100 },
+    { img: 'assets/img/x.png', title: 'Poder X', priceText: '100 moedas', cost: 100 }
   ];
 
   // modal control / refs
