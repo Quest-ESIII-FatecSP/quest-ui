@@ -9,10 +9,10 @@ import {
   ViewChild,
   ViewChildren
 } from '@angular/core';
-import {StompService} from "../../services/stomp.service";
-import {Router} from "@angular/router";
+import { StompService } from "../../services/stomp.service";
+import { Router } from "@angular/router";
 import { JogadorService, RankingJogador } from '../../services/jogador.service';
-import { ItemLoja, LojaService, TipoItemEnum } from '../../services/loja.service';
+import { ItemLoja, LojaService, Pacote, TipoItemEnum } from '../../services/loja.service';
 import { BlockUI, NgBlockUI } from 'ng-block-ui';
 declare const bootstrap: any;
 
@@ -31,8 +31,9 @@ interface Sala {
 export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
   // estado visível
   isSalaEmCriacao: boolean = false;
-  roomInfos = {roomCode: '', nomeSala: ''}
+  roomInfos = { roomCode: '', nomeSala: '' }
   EnterText = 'Entrar';
+
   player1 = {
     username: 'Jogador 1',
     avatar: 'assets/img/Variedades F.png',
@@ -41,14 +42,16 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
     active: false,
     email: ""
   };
+
   player2 = {
     name: 'Jogador 2',
     avatar: 'assets/img/Mundo M.png', status: 'Aguardando...',
-    active: false };
+    active: false
+  };
 
   @BlockUI() blockUI!: NgBlockUI;
 
-
+  pacotesMoeda: Pacote[] = [];
   playersRanking: RankingJogador[] = [];
 
   // salas / sistema local
@@ -61,9 +64,6 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
   avataresInventario: ItemLoja[] = [];
 
   produtos = [
-    { img: 'assets/img/pacote-moedas-pequeno.png', title: '100 Moedas', priceText: 'R$ 5,00', cost: 5 },
-    { img: 'assets/img/pacote-moedas-medio.png', title: '500 Moedas', priceText: 'R$ 45,00', cost: 45 },
-    { img: 'assets/img/pacote-moedas-grande.png', title: '1000 Moedas', priceText: 'R$ 80,00', cost: 80 },
     { img: 'assets/img/Vampiro.png', title: 'Avatar Limitado Vampiro', priceText: '1000 moedas', cost: 1000 },
     { img: 'assets/img/Bruxa.png', title: 'Avatar Limitado Bruxa', priceText: '1000 moedas', cost: 1000 },
     { img: 'assets/img/congelar.jpeg', title: 'Congelar', priceText: '100 moedas', cost: 100 },
@@ -100,13 +100,17 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
     private router: Router,
     private jogadorService: JogadorService,
     private lojaService: LojaService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.ObterDadosJogador();
+    this.ObterPacotesMoeda();
+    this.ObterItensLoja();
     this.ObterRanking();
     this.stompLobbySubscription();
     this.ObterInventarioJogador();
+
+
     // tenta restaurar avatares de localStorage
     try {
       // recuperar salas se existirem (apenas para demo local)
@@ -114,7 +118,7 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
       if (rawSalas) {
         try {
           this.salas = JSON.parse(rawSalas);
-        } catch {}
+        } catch { }
       }
     } catch (e) {
       // storage indisponível — silencioso
@@ -149,12 +153,12 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
     this.modalInstances.clear();
   }
 
-  stompRoomSubscription(roomCode: string){
+  stompRoomSubscription(roomCode: string) {
     console.log('me inscrevi no room ' + roomCode)
     this.stompService.subscribe(`/room/${roomCode}`, (message) => {
       console.log(message)
       console.log(message.headers["event"])
-      this.player2 = {...this.player2, active: true, status: 'Conectado'}
+      this.player2 = { ...this.player2, active: true, status: 'Conectado' }
       this.EnterText = 'Entrando na Sala...'
       setTimeout(() => {
         this.router.navigate(['/room/', this.roomInfos.roomCode])
@@ -162,7 +166,7 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  stompLobbySubscription(){
+  stompLobbySubscription() {
     this.stompService.subscribe('/lobby', (message) => {
       const tipoEvento = message.headers["event"];
       console.log(tipoEvento)
@@ -223,7 +227,7 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
     try {
       this.jogadorService.AtualizarAvatarJogador(avatarId).subscribe({
         next: (data) => {
-          if(data.ok) {
+          if (data.ok) {
             this.ObterDadosJogador();
           }
         }
@@ -251,7 +255,7 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
 
   accessRoom(): void {
     this.requestedRoomCode = this.requestedRoomCode.trim().toUpperCase();
-    this.stompService.publish({destination: `/room/${this.requestedRoomCode}/${this.stompService.userID}`});
+    this.stompService.publish({ destination: `/room/${this.requestedRoomCode}/${this.stompService.userID}` });
   }
 
   confirmarCriacaoSala() {
@@ -262,7 +266,7 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    this.stompService.publish({destination: `/createRoom/${nome}`});
+    this.stompService.publish({ destination: `/createRoom/${nome}` });
     this.player1.active = true
     // fecha modal
     this.closeBootstrapModal('criarSalaModal');
@@ -318,7 +322,7 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
         'sync_answer', 'matchResult', 'goLobbyNow', 'rematchNow'
       ];
       keys.forEach(k => localStorage.removeItem(k));
-    } catch (e) {}
+    } catch (e) { }
     // abre nova aba para jogador 2 e navega atual para jogador 1
     try {
       const p2Url = 'partida.html?p=2';
@@ -379,7 +383,7 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
       const t = setTimeout(() => {
         try {
           this.renderer.addClass(cardRef.nativeElement, 'show');
-        } catch {}
+        } catch { }
       }, 120 * (idx + 1));
       this.timeouts.push(t);
     });
@@ -400,7 +404,7 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
           this.renderer.removeStyle(el, 'transform');
           this.renderer.removeStyle(el, 'boxShadow');
           this.renderer.removeStyle(el, 'transition');
-        } catch {}
+        } catch { }
       }, 900);
       this.timeouts.push(t);
     } catch (e) {
@@ -409,7 +413,7 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   getMedalIcon(position: number): string {
-    switch(position) {
+    switch (position) {
       case 1:
         return '🏆';
       case 2:
@@ -422,7 +426,7 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   getPositionClass(position: number): string {
-    switch(position) {
+    switch (position) {
       case 1:
         return 'position-1';
       case 2:
@@ -469,6 +473,53 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
       },
       complete: () => {
         this.blockUI.stop();
+      }
+    });
+  }
+
+  ObterPacotesMoeda() {
+    this.blockUI.start("Carregando pacotes de moeda...");
+
+    this.lojaService.ObterPacotesMoeda().subscribe({
+      next: (data) => {
+        this.pacotesMoeda = data;
+        this.pacotesMoeda = this.pacotesMoeda.map(p => {
+          switch (p.quantidade) {
+            case 100:
+              p.img = 'assets/img/pacote-moedas-pequeno.png';
+              break;
+            case 500:
+              p.img = 'assets/img/pacote-moedas-medio.png';
+              break;
+            case 1000:
+              p.img = 'assets/img/pacote-moedas-grande.png';
+              break;
+            default:
+              p.img = 'assets/img/pacote-moedas-pequeno.png';
+              break;
+          }
+
+          return p;
+        });
+      },
+      complete: () => {
+        this.blockUI.stop();
+      }
+    });
+  }
+
+  ComprarMoedas(pacote: Pacote) {
+    this.lojaService.ComprarMoedas(pacote.quantidade).subscribe({
+      next: (data) => {
+        this.ObterDadosJogador();
+      }
+    });
+  }
+
+  ObterItensLoja() {
+    this.lojaService.ObterItensLoja().subscribe({
+      next: (data) => {
+        console.log("Itens da loja:", data);
       }
     });
   }

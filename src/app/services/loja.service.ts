@@ -10,14 +10,26 @@ export interface ItemLoja {
   preco: number;
   tipo: string;
   nomeAvatar: string;
-  quantidadeInventario: number;
+  nomeInterface: string;
+  tema: string;
+  nomePoder: string;
+  descricaoPoder: string;
   avatarImagem: string;
+  quantidadeInventario: number;
 }
 
 export enum TipoItemEnum {
   avatar = 'AVATAR',
   moeda = 'MOEDA',
   interface = 'INTERFACE' // nao tem interface
+}
+
+export interface Pacote {
+  desconto: number;
+  descricao: string;
+  preco: number;
+  quantidade: number;
+  img: string;
 }
 
 @Injectable({
@@ -36,5 +48,32 @@ export class LojaService {
     const fullUrl = filtroTipo ? `${url}?tipoItem=${filtroTipo}` : url;
 
     return this.http.get<ItemLoja[]>(fullUrl, { headers } );
+  }
+
+  ObterPacotesMoeda(): Observable<Pacote[]> {
+    const url = `${this.baseUrl}/api/loja/pacotes`;
+    const token = localStorage.getItem('userToken') || '';
+    const headers = { 'user-id': token };
+
+    return this.http.get<Pacote[]>(url, { headers } );
+  }
+
+  ObterItensLoja(): Observable<ItemLoja[]> {
+    const url = `${this.baseUrl}/api/loja/itens`;
+    const token = localStorage.getItem('userToken') || '';
+    const headers = { 'user-id': token };
+
+    return this.http.get<ItemLoja[]>(url, { headers } );
+  }
+
+  ComprarMoedas(quantidade: number) {
+    const url = `${this.baseUrl}/api/loja/comprar-moedas`;
+    const token = localStorage.getItem('userToken') || '';
+    const headers = { 'user-id': token };
+    const payload = {
+      quantidade: quantidade
+    }
+
+    return this.http.post(url, payload, { headers });
   }
 }

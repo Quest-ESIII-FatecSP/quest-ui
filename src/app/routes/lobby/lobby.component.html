@@ -127,6 +127,22 @@
             </div>
             <div class="modal-body">
               <div class="produtos-container">
+                <div class="produto" *ngFor="let pacote of pacotesMoeda">
+                  <img [src]="pacote.img" />
+                  <h3>{{ pacote.descricao }}</h3>
+                  <div class="quantity-display">
+                    <span class="quantity-badge">{{ pacote.quantidade }} </span> <span class="quantity-label">moedas</span>
+                  </div>
+                  <div class="price-container">
+                    <p *ngIf="pacote.desconto > 0" class="original-price">De: <span class="strike">{{ pacote.preco | currency:'BRL' }}</span></p>
+                    <p class="final-price" [class.has-discount]="pacote.desconto > 0">
+                      <span *ngIf="pacote.desconto > 0">Por: </span>
+                      <strong>{{ (pacote.preco - pacote.desconto) | currency:'BRL' }}</strong>
+                    </p>
+                    <span *ngIf="pacote.desconto > 0" class="discount-badge">{{ (pacote.desconto / pacote.preco * 100) | number:'1.0-0' }}% de desconto</span>
+                  </div>
+                  <button (click)="ComprarMoedas(pacote)">Comprar</button>
+                </div>
                 <div class="produto" *ngFor="let p of produtos">
                   <img [src]="p.img" />
                   <h3>{{ p.title }}</h3>
