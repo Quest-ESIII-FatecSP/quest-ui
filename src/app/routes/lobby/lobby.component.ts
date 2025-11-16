@@ -11,8 +11,16 @@ import {
 } from '@angular/core';
 import {StompService} from "../../services/stomp.service";
 import {Router} from "@angular/router";
+import { LobbyService, RankingJogador } from '../../services/lobby.service';
 
 declare const bootstrap: any; // bootstrap bundle (Modal) — incluído globalmente no index.html
+
+interface Player {
+  position: number;
+  name: string;
+  score: number;
+  avatar: string;
+}
 
 interface Sala {
   nome: string;
@@ -41,6 +49,8 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
     name: 'Jogador 2',
     avatar: 'assets/img/Mundo M.png', status: 'Aguardando...',
     active: false };
+
+  playersRanking: RankingJogador[] = [];
 
   // salas / sistema local
   salas: Sala[] = [];
@@ -98,10 +108,16 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
   // timers / subscriptions
   private timeouts: any[] = [];
 
-  constructor(private renderer: Renderer2, private stompService: StompService, private router: Router) {}
+  constructor(
+    private renderer: Renderer2,
+    private stompService: StompService,
+    private router: Router,
+    private lobbyService: LobbyService
+  ) {}
 
   ngOnInit(): void {
     this.stompLobbySubscription();
+    this.ObterRanking();
     // tenta restaurar avatares de localStorage
     try {
       const sa = localStorage.getItem('selectedAvatar');
@@ -398,9 +414,10 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
 
   pulseCard(cardRef: ElementRef | undefined) {
     if (!cardRef || !cardRef.nativeElement) return;
+
     const el = cardRef.nativeElement;
+
     try {
-      // aplica estilos temporários
       this.renderer.setStyle(el, 'transition', 'transform 0.25s ease, box-shadow 0.25s ease');
       this.renderer.setStyle(el, 'transform', 'scale(1.03)');
       this.renderer.setStyle(el, 'boxShadow', '0 26px 48px rgba(0,0,0,0.6)');
@@ -416,5 +433,44 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
     } catch (e) {
       // fallback silencioso
     }
+  }
+
+  getMedalIcon(position: number): string {
+    switch(position) {
+      case 1:
+        return '🏆';
+      case 2:
+        return '🥈';
+      case 3:
+        return '🥉';
+      default:
+        return '';
+    }
+  }
+
+  getPositionClass(position: number): string {
+    switch(position) {
+      case 1:
+        return 'position-1';
+      case 2:
+        return 'position-2';
+      case 3:
+        return 'position-3';
+      default:
+        return '';
+    }
+  }
+
+  ObterRanking() {
+    this.lobbyService.ObterRanking().subscribe({
+      next: (data) => {
+        this.playersRanking = data;
+
+        this.playersRanking = this.playersRanking.map((player, index) => {
+          player.posicao = index + 1;
+          return player;
+        });
+      }
+    })
   }
 }
