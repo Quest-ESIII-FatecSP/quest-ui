@@ -8,19 +8,25 @@ import { RegisterComponent } from './routes/register/register.component';
 import { LobbyComponent } from './routes/lobby/lobby.component';
 import { LoginComponent } from './routes/login/login.component';
 import {ZardProgressBarComponent} from "@shared/components/progress-bar/progress-bar.component";
+import { LoginSuccessComponent } from './routes/login-success/login-success.component';
+import {HttpClientModule} from "@angular/common/http";
+import { RoomComponent } from './routes/room/room.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     RegisterComponent,
+    LoginComponent,
     LobbyComponent,
-    LoginComponent
+    LoginSuccessComponent,
+    RoomComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     FormsModule,
-    ZardProgressBarComponent
+    ZardProgressBarComponent,
+    HttpClientModule
   ],
   providers: [],
   bootstrap: [AppComponent]
