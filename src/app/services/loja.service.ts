@@ -8,7 +8,7 @@ export interface ItemLoja {
   nome: string;
   descricao: string;
   preco: number;
-  tipo: string;
+  tipo: TipoItemEnum;
   nomeAvatar: string;
   nomeInterface: string;
   tema: string;
@@ -75,5 +75,19 @@ export class LojaService {
     }
 
     return this.http.post(url, payload, { headers });
+  }
+
+  ComprarItemLoja(tipoItem: TipoItemEnum, idItem: number, quantidade: number): Observable<ItemLoja[]> {
+    const url = `${this.baseUrl}/api/loja/comprar-item`;
+    const token = localStorage.getItem('userToken') || '';
+    const headers = { 'user-id': token };
+
+    const payload = {
+      tipoItem,
+      idItem,
+      quantidade
+    }
+
+    return this.http.post<ItemLoja[]>(url, payload, { headers });
   }
 }

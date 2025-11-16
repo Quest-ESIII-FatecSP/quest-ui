@@ -14,6 +14,7 @@ import { Router } from "@angular/router";
 import { JogadorService, RankingJogador } from '../../services/jogador.service';
 import { ItemLoja, LojaService, Pacote, TipoItemEnum } from '../../services/loja.service';
 import { BlockUI, NgBlockUI } from 'ng-block-ui';
+import { switchMap } from 'rxjs';
 declare const bootstrap: any;
 
 interface Sala {
@@ -51,6 +52,7 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @BlockUI() blockUI!: NgBlockUI;
 
+  itensCompra: ItemLoja[] = [];
   pacotesMoeda: Pacote[] = [];
   playersRanking: RankingJogador[] = [];
 
@@ -62,15 +64,6 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
   requestedRoomCode = '';
 
   avataresInventario: ItemLoja[] = [];
-
-  produtos = [
-    { img: 'assets/img/Vampiro.png', title: 'Avatar Limitado Vampiro', priceText: '1000 moedas', cost: 1000 },
-    { img: 'assets/img/Bruxa.png', title: 'Avatar Limitado Bruxa', priceText: '1000 moedas', cost: 1000 },
-    { img: 'assets/img/congelar.jpeg', title: 'Congelar', priceText: '100 moedas', cost: 100 },
-    { img: 'assets/img/4cliques.jpeg', title: 'Alternativas Fujonas', priceText: '100 moedas', cost: 100 },
-    { img: 'assets/img/jumpscare.jpeg', title: 'Susto', priceText: '100 moedas', cost: 100 },
-    { img: 'assets/img/x.jpeg', title: 'Poder X', priceText: '100 moedas', cost: 100 }
-  ];
 
   // modal control / refs
   @ViewChild('avatarModal', { read: ElementRef }) avatarModalRef!: ElementRef;
@@ -103,12 +96,12 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
   ) { }
 
   ngOnInit(): void {
+    this.stompLobbySubscription();
     this.ObterDadosJogador();
+    this.ObterInventarioJogador();
+    this.ObterRanking();
     this.ObterPacotesMoeda();
     this.ObterItensLoja();
-    this.ObterRanking();
-    this.stompLobbySubscription();
-    this.ObterInventarioJogador();
 
 
     // tenta restaurar avatares de localStorage
@@ -516,10 +509,50 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
+  ComprarItemLoja(item: ItemLoja) {
+    this.blockUI.start();
+
+    this.lojaService.ComprarItemLoja(item.tipo, item.id, 1).pipe(
+      switchMap(() => this.lojaService.ObterItensInventario())
+    ).subscribe({
+      next: (inventario) => {
+        this.avataresInventario = inventario.filter(item => item.tipo === TipoItemEnum.avatar);
+
+        this.ObterItensLoja();
+      },
+      error: (err) => {
+        console.error('Erro ao comprar item:', err);
+        this.blockUI.stop();
+      },
+      complete: () => {
+        this.blockUI.stop();
+      }
+    });
+  }
+
   ObterItensLoja() {
+    this.blockUI.start("Carregando itens da loja...");
+
     this.lojaService.ObterItensLoja().subscribe({
       next: (data) => {
-        console.log("Itens da loja:", data);
+        this.itensCompra = data.sort((a, b) => {
+          const tipoCmp = (a.tipo || '').localeCompare(b.tipo || '');
+          if (tipoCmp !== 0) return tipoCmp;
+          const pa = (a.preco ?? 0);
+          const pb = (b.preco ?? 0);
+          return pa - pb;
+        });
+
+        this.itensCompra = this.itensCompra.filter(item => {
+          if (item.tipo === TipoItemEnum.avatar) {
+            return !this.avataresInventario.some(av => av.id === item.id);
+          }
+
+          return true;
+        })
+      },
+      complete: () => {
+        this.blockUI.stop();
       }
     });
   }

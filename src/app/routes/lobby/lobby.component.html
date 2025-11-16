@@ -143,11 +143,11 @@
                   </div>
                   <button (click)="ComprarMoedas(pacote)">Comprar</button>
                 </div>
-                <div class="produto" *ngFor="let p of produtos">
-                  <img [src]="p.img" />
-                  <h3>{{ p.title }}</h3>
-                  <h3>{{ p.priceText }}</h3>
-                  <button (click)="comprarProduto(p)">Comprar</button>
+                <div class="produto" *ngFor="let item of itensCompra">
+                  <img class="img-item" [src]="item.avatarImagem" />
+                  <h3>{{ item.nome }}</h3>
+                  <h3>{{ item.preco }} moedas</h3>
+                  <button (click)="ComprarItemLoja(item)">Comprar</button>
                 </div>
               </div>
             </div>
