@@ -79,7 +79,6 @@
 
             <button class="btn btn-success w-100 mb-2 btn-energy" (click)="criarSala()">Criar Sala</button>
             <button class="btn btn-primary w-100 mb-2 btn-energy" (click)="entrarSala()">Entrar na Sala</button>
-            <button class="btn btn-warning w-100 mb-2 btn-energy" (click)="criarPartida()">Jogar</button>
           </div>
         </div>
 
@@ -133,7 +132,7 @@
           </div>
           <div class="modal-body">
             <div class="produtos-container">
-              <div class="produto" *ngFor="let p of produtos">
+              <div class="produto d-flex flex-col align-items-center" *ngFor="let p of produtos">
                 <img [src]="p.img"/>
                 <h3>{{ p.title }}</h3>
                 <h3>{{ p.priceText }}</h3>
