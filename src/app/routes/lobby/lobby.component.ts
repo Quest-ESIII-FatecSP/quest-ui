@@ -13,6 +13,7 @@ import {StompService} from "../../services/stomp.service";
 import {Router} from "@angular/router";
 import { LobbyService, RankingJogador } from '../../services/lobby.service';
 
+
 declare const bootstrap: any; // bootstrap bundle (Modal) — incluído globalmente no index.html
 
 interface Player {
@@ -21,6 +22,8 @@ interface Player {
   score: number;
   avatar: string;
 }
+
+
 
 interface Sala {
   nome: string;
@@ -72,6 +75,35 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
     'assets/img/Bruxa.png',
     'assets/img/Vampiro.png'
   ];
+
+  currentSlide = 0;
+  slides: string[] = [
+    'assets/img/TUTORIAL.png',
+    'assets/img/TUTORIAL2.png',
+    'assets/img/TUTORIAL3.png',
+    'assets/img/TUTORIAL4.png',
+    'assets/img/TUTORIAL5.png',
+    'assets/img/TUTORIAL6.png',
+    'assets/img/TUTORIAL7.png',
+    'assets/img/TUTORIAL8.png',
+    'assets/img/TUTORIAL9.png',
+  ];
+
+
+// função para ir para o próximo slide
+nextSlide() {
+  this.currentSlide = (this.currentSlide + 1) % this.slides.length;
+}
+
+// função para ir para o slide anterior
+prevSlide() {
+  this.currentSlide = (this.currentSlide - 1 + this.slides.length) % this.slides.length;
+}
+
+// função para ir direto para um slide específico (usada pelos indicadores)
+goToSlide(index: number) {
+  this.currentSlide = index;
+}
 
   produtos = [
     { img: 'assets/img/pacote-moedas-pequeno.png', title: '100 Moedas', priceText: 'R$ 5,00', cost: 5 },
@@ -473,4 +505,6 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     })
   }
+
+  
 }
