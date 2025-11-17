@@ -205,62 +205,8 @@
 
     .btn:hover { background-color: #163eb3; }
 
-    #cards { position: fixed; inset:0; pointer-events:none; z-index:3; }
-    .cards-side{ position:fixed; top:50%; transform:translateY(-50%); display:flex; flex-direction:column; gap:16px; }
-    .cards-side.left{ left:16px; }
-    .cards-side.right{ right:16px; }
-    .cards-stack{ display:flex; flex-direction:row; column-gap:16px; }
-    .cards-stack .cards-col{ display:flex; flex-direction:column; gap:16px; align-items:center; }
-    .cards-side .card{ width:100px; height:150px; }
-    @media (max-height: 860px){ .cards-side .card{ width:92px; height:138px; } }
-    @media (max-height: 760px){ .cards-side .card{ width:86px; height:129px; } }
-    @media (max-height: 680px){ .cards-side .card{ width:82px; height:124px; } }
-
+    /* Card styles moved to global `styles.scss` to ensure dynamically created elements receive them. */
     #category.centered-title{ width: 100%; text-align: center; font-weight: 700; }
-
-    .card {
-      width: 100px;
-      height: 150px;
-      background: linear-gradient(145deg, #1a1f4b, #0b0f30);
-      border: 2px solid #FFD700;
-      border-radius: 15px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 32px;
-      cursor: pointer;
-      transition: transform 0.25s ease, box-shadow 0.25s ease;
-    }
-    .card.card-used{
-      background: linear-gradient(145deg, #fff1a8, #ffd23a);
-      color: #000 !important;
-      cursor: not-allowed;
-      filter: saturate(1.05);
-    }
-
-    .card-inner {
-      width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 600ms cubic-bezier(.2,.9,.3,1);
-      border-radius: 12px; display: flex; align-items: center; justify-content: center;
-    }
-    .card-face { position: absolute; inset: 0; display:flex; align-items:center; justify-content:center; backface-visibility: hidden; border-radius: 12px; }
-    .card-front { background: linear-gradient(145deg, #1a1f4b, #0b0f30); color: transparent; }
-    .card-back { background: linear-gradient(145deg, #fff9e6, #ffd23a); color: #1a1200; transform: rotateY(180deg); font-weight:900; font-size:34px }
-    .card-inner.flipped { transform: rotateY(180deg); }
-
-    .card:hover {
-      transform: translateY(-12px);
-      box-shadow: 0 0 16px rgba(255, 215, 0, 0.45);
-    }
-
-    .card-vibe { width:100%; height:100%; display:flex; align-items:center; justify-content:center; }
-    .card-vibe.vibrate { animation: vibrate 900ms infinite; }
-    @keyframes vibrate {
-      0% { transform: translateX(0) rotate(0.0deg); }
-      25% { transform: translateX(-1.8px) rotate(-0.6deg); }
-      50% { transform: translateX(0.8px) rotate(0.4deg); }
-      75% { transform: translateX(-0.6px) rotate(-0.3deg); }
-      100% { transform: translateX(0) rotate(0.0deg); }
-    }
 
 
     #question-area {
@@ -358,14 +304,10 @@
     .result-animation.wrong { background-color: rgba(200,0,0,0.85); }
 
     :root{ --rot-size:320px; }
-    .roleta-wrap{ display:flex; flex-direction:column; align-items:center; gap:8px }
-    .roleta{ width:320px; height:320px; position:relative; border-radius:50%; display:grid; place-items:center; }
-    .disco{ width:100%; height:100%; border-radius:50%; background:transparent; display:grid; place-items:center; border:10px solid #ffd23a; box-shadow: 0 0 30px rgba(255,210,58,0.25); transform:rotate(0deg); transition: transform 5s cubic-bezier(.17,.89,.32,1.49); }
-    .disco.idle{ animation: none }
-    .miolo{ position:absolute; width:110px; height:110px; border-radius:50%; background:radial-gradient(circle at 30% 30%, #2a2b3f, #0b0f1f 60%); border:6px solid rgba(0,0,0,0.5); box-shadow: inset 0 2px 12px #000a, 0 8px 18px rgba(0,0,0,.45); z-index:2}
-    .girar-central{ position:absolute; z-index:5; top:50%; left:50%; transform:translate(-50%,-50%); width:84px; height:84px; border-radius:50%; display:grid; place-items:center; font-weight:800; cursor:pointer; border:6px solid rgba(0,0,0,0.25); color:#1a1200; background: linear-gradient(180deg,#ffd23a,#d4a200); }
-    .pointer-top{ position:absolute; top:-6px; left:50%; transform:translateX(-50%); width:14px; height:14px; border-radius:50%; background:transparent; z-index:5 }
-
+    /* Legacy roleta styles removed after componentization.
+       The roleta now encapsulates its own visuals in
+       `src/app/routes/roleta/roleta.component.scss` to avoid
+       style conflicts. Keep only modal/iframe sizing here. */
     #roletaModal > div { overflow: visible !important; }
     #roletaModal > div > div { overflow: visible !important; }
     #roletaIframe {
