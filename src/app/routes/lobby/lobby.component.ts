@@ -491,11 +491,16 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
       next: (data) => {
         const { avatar, email, moeda, username, tipo } = data;
 
-        this.player1.username = username;
-        this.player1.avatar = avatar;
-        this.player1.moeda = moeda;
-        this.player1.email = email;
-        this.player1.tipo = tipo ?? TipoJogadorEnum.CONVIDADO;
+        if(tipo == TipoJogadorEnum.CONVIDADO) {
+          this.player1.tipo = TipoJogadorEnum.CONVIDADO;
+          this.player1.username = "Convidado";
+        } else {
+          this.player1.username = username;
+          this.player1.avatar = avatar;
+          this.player1.moeda = moeda;
+          this.player1.email = email;
+          this.player1.tipo = tipo ?? TipoJogadorEnum.CONVIDADO;
+        }
 
       },
       complete: () => {
