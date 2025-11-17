@@ -5,19 +5,20 @@ import {LoginComponent} from './routes/login/login.component';
 import {RegisterComponent} from './routes/register/register.component';
 import {LoginSuccessComponent} from "./routes/login-success/login-success.component";
 import {RoomComponent} from "./routes/room/room.component";
-import {RoletaComponent} from "./routes/roleta/roleta.component";
+
+const routes: Routes = [
+  { path: '', redirectTo: 'login', pathMatch: 'full' },
+  { path: 'login', component: LoginComponent },
+  { path: 'register', component: RegisterComponent },
+  { path: 'lobby', component: LobbyComponent },
+  { path: 'auth/success', component: LoginSuccessComponent },
+  { path: 'room/:id', component: RoomComponent },
+  { path: '**', redirectTo: 'login' }
+];
 
 @NgModule({
-  imports: [RouterModule.forRoot([
-    { path: '', redirectTo: 'login', pathMatch: 'full' },
-    { path: 'login', component: LoginComponent },
-    { path: 'register', component: RegisterComponent },
-    { path: 'lobby', component: LobbyComponent },
-    { path: 'auth/success', component: LoginSuccessComponent },
-    { path: 'room/:id', component: RoomComponent },
-    { path: 'roleta', component: RoletaComponent },
-    { path: '**', redirectTo: 'login' }
-  ])],
+  imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule]
 })
+
 export class AppRoutingModule { }
