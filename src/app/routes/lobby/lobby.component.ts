@@ -302,34 +302,34 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   // ---------- PARTIDA / UTIL ----------
-  criarPartida() {
-    // efeito visual: destacar card 1
-    this.pulseCard(this.playerCard1Ref);
-
-    // persiste avatares
-    try {
-      localStorage.setItem('selectedAvatar1', this.player1.avatar);
-      localStorage.setItem('selectedAvatar2', this.player2.avatar);
-      localStorage.setItem('newMatch', String(Date.now()));
-
-      // limpa chaves antigas (compat com original)
-      const keys = [
-        'sync_roleta', 'sync_roleta_spin', 'sync_card', 'sync_question',
-        'sync_answer', 'matchResult', 'goLobbyNow', 'rematchNow'
-      ];
-      keys.forEach(k => localStorage.removeItem(k));
-    } catch (e) { }
-    // abre nova aba para jogador 2 e navega atual para jogador 1
-    try {
-      const p2Url = 'partida.html?p=2';
-      const p1Url = 'partida.html?p=1';
-      const win2 = window.open(p2Url, '_blank');
-      // mesmo que bloqueado, redireciona atual
-      window.location.href = p1Url;
-    } catch (e) {
-      console.warn('Tentativa de abrir partida falhou', e);
-    }
-  }
+  // criarPartida() {
+  //   // efeito visual: destacar card 1
+  //   this.pulseCard(this.playerCard1Ref);
+  //
+  //   // persiste avatares
+  //   try {
+  //     localStorage.setItem('selectedAvatar1', this.player1.avatar);
+  //     localStorage.setItem('selectedAvatar2', this.player2.avatar);
+  //     localStorage.setItem('newMatch', String(Date.now()));
+  //
+  //     // limpa chaves antigas (compat com original)
+  //     const keys = [
+  //       'sync_roleta', 'sync_roleta_spin', 'sync_card', 'sync_question',
+  //       'sync_answer', 'matchResult', 'goLobbyNow', 'rematchNow'
+  //     ];
+  //     keys.forEach(k => localStorage.removeItem(k));
+  //   } catch (e) {}
+  //   // abre nova aba para jogador 2 e navega atual para jogador 1
+  //   try {
+  //     const p2Url = 'partida.html?p=2';
+  //     const p1Url = 'partida.html?p=1';
+  //     const win2 = window.open(p2Url, '_blank');
+  //     // mesmo que bloqueado, redireciona atual
+  //     window.location.href = p1Url;
+  //   } catch (e) {
+  //     console.warn('Tentativa de abrir partida falhou', e);
+  //   }
+  // }
 
   entrarSalada() {
     this.pulseCard(this.playerCard2Ref);

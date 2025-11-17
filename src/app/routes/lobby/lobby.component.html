@@ -72,10 +72,8 @@
                 </div>
               </div>
 
-              <button class="btn btn-success w-100 mb-2 btn-energy" (click)="criarSala()">Criar Sala</button>
-              <button class="btn btn-primary w-100 mb-2 btn-energy" (click)="entrarSala()">Entrar na Sala</button>
-              <button class="btn btn-warning w-100 mb-2 btn-energy" (click)="criarPartida()">Jogar</button>
-            </div>
+            <button class="btn btn-success w-100 mb-2 btn-energy" (click)="criarSala()">Criar Sala</button>
+            <button class="btn btn-primary w-100 mb-2 btn-energy" (click)="entrarSala()">Entrar na Sala</button>
           </div>
 
           <div class="col-lg-4 d-flex flex-column gap-3 sidebar">
@@ -306,21 +304,29 @@
       </div>
     </div>
 
-    <!-- Senha Entrada Modal -->
-    <div class="modal fade" id="senhaEntradaModal" tabindex="-1" #senhaEntradaModal>
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content p-4 text-center">
-          <h4 class="mb-3" id="tituloSalaEntrada">Entrar na Sala</h4>
-          <input type="password" class="form-control mb-3" placeholder="Digite a senha da sala"
-            [(ngModel)]="senhaEntrada" />
-          <button class="btn btn-primary w-100 mb-2" (click)="confirmarEntradaSala()">Entrar</button>
-          <button class="btn btn-secondary w-100" (click)="closeBootstrapModal('senhaEntradaModal')">Cancelar</button>
+  <!-- Entrar Sala Modal -->
+  <div class="modal fade" id="entrarSalaModal" tabindex="-1" #entrarSalaModal>
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content p-4 text-center">
+        <h4 class="mb-3">Entrar em uma Sala</h4>
+        <div class="mb-3 text-start">
+          <label class="form-label">Senha da sala:</label>
+          <input type="text" class="form-control" maxlength="4" placeholder="Cole aqui o código passado para você"
+                 [(ngModel)]="requestedRoomCode"/>
         </div>
       </div>
     </div>
 
-    <footer class="halloween-footer text-center">
-      <div class="container p-2"></div>
-    </footer>
+  <!-- Senha Entrada Modal -->
+  <div class="modal fade" id="senhaEntradaModal" tabindex="-1" #senhaEntradaModal>
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content p-4 text-center">
+        <h4 class="mb-3" id="tituloSalaEntrada">Entrar na Sala</h4>
+        <input type="password" class="form-control mb-3" placeholder="Digite a senha da sala"
+               [(ngModel)]="senhaEntrada" />
+        <button class="btn btn-primary w-100 mb-2" (click)="confirmarEntradaSala()">Entrar</button>
+        <button class="btn btn-secondary w-100" (click)="closeBootstrapModal('senhaEntradaModal')">Cancelar</button>
+      </div>
+    </div>
   </div>
 </block-ui>
