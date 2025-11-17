@@ -154,19 +154,34 @@
         </div>
       </div>
 
-      <!-- Tutorial Modal -->
-      <div class="modal fade" id="TutorialModal" tabindex="-1" #tutorialModal>
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-          <div class="modal-content p-4">
-            <div class="modal-header justify-content-center">
-              <h4 class="modal-title text-center">Tutorial</h4>
-              <button type="button" class="btn-close btn-close-white" (click)="closeBootstrapModal('TutorialModal')"
-                style="position: absolute; right: 2rem;"></button>
-            </div>
-            <div class="modal-body">
-              <!-- Conteúdo do tutorial aqui -->
-              <p>Coloque o conteúdo do tutorial aqui.</p>
-            </div>
+    <!-- Tutorial Modal -->
+    <div class="modal fade" id="TutorialModal" tabindex="-1" #tutorialModal>
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content p-4">
+          <div class="modal-header justify-content-center">
+            <h4 class="modal-title text-center">Tutorial</h4>
+            <button type="button" class="btn-close btn-close-white" (click)="closeBootstrapModal('TutorialModal')"
+             style="position: absolute; right: 2rem;"></button>
+          </div>
+          <div class="modal-body">
+         <div class="carousel-wrapper">
+  <div class="carousel-track" 
+       [style.transform]="'translateX(-' + (currentSlide * 100) + '%)'">
+    <div class="carousel-item" *ngFor="let slide of slides">
+      <img [src]="slide" class="carousel-img" alt="Slide">
+    </div>
+  </div>
+
+  <button class="carousel-btn left" (click)="prevSlide()">❮</button>
+  <button class="carousel-btn right" (click)="nextSlide()">❯</button>
+
+  <div class="carousel-indicators">
+    <span *ngFor="let slide of slides; let i = index" 
+          [class.active]="i === currentSlide" 
+          (click)="goToSlide(i)">
+    </span>
+  </div>
+</div>
           </div>
         </div>
       </div>

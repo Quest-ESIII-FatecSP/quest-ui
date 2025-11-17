@@ -17,6 +17,8 @@ import { ItemLoja, LojaService, Pacote, TipoItemEnum } from '../../services/loja
 import { StompService } from "../../services/stomp.service";
 declare const bootstrap: any;
 
+
+
 interface Sala {
   nome: string;
   senha: string;
@@ -62,6 +64,35 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
   senhaEntrada = '';
   novaSala = { nome: '', senha: '' };
   requestedRoomCode = '';
+
+ 
+  currentSlide = 0;
+  slides: string[] = [
+    'assets/img/TUTORIAL.png',
+    'assets/img/TUTORIAL2.png',
+    'assets/img/TUTORIAL3.png',
+    'assets/img/TUTORIAL4.png',
+    'assets/img/TUTORIAL5.png',
+    'assets/img/TUTORIAL6.png',
+    'assets/img/TUTORIAL7.png',
+    'assets/img/TUTORIAL8.png',
+    'assets/img/TUTORIAL9.png',
+  ];
+  
+  // função para ir para o próximo slide
+  nextSlide() {
+    this.currentSlide = (this.currentSlide + 1) % this.slides.length;
+  }
+
+  // função para ir para o slide anterior
+  prevSlide() {
+    this.currentSlide = (this.currentSlide - 1 + this.slides.length) % this.slides.length;
+  }
+
+  // função para ir direto para um slide específico (usada pelos indicadores)
+  goToSlide(index: number) {
+    this.currentSlide = index;
+  }
 
   avataresInventario: ItemLoja[] = [];
   poderesInventario: ItemLoja[] = [];
