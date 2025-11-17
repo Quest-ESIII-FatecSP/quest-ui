@@ -1,4 +1,5 @@
-import { Component, OnInit, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy, ViewChild } from '@angular/core';
+import { QuestWheelComponent, WheelSector } from '../../components/quest-wheel/quest-wheel.component';
 
 declare global {
   interface Window {
@@ -16,12 +17,76 @@ declare global {
   }
 }
 
+export interface Sector {
+  index: number;
+  sector: string;
+  color: string;
+  iconUrl: string;
+  id: string;
+  label: string;
+}
+
 @Component({
   selector: 'app-room',
   templateUrl: './room.component.html',
   styleUrls: ['./room.component.scss']
 })
 export class RoomComponent implements OnInit, AfterViewInit, OnDestroy {
+  @ViewChild(QuestWheelComponent) wheel?: QuestWheelComponent;
+
+  roletaTravada: boolean = false;
+
+  roletaComecouSpin(event: any) {
+    this.roletaTravada = true;
+  }
+
+  themeModalOpen = false;
+  selectedSector: WheelSector | null = null;
+  private autoCloseTimer: any = null;
+
+  // opcional: tempo para fechar automaticamente (ms)
+  autoCloseMs = 2200;
+
+  onSpinStart() {
+    // bloquear UI se necessário, mostrar "girando..."
+    console.log('spin started');
+    // ex: this.isSpinning = true;
+  }
+
+  onSpinEnd(result: { index: number; sector: WheelSector }) {
+    console.log('spin ended', result);
+    this.selectedSector = result.sector;
+    this.openThemeModal();
+    this.roletaTravada = false;
+  }
+
+  openThemeModal() {
+    this.themeModalOpen = true;
+    // auto-close after X ms
+    if (this.autoCloseMs > 0) {
+      if (this.autoCloseTimer) clearTimeout(this.autoCloseTimer);
+      this.autoCloseTimer = setTimeout(() => this.confirmTheme(), this.autoCloseMs);
+    }
+  }
+
+  closeThemeModal() {
+    if (this.autoCloseTimer) { clearTimeout(this.autoCloseTimer); this.autoCloseTimer = null; }
+    this.themeModalOpen = false;
+  }
+
+  confirmTheme() {
+    // chamado ao fechar (botão OK ou auto)
+    this.closeThemeModal();
+
+    // notificar backend que o tema foi exibido / aceito (exemplo STOMP)
+    // this.stompService.send('/app/game/theme-shown', JSON.stringify({ categoryId: this.selectedSector?.id }));
+
+    // seguir próximo passo do fluxo (ex: mostrar seleção de cartas)
+    // this.startCardSelectionPhase();
+
+    console.log('Tema confirmado:', this.selectedSector);
+  }
+
 
   // Audio storage
   private SFX: Record<string, HTMLAudioElement> = {};
@@ -37,9 +102,9 @@ export class RoomComponent implements OnInit, AfterViewInit, OnDestroy {
   private roundCount = 0;
 
   // intervals / handlers to cleanup
-  private storageListener = (ev: StorageEvent) => {};
-  private clickOutsideListener = (ev: MouseEvent) => {};
-  private messageListener = (e: MessageEvent) => {};
+  private storageListener = (ev: StorageEvent) => { };
+  private clickOutsideListener = (ev: MouseEvent) => { };
+  private messageListener = (e: MessageEvent) => { };
   private powerTrayWatchInterval: any = null;
 
   // Example question bank (kept from original)
@@ -262,6 +327,8 @@ export class RoomComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // clear queued timeouts
     this.timeouts.forEach(t => { try { clearTimeout(t); } catch (e) { } });
+
+    if (this.autoCloseTimer) clearTimeout(this.autoCloseTimer);
   }
 
   // -----------------------
@@ -300,7 +367,7 @@ export class RoomComponent implements OnInit, AfterViewInit, OnDestroy {
   private triggerJumpScareEffect() {
     try {
       // choose a random jumpscare audio among loaded ones
-      const candidates = ['poder_jumpscare_1','poder_jumpscare_2','poder_jumpscare_3'];
+      const candidates = ['poder_jumpscare_1', 'poder_jumpscare_2', 'poder_jumpscare_3'];
       const avail = candidates.filter(c => !!this.SFX[c]);
       if (avail.length > 0) {
         const pick = avail[Math.floor(Math.random() * avail.length)];
@@ -318,7 +385,7 @@ export class RoomComponent implements OnInit, AfterViewInit, OnDestroy {
       overlay.style.background = 'rgba(0,0,0,0.85)';
       overlay.style.zIndex = '20000';
       const img = document.createElement('img');
-      const pool = ['assets/jumpscare/jump1.jpg','assets/jumpscare/jump2.jpg','assets/jumpscare/jump3.jpg'];
+      const pool = ['assets/jumpscare/jump1.jpg', 'assets/jumpscare/jump2.jpg', 'assets/jumpscare/jump3.jpg'];
       img.src = pool[Math.floor(Math.random() * pool.length)];
       img.style.maxWidth = '80%'; img.style.maxHeight = '80%'; img.style.borderRadius = '8px';
       img.style.boxShadow = '0 10px 40px rgba(0,0,0,0.8)';
@@ -759,21 +826,21 @@ export class RoomComponent implements OnInit, AfterViewInit, OnDestroy {
         try { const iframe = document.getElementById('roletaIframe') as HTMLIFrameElement; if (iframe) iframe.src = '/roleta?_=' + Date.now(); } catch (e) { }
         this.showModalRoleta();
         const sendSetup = () => {
-         try {
-              const iframe = document.getElementById('roletaIframe') as HTMLIFrameElement;
-              iframe.contentWindow!.postMessage(
-             { type: 'setSpinEnabled', enabled: (this.localPlayerId === this.currentPlayer) }, 
+          try {
+            const iframe = document.getElementById('roletaIframe') as HTMLIFrameElement;
+            iframe.contentWindow!.postMessage(
+              { type: 'setSpinEnabled', enabled: (this.localPlayerId === this.currentPlayer) },
               '*'
-              );
-            } catch (e) { }
+            );
+          } catch (e) { }
 
-            try {
-              const iframe = document.getElementById('roletaIframe') as HTMLIFrameElement;
-              iframe.contentWindow!.postMessage(
-                { type: 'resetWheel' }, 
-                '*'
-              );
-            } catch (e) { }
+          try {
+            const iframe = document.getElementById('roletaIframe') as HTMLIFrameElement;
+            iframe.contentWindow!.postMessage(
+              { type: 'resetWheel' },
+              '*'
+            );
+          } catch (e) { }
         };
         try {
           const iframe = document.getElementById('roletaIframe') as HTMLIFrameElement;
@@ -802,18 +869,18 @@ export class RoomComponent implements OnInit, AfterViewInit, OnDestroy {
       } catch (e) { }
       try { iframe.src = '/roleta?_=' + Date.now(); } catch (e) { }
       const sendSetup = () => {
-       try {
-  iframe.contentWindow!.postMessage(
-    { type: 'setSpinEnabled', enabled: (this.localPlayerId === this.currentPlayer) }, 
-    '*'
-  );
-} catch (e) {}
-try {
-  iframe.contentWindow!.postMessage(
-    { type: 'resetWheel' }, 
-    '*'
-  );
-} catch (e) {}
+        try {
+          iframe.contentWindow!.postMessage(
+            { type: 'setSpinEnabled', enabled: (this.localPlayerId === this.currentPlayer) },
+            '*'
+          );
+        } catch (e) { }
+        try {
+          iframe.contentWindow!.postMessage(
+            { type: 'resetWheel' },
+            '*'
+          );
+        } catch (e) { }
         try {
           const overlay = document.getElementById('roletaOverlay');
           if (overlay) overlay.style.display = (this.localPlayerId === this.currentPlayer) ? 'none' : 'flex';
@@ -1187,31 +1254,31 @@ try {
   // Misc: confetti, rematch helpers preserved (you can expand UI later)
   // -----------------------
   private finalizeIfRoundLimitOrWinner() {
-  try {
-    // já ganhou por pontos?
-    if (this.points[1] >= 15 || this.points[2] >= 15) return;
+    try {
+      // já ganhou por pontos?
+      if (this.points[1] >= 15 || this.points[2] >= 15) return;
 
-    // limite de rounds (5 rounds)
-    if (this.roundCount >= 5) {
-      let winnerId;
+      // limite de rounds (5 rounds)
+      if (this.roundCount >= 5) {
+        let winnerId;
 
-      // empate → vitória do player 1
-      if (this.points[1] === this.points[2]) {
-        winnerId = 1;
-      } else {
-        winnerId = (this.points[1] > this.points[2]) ? 1 : 2;
+        // empate → vitória do player 1
+        if (this.points[1] === this.points[2]) {
+          winnerId = 1;
+        } else {
+          winnerId = (this.points[1] > this.points[2]) ? 1 : 2;
+        }
+
+        const winner = {
+          id: winnerId,
+          name: document.getElementById(`player${winnerId}-name`)?.textContent || ('Jogador ' + winnerId),
+          pts: this.points[winnerId]
+        };
+
+        this.showFinalWinner(winner);
       }
-
-      const winner = {
-        id: winnerId,
-        name: document.getElementById(`player${winnerId}-name`)?.textContent || ('Jogador ' + winnerId),
-        pts: this.points[winnerId]
-      };
-
-      this.showFinalWinner(winner);
-    }
-  } catch (e) { }
-}
+    } catch (e) { }
+  }
 
   private randomColor() {
     const palette = ['#FFD700', '#FF5E5E', '#5EE0FF', '#8AFF8A', '#C686FF', '#FFB86B'];

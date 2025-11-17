@@ -12,6 +12,7 @@ import {HttpClientModule} from "@angular/common/http";
 import { RoomComponent } from './routes/room/room.component';
 import { RoletaComponent } from './routes/roleta/roleta.component';
 import { BlockUIModule } from 'ng-block-ui';
+import { QuestWheelComponent } from './components/quest-wheel/quest-wheel.component';
 
 @NgModule({
   declarations: [
@@ -21,7 +22,8 @@ import { BlockUIModule } from 'ng-block-ui';
     LobbyComponent,
     LoginSuccessComponent,
     RoomComponent,
-    RoletaComponent
+    RoletaComponent,
+    QuestWheelComponent
   ],
   imports: [
     BrowserModule,
