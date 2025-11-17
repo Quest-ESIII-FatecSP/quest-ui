@@ -5,4 +5,60 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Card styles moved from room.component.scss to global so dynamically created cards receive them */
+#cards { position: fixed; inset:0; pointer-events:none; z-index:3; }
+.cards-side{ position:fixed; top:50%; transform:translateY(-50%); display:flex; flex-direction:column; gap:16px; }
+.cards-side.left{ left:16px; }
+.cards-side.right{ right:16px; }
+.cards-stack{ display:flex; flex-direction:row; column-gap:16px; }
+.cards-stack .cards-col{ display:flex; flex-direction:column; gap:16px; align-items:center; }
+.cards-side .card{ width:100px; height:150px; }
+@media (max-height: 860px){ .cards-side .card{ width:92px; height:138px; } }
+@media (max-height: 760px){ .cards-side .card{ width:86px; height:129px; } }
+@media (max-height: 680px){ .cards-side .card{ width:82px; height:124px; } }
+
+.card {
+	width: 100px;
+	height: 150px;
+	background: linear-gradient(145deg, #1a1f4b, #0b0f30);
+	border: 2px solid #FFD700;
+	border-radius: 15px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	font-size: 32px;
+	cursor: pointer;
+	transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.card.card-used{
+	background: linear-gradient(145deg, #fff1a8, #ffd23a);
+	color: #000 !important;
+	cursor: not-allowed;
+	filter: saturate(1.05);
+}
+
+.card-inner {
+	width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 600ms cubic-bezier(.2,.9,.3,1);
+	border-radius: 12px; display: flex; align-items: center; justify-content: center;
+}
+.card-face { position: absolute; inset: 0; display:flex; align-items:center; justify-content:center; backface-visibility: hidden; border-radius: 12px; }
+.card-front { background: linear-gradient(145deg, #1a1f4b, #0b0f30); color: transparent; }
+.card-back { background: linear-gradient(145deg, #fff9e6, #ffd23a); color: #1a1200; transform: rotateY(180deg); font-weight:900; font-size:34px }
+.card-inner.flipped { transform: rotateY(180deg); }
+
+.card:hover {
+	transform: translateY(-12px);
+	box-shadow: 0 0 16px rgba(255, 215, 0, 0.45);
+}
+
+.card-vibe { width:100%; height:100%; display:flex; align-items:center; justify-content:center; }
+.card-vibe.vibrate { animation: vibrate 900ms infinite; }
+@keyframes vibrate {
+	0% { transform: translateX(0) rotate(0.0deg); }
+	25% { transform: translateX(-1.8px) rotate(-0.6deg); }
+	50% { transform: translateX(0.8px) rotate(0.4deg); }
+	75% { transform: translateX(-0.6px) rotate(-0.3deg); }
+	100% { transform: translateX(0) rotate(0.0deg); }
+}
+
 

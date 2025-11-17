@@ -712,13 +712,18 @@ export class RoomComponent implements OnInit, AfterViewInit, OnDestroy {
         if (isQuestionVisible) { ro.style.display = 'none'; } else { ro.style.display = 'flex'; }
       }
       try {
-        const iframe = document.getElementById('roletaIframe') as HTMLIFrameElement;
-        if (iframe && iframe.contentWindow) {
-          iframe.contentWindow.postMessage({ type: 'setSpinEnabled', enabled: (this.localPlayerId === this.currentPlayer) }, '*');
-          const overlay = document.getElementById('roletaOverlay');
-          if (overlay) overlay.style.display = (this.localPlayerId === this.currentPlayer) ? 'none' : 'flex';
-          if (iframe) { if (this.localPlayerId !== this.currentPlayer) iframe.classList.add('dim'); else iframe.classList.remove('dim'); }
+        const el = document.getElementById('roletaIframe');
+        const isIframe = el && el.tagName && el.tagName.toLowerCase() === 'iframe';
+        // If a component exposes a global API (roletaAPI) use it, otherwise fallback to iframe postMessage
+        const api = (window as any).roletaAPI;
+        if (api && typeof api.setSpinEnabled === 'function') {
+          try { api.setSpinEnabled(this.localPlayerId === this.currentPlayer); } catch (e) { }
+        } else if (isIframe) {
+          try { (el as HTMLIFrameElement).contentWindow!.postMessage({ type: 'setSpinEnabled', enabled: (this.localPlayerId === this.currentPlayer) }, '*'); } catch (e) { }
         }
+        const overlay = document.getElementById('roletaOverlay');
+        if (overlay) overlay.style.display = (this.localPlayerId === this.currentPlayer) ? 'none' : 'flex';
+        if (el) { if (this.localPlayerId !== this.currentPlayer) el.classList.add('dim'); else el.classList.remove('dim'); }
       } catch (e) { }
       const btn = document.getElementById('openRoletaBtn') as HTMLButtonElement;
       if (btn) btn.disabled = isQuestionVisible || !(this.localPlayerId === this.currentPlayer);
@@ -783,6 +788,62 @@ export class RoomComponent implements OnInit, AfterViewInit, OnDestroy {
         } catch (e) { }
       }, 1000);
     } catch (e) { }
+  }
+
+  // -----------------------
+  // Roleta adapter helpers (unify iframe vs component API)
+  // -----------------------
+  private getRoletaEl(): HTMLElement | null {
+    try { return document.getElementById('roletaIframe'); } catch (e) { return null; }
+  }
+
+  private isRoletaIframe(el: any): el is HTMLIFrameElement {
+    try { return !!(el && el.tagName && String(el.tagName).toLowerCase() === 'iframe'); } catch (e) { return false; }
+  }
+
+  private roletaSetSpinEnabled(enabled: boolean) {
+    try {
+      const api = (window as any).roletaAPI;
+      const el = this.getRoletaEl();
+      if (api && typeof api.setSpinEnabled === 'function') {
+        try { api.setSpinEnabled(enabled); } catch (e) { }
+        return;
+      }
+      if (this.isRoletaIframe(el)) {
+        try { (el as HTMLIFrameElement).contentWindow!.postMessage({ type: 'setSpinEnabled', enabled }, '*'); } catch (e) { }
+      }
+    } catch (e) { }
+  }
+
+  private roletaResetWheel() {
+    try {
+      const api = (window as any).roletaAPI;
+      const el = this.getRoletaEl();
+      if (api && typeof api.resetWheel === 'function') {
+        try { api.resetWheel(); } catch (e) { }
+        return;
+      }
+      if (this.isRoletaIframe(el)) {
+        try { (el as HTMLIFrameElement).contentWindow!.postMessage({ type: 'resetWheel' }, '*'); } catch (e) { }
+      }
+    } catch (e) { }
+  }
+
+  private roletaEnsureSrc() {
+    try {
+      const el = this.getRoletaEl();
+      if (this.isRoletaIframe(el)) {
+        try { (el as HTMLIFrameElement).src = '/roleta?_=' + Date.now(); } catch (e) { }
+      }
+    } catch (e) { }
+  }
+
+  private setRoletaDim(dim: boolean) {
+    try { const el = this.getRoletaEl(); if (el) { if (dim) el.classList.add('dim'); else el.classList.remove('dim'); } } catch (e) { }
+  }
+
+  private setRoletaOverlayVisible(visible: boolean) {
+    try { const overlay = document.getElementById('roletaOverlay'); if (overlay) overlay.style.display = visible ? 'flex' : 'none'; } catch (e) { }
   }
 
   // -----------------------
@@ -871,18 +932,18 @@ export class RoomComponent implements OnInit, AfterViewInit, OnDestroy {
       } catch (e) { }
       try { iframe.src = '/roleta?_=' + Date.now(); } catch (e) { }
       const sendSetup = () => {
-        try {
-          iframe.contentWindow!.postMessage(
-            { type: 'setSpinEnabled', enabled: (this.localPlayerId === this.currentPlayer) },
-            '*'
-          );
-        } catch (e) { }
-        try {
-          iframe.contentWindow!.postMessage(
-            { type: 'resetWheel' },
-            '*'
-          );
-        } catch (e) { }
+       try {
+  iframe.contentWindow!.postMessage(
+    { type: 'setSpinEnabled', enabled: (this.localPlayerId === this.currentPlayer) },
+    '*'
+  );
+} catch (e) {}
+try {
+  iframe.contentWindow!.postMessage(
+    { type: 'resetWheel' },
+    '*'
+  );
+} catch (e) {}
         try {
           const overlay = document.getElementById('roletaOverlay');
           if (overlay) overlay.style.display = (this.localPlayerId === this.currentPlayer) ? 'none' : 'flex';
