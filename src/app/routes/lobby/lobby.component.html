@@ -4,8 +4,11 @@
 
       <header class="d-flex justify-content-between align-items-center">
         <div class="left-area d-flex align-items-center gap-3 position-relative">
-          <img [src]="player1.avatar" alt="Avatar" class="player-avatar" #headerAvatar (click)="openAvatarModal(1)" />
-          <span class="fw-bold fs-5 ms-2" id="playerName" (click)="mudarNome()">
+          <img *ngIf="player1.tipo == tipoJogadorEnum.CADASTRADO; else convidado" [src]="player1.avatar" alt="Avatar" class="player-avatar" #headerAvatar (click)="openAvatarModal(1)" />
+          <ng-template #convidado>
+            <img src="assets/img/Variedades F.png" alt="Avatar Convidado" class="player-avatar" />
+          </ng-template>
+          <span class="fw-bold fs-5 ms-2" id="playerName">
             {{ player1.username }}
           </span>
         </div>
@@ -19,7 +22,7 @@
         </h1>
 
         <div class="header-right d-flex gap-4 align-items-center">
-          <div class="d-flex align-items-center">
+          <div *ngIf="player1.tipo == tipoJogadorEnum.CADASTRADO" class="d-flex align-items-center">
             <img src="assets/img/moeda.png" class="resource-icon" />
             <span style="font-size: 40px;" class="text-white">{{ player1.moeda }}</span>
           </div>
@@ -78,7 +81,7 @@
           </div>
 
           <div class="col-lg-4 d-flex flex-column gap-3 sidebar">
-            <div class="card p-3 d-flex align-items-center gap-2" (click)="openModal('lojaModal')">
+            <div *ngIf="player1.tipo == tipoJogadorEnum.CADASTRADO" class="card p-3 d-flex align-items-center gap-2" (click)="openModal('lojaModal')">
               <i class="bi bi-cart fs-3"></i><span class="fs-5">Loja</span>
             </div>
 
@@ -90,7 +93,7 @@
               <i class="bi bi-trophy-fill fs-3"></i><span class="fs-5">Ranking</span>
             </div>
 
-            <div class="card p-3 d-flex align-items-center gap-2" (click)="openModal('InventarioModal')">
+            <div *ngIf="player1.tipo == tipoJogadorEnum.CADASTRADO" class="card p-3 d-flex align-items-center gap-2" (click)="openModal('InventarioModal')">
               <i class="bi-backpack-fill fs-3"></i><span class="fs-5">Inventario de Poderes</span>
             </div>
           </div>

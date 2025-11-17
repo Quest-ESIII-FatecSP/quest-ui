@@ -12,12 +12,10 @@ import {
 import { Router } from '@angular/router';
 import { BlockUI, NgBlockUI } from 'ng-block-ui';
 import { switchMap } from 'rxjs';
-import { JogadorService, RankingJogador } from '../../services/jogador.service';
+import { JogadorService, RankingJogador, TipoJogadorEnum } from '../../services/jogador.service';
 import { ItemLoja, LojaService, Pacote, TipoItemEnum } from '../../services/loja.service';
 import { StompService } from "../../services/stomp.service";
 declare const bootstrap: any;
-
-
 
 interface Sala {
   nome: string;
@@ -42,6 +40,7 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
     avatar: 'assets/img/Variedades F.png',
     moeda: 0,
     status: 'Conectado',
+    tipo: TipoJogadorEnum.CADASTRADO,
     active: false,
     email: ""
   };
@@ -51,6 +50,8 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
     avatar: 'assets/img/Mundo M.png', status: 'Aguardando...',
     active: false
   };
+
+  tipoJogadorEnum = TipoJogadorEnum;
 
   @BlockUI() blockUI!: NgBlockUI;
 
@@ -222,6 +223,8 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // ---------- AVATAR / NOME ----------
   openAvatarModal(target: number) {
+
+
     this.avatarTarget = target === 2 ? 2 : 1;
     // atualiza label no modal (o template exibe avatarTarget diretamente)
     const inst = this.modalInstances.get('avatarModal');
@@ -486,12 +489,14 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.jogadorService.ObterDadosJogador().subscribe({
       next: (data) => {
-        const { avatar, email, moeda, username } = data;
+        const { avatar, email, moeda, username, tipo } = data;
 
         this.player1.username = username;
         this.player1.avatar = avatar;
         this.player1.moeda = moeda;
         this.player1.email = email;
+        this.player1.tipo = tipo ?? TipoJogadorEnum.CONVIDADO;
+
       },
       complete: () => {
         this.blockUI.stop();
