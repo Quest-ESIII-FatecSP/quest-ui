@@ -9,19 +9,13 @@ import {
   ViewChild,
   ViewChildren
 } from '@angular/core';
-import {StompService} from "../../services/stomp.service";
-import {Router} from "@angular/router";
-import { LobbyService, RankingJogador } from '../../services/lobby.service';
-
-
-declare const bootstrap: any; // bootstrap bundle (Modal) — incluído globalmente no index.html
-
-interface Player {
-  position: number;
-  name: string;
-  score: number;
-  avatar: string;
-}
+import { Router } from "@angular/router";
+import { BlockUI, NgBlockUI } from 'ng-block-ui';
+import { switchMap } from 'rxjs';
+import { JogadorService, RankingJogador } from '../../services/jogador.service';
+import { ItemLoja, LojaService, Pacote, TipoItemEnum } from '../../services/loja.service';
+import { StompService } from "../../services/stomp.service";
+declare const bootstrap: any;
 
 
 
@@ -39,20 +33,29 @@ interface Sala {
 })
 export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
   // estado visível
-  playerName = 'Jogador1';
-  moedas = 100;
   isSalaEmCriacao: boolean = false;
-  roomInfos = {roomCode: '', nomeSala: ''}
+  roomInfos = { roomCode: '', nomeSala: '' }
   EnterText = 'Entrar';
+
   player1 = {
-    name: 'Jogador 1',
+    username: 'Jogador 1',
     avatar: 'assets/img/Variedades F.png',
-    status: 'Conectado', active: false };
+    moeda: 0,
+    status: 'Conectado',
+    active: false,
+    email: ""
+  };
+
   player2 = {
     name: 'Jogador 2',
     avatar: 'assets/img/Mundo M.png', status: 'Aguardando...',
-    active: false };
+    active: false
+  };
 
+  @BlockUI() blockUI!: NgBlockUI;
+
+  itensCompra: ItemLoja[] = [];
+  pacotesMoeda: Pacote[] = [];
   playersRanking: RankingJogador[] = [];
 
   // salas / sistema local
@@ -62,20 +65,7 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
   novaSala = { nome: '', senha: '' };
   requestedRoomCode = '';
 
-  // avatars e produtos (originais)
-  avatars: string[] = [
-    'assets/img/Artes F.png',
-    'assets/img/Esportes F.png',
-    'assets/img/Ciência M.png',
-    'assets/img/Mundo M.png',
-    'assets/img/Sociedade M.png',
-    'assets/img/Variedades F.png',
-    'assets/img/Musculoso.png',
-    'assets/img/Raquel.png',
-    'assets/img/Bruxa.png',
-    'assets/img/Vampiro.png'
-  ];
-
+ 
   currentSlide = 0;
   slides: string[] = [
     'assets/img/TUTORIAL.png',
@@ -88,34 +78,24 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
     'assets/img/TUTORIAL8.png',
     'assets/img/TUTORIAL9.png',
   ];
+  
+  // função para ir para o próximo slide
+  nextSlide() {
+    this.currentSlide = (this.currentSlide + 1) % this.slides.length;
+  }
 
+  // função para ir para o slide anterior
+  prevSlide() {
+    this.currentSlide = (this.currentSlide - 1 + this.slides.length) % this.slides.length;
+  }
 
-// função para ir para o próximo slide
-nextSlide() {
-  this.currentSlide = (this.currentSlide + 1) % this.slides.length;
-}
+  // função para ir direto para um slide específico (usada pelos indicadores)
+  goToSlide(index: number) {
+    this.currentSlide = index;
+  }
 
-// função para ir para o slide anterior
-prevSlide() {
-  this.currentSlide = (this.currentSlide - 1 + this.slides.length) % this.slides.length;
-}
-
-// função para ir direto para um slide específico (usada pelos indicadores)
-goToSlide(index: number) {
-  this.currentSlide = index;
-}
-
-  produtos = [
-    { img: 'assets/img/pacote-moedas-pequeno.png', title: '100 Moedas', priceText: 'R$ 5,00', cost: 5 },
-    { img: 'assets/img/pacote-moedas-medio.png', title: '500 Moedas', priceText: 'R$ 45,00', cost: 45 },
-    { img: 'assets/img/pacote-moedas-grande.png', title: '1000 Moedas', priceText: 'R$ 80,00', cost: 80 },
-    { img: 'assets/img/Vampiro.png', title: 'Avatar Limitado Vampiro', priceText: '1000 moedas', cost: 1000 },
-    { img: 'assets/img/Bruxa.png', title: 'Avatar Limitado Bruxa', priceText: '1000 moedas', cost: 1000 },
-    { img: 'assets/img/congelar.png', title: 'Congelar', priceText: '100 moedas', cost: 100 },
-    { img: 'assets/img/4cliques.png', title: 'Alternativas Fujonas', priceText: '100 moedas', cost: 100 },
-    { img: 'assets/img/jumpscare.png', title: 'Susto', priceText: '100 moedas', cost: 100 },
-    { img: 'assets/img/x.png', title: 'Poder X', priceText: '100 moedas', cost: 100 }
-  ];
+  avataresInventario: ItemLoja[] = [];
+  poderesInventario: ItemLoja[] = [];
 
   // modal control / refs
   @ViewChild('avatarModal', { read: ElementRef }) avatarModalRef!: ElementRef;
@@ -126,6 +106,7 @@ goToSlide(index: number) {
   @ViewChild('criarSalaModal', { read: ElementRef }) criarSalaModalRef!: ElementRef;
   @ViewChild('entrarSalaModal', { read: ElementRef }) entrarSalaModalRef!: ElementRef;
   @ViewChild('senhaEntradaModal', { read: ElementRef }) senhaEntradaModalRef!: ElementRef;
+  @ViewChild('inventarioModal', { read: ElementRef }) inventarioModalRef!: ElementRef;
 
   @ViewChild('playerCard1', { read: ElementRef }) playerCard1Ref!: ElementRef;
   @ViewChild('playerCard2', { read: ElementRef }) playerCard2Ref!: ElementRef;
@@ -135,7 +116,6 @@ goToSlide(index: number) {
   private modalInstances = new Map<string, any>();
 
   avatarTarget = 1; // 1 ou 2
-  selectedAvatar: string | null = null;
 
   // timers / subscriptions
   private timeouts: any[] = [];
@@ -144,35 +124,27 @@ goToSlide(index: number) {
     private renderer: Renderer2,
     private stompService: StompService,
     private router: Router,
-    private lobbyService: LobbyService
-  ) {}
+    private jogadorService: JogadorService,
+    private lojaService: LojaService
+  ) { }
 
   ngOnInit(): void {
     this.stompLobbySubscription();
+    this.ObterDadosJogador();
+    this.ObterInventarioJogador();
     this.ObterRanking();
+    this.ObterPacotesMoeda();
+    this.ObterItensLoja();
+
+
     // tenta restaurar avatares de localStorage
     try {
-      const sa = localStorage.getItem('selectedAvatar');
-      const sa1 = localStorage.getItem('selectedAvatar1');
-      const sa2 = localStorage.getItem('selectedAvatar2');
-
-      if (sa1) this.player1.avatar = sa1;
-      else if (sa) this.player1.avatar = sa;
-
-      if (sa2) this.player2.avatar = sa2;
-
-      const storedName = localStorage.getItem('playerName');
-      if (storedName) this.playerName = storedName;
-
-      const storedMoedas = localStorage.getItem('moedas');
-      if (storedMoedas) this.moedas = Number(storedMoedas);
-
       // recuperar salas se existirem (apenas para demo local)
       const rawSalas = localStorage.getItem('salas');
       if (rawSalas) {
         try {
           this.salas = JSON.parse(rawSalas);
-        } catch {}
+        } catch { }
       }
     } catch (e) {
       // storage indisponível — silencioso
@@ -189,6 +161,7 @@ goToSlide(index: number) {
     this.safeCreateModal('criarSalaModal', this.criarSalaModalRef);
     this.safeCreateModal('entrarSalaModal', this.entrarSalaModalRef);
     this.safeCreateModal('senhaEntradaModal', this.senhaEntradaModalRef);
+    this.safeCreateModal('InventarioModal', this.inventarioModalRef);
 
     // animação inicial dos cards
     this.revealPlayerCards();
@@ -207,12 +180,12 @@ goToSlide(index: number) {
     this.modalInstances.clear();
   }
 
-  stompRoomSubscription(roomCode: string){
+  stompRoomSubscription(roomCode: string) {
     console.log('me inscrevi no room ' + roomCode)
     this.stompService.subscribe(`/room/${roomCode}`, (message) => {
       console.log(message)
       console.log(message.headers["event"])
-      this.player2 = {...this.player2, active: true, status: 'Conectado'}
+      this.player2 = { ...this.player2, active: true, status: 'Conectado' }
       this.EnterText = 'Entrando na Sala...'
       setTimeout(() => {
         this.router.navigate(['/room/', this.roomInfos.roomCode])
@@ -220,7 +193,7 @@ goToSlide(index: number) {
     });
   }
 
-  stompLobbySubscription(){
+  stompLobbySubscription() {
     this.stompService.subscribe('/lobby', (message) => {
       const tipoEvento = message.headers["event"];
       console.log(tipoEvento)
@@ -275,32 +248,31 @@ goToSlide(index: number) {
     if (inst) inst.show();
   }
 
-  changeProfilePic(src: string) {
+  changeProfilePic(avatarId: number) {
+    this.blockUI.start('Atualizando avatar...');
+
     try {
-      if (this.avatarTarget === 2) {
-        this.player2.avatar = src;
-        localStorage.setItem('selectedAvatar2', src);
-      } else {
-        this.player1.avatar = src;
-        // header
-        this.selectedAvatar = src;
-        localStorage.setItem('selectedAvatar', src);
-        localStorage.setItem('selectedAvatar1', src);
-      }
+      this.jogadorService.AtualizarAvatarJogador(avatarId).subscribe({
+        next: (data) => {
+          if (data.ok) {
+            this.ObterDadosJogador();
+          }
+        }
+      });
     } catch (e) {
-      // ignore
+      console.log(e);
     } finally {
-      // fecha modal se estiver aberto
+      this.blockUI.stop();
       this.closeBootstrapModal('avatarModal');
     }
   }
 
   mudarNome() {
-    const novo = prompt('Digite o novo nome do jogador:', this.playerName);
-    if (novo && novo.trim().length > 0) {
-      this.playerName = novo.trim();
-      localStorage.setItem('playerName', this.playerName);
-    }
+    // const novo = prompt('Digite o novo nome do jogador:', this.playerName);
+    // if (novo && novo.trim().length > 0) {
+    //   this.playerName = novo.trim();
+    //   localStorage.setItem('playerName', this.playerName);
+    // }
   }
 
   // ---------- SALAS (Criar / Entrar) ----------
@@ -310,7 +282,7 @@ goToSlide(index: number) {
 
   accessRoom(): void {
     this.requestedRoomCode = this.requestedRoomCode.trim().toUpperCase();
-    this.stompService.publish({destination: `/room/${this.requestedRoomCode}/${this.stompService.userID}`});
+    this.stompService.publish({ destination: `/room/${this.requestedRoomCode}/${this.stompService.userID}` });
   }
 
   confirmarCriacaoSala() {
@@ -321,7 +293,7 @@ goToSlide(index: number) {
       return;
     }
 
-    this.stompService.publish({destination: `/createRoom/${nome}`});
+    this.stompService.publish({ destination: `/createRoom/${nome}` });
     this.player1.active = true
     // fecha modal
     this.closeBootstrapModal('criarSalaModal');
@@ -349,8 +321,8 @@ goToSlide(index: number) {
     }
 
     // atualiza status jogador 2
-    this.salaSelecionada.jogador2 = this.playerName;
-    this.player2.status = `Conectado (${this.playerName})`;
+    this.salaSelecionada.jogador2 = this.player1.username;
+    this.player2.status = `Conectado (${this.player1.username})`;
 
 
     this.closeBootstrapModal('senhaEntradaModal');
@@ -400,9 +372,9 @@ goToSlide(index: number) {
       // aqui você pode integrar com pagamento — por enquanto demo local
       if (p.cost <= 100) {
         // itens "consumíveis" compráveis
-        if (this.moedas >= p.cost) {
-          this.moedas -= p.cost;
-          localStorage.setItem('moedas', String(this.moedas));
+        if (this.player1.moeda >= p.cost) {
+          this.player1.moeda -= p.cost;
+          localStorage.setItem('moedas', String(this.player1.moeda));
           alert(`Comprado: ${p.title}`);
         } else {
           alert('Moedas insuficientes.');
@@ -413,8 +385,8 @@ goToSlide(index: number) {
         const mapping: any = { 5: 100, 45: 500, 80: 1000 };
         const add = mapping[p.cost] || 0;
         if (add > 0) {
-          this.moedas += add;
-          localStorage.setItem('moedas', String(this.moedas));
+          this.player1.moeda += add;
+          localStorage.setItem('moedas', String(this.player1.moeda));
           alert(`Compra concluída: ${p.title}. Você recebeu ${add} moedas.`);
         } else {
           alert('Compra processada (demo).');
@@ -438,7 +410,7 @@ goToSlide(index: number) {
       const t = setTimeout(() => {
         try {
           this.renderer.addClass(cardRef.nativeElement, 'show');
-        } catch {}
+        } catch { }
       }, 120 * (idx + 1));
       this.timeouts.push(t);
     });
@@ -459,7 +431,7 @@ goToSlide(index: number) {
           this.renderer.removeStyle(el, 'transform');
           this.renderer.removeStyle(el, 'boxShadow');
           this.renderer.removeStyle(el, 'transition');
-        } catch {}
+        } catch { }
       }, 900);
       this.timeouts.push(t);
     } catch (e) {
@@ -468,7 +440,7 @@ goToSlide(index: number) {
   }
 
   getMedalIcon(position: number): string {
-    switch(position) {
+    switch (position) {
       case 1:
         return '🏆';
       case 2:
@@ -481,7 +453,7 @@ goToSlide(index: number) {
   }
 
   getPositionClass(position: number): string {
-    switch(position) {
+    switch (position) {
       case 1:
         return 'position-1';
       case 2:
@@ -494,7 +466,7 @@ goToSlide(index: number) {
   }
 
   ObterRanking() {
-    this.lobbyService.ObterRanking().subscribe({
+    this.jogadorService.ObterRanking().subscribe({
       next: (data) => {
         this.playersRanking = data;
 
@@ -506,5 +478,121 @@ goToSlide(index: number) {
     })
   }
 
-  
+  ObterInventarioJogador(filtroTipo?: TipoItemEnum) {
+    this.lojaService.ObterItensInventario(filtroTipo).subscribe({
+      next: (data) => {
+        this.avataresInventario = data.filter(item => item.tipo === TipoItemEnum.avatar);
+        this.poderesInventario = data.filter(item => item.tipo === TipoItemEnum.poder);
+      }
+    });
+  }
+
+  ObterDadosJogador() {
+    this.blockUI.start("Carregando dados do jogador...");
+
+    this.jogadorService.ObterDadosJogador().subscribe({
+      next: (data) => {
+        const { avatar, email, moeda, username } = data;
+
+        this.player1.username = username;
+        this.player1.avatar = avatar;
+        this.player1.moeda = moeda;
+        this.player1.email = email;
+      },
+      complete: () => {
+        this.blockUI.stop();
+      }
+    });
+  }
+
+  ObterPacotesMoeda() {
+    this.blockUI.start("Carregando pacotes de moeda...");
+
+    this.lojaService.ObterPacotesMoeda().subscribe({
+      next: (data) => {
+        this.pacotesMoeda = data;
+        this.pacotesMoeda = this.pacotesMoeda.map(p => {
+          switch (p.quantidade) {
+            case 100:
+              p.img = 'assets/img/pacote-moedas-pequeno.png';
+              break;
+            case 500:
+              p.img = 'assets/img/pacote-moedas-medio.png';
+              break;
+            case 1000:
+              p.img = 'assets/img/pacote-moedas-grande.png';
+              break;
+            default:
+              p.img = 'assets/img/pacote-moedas-pequeno.png';
+              break;
+          }
+
+          return p;
+        });
+      },
+      complete: () => {
+        this.blockUI.stop();
+      }
+    });
+  }
+
+  ComprarMoedas(pacote: Pacote) {
+    this.lojaService.ComprarMoedas(pacote.quantidade).subscribe({
+      next: (data) => {
+        this.ObterDadosJogador();
+      }
+    });
+  }
+
+  ComprarItemLoja(item: ItemLoja) {
+    this.blockUI.start();
+
+    this.lojaService.ComprarItemLoja(item.tipo, item.id, 1).pipe(
+      switchMap(() => this.lojaService.ObterItensInventario())
+    ).subscribe({
+      next: (data) => {
+
+        this.avataresInventario = data.filter(item => item.tipo === TipoItemEnum.avatar);
+        this.poderesInventario = data.filter(item => item.tipo === TipoItemEnum.poder);
+
+        this.player1.moeda -= item.preco ?? 0;
+
+        this.ObterItensLoja();
+      },
+      error: (err) => {
+        console.error('Erro ao comprar item:', err);
+        this.blockUI.stop();
+      },
+      complete: () => {
+        this.blockUI.stop();
+      }
+    });
+  }
+
+  ObterItensLoja() {
+    this.blockUI.start("Carregando itens da loja...");
+
+    this.lojaService.ObterItensLoja().subscribe({
+      next: (data) => {
+        this.itensCompra = data.sort((a, b) => {
+          const tipoCmp = (a.tipo || '').localeCompare(b.tipo || '');
+          if (tipoCmp !== 0) return tipoCmp;
+          const pa = (a.preco ?? 0);
+          const pb = (b.preco ?? 0);
+          return pa - pb;
+        });
+
+        this.itensCompra = this.itensCompra.filter(item => {
+          if (item.tipo === TipoItemEnum.avatar) {
+            return !this.avataresInventario.some(av => av.id === item.id);
+          }
+
+          return true;
+        })
+      },
+      complete: () => {
+        this.blockUI.stop();
+      }
+    });
+  }
 }
