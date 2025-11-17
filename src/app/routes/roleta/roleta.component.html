@@ -1,0 +1,30 @@
+<canvas #backgroundCanvas id="backgroundCanvas"></canvas>
+<div class="overlay"></div>
+<div class="hidden-icons" aria-hidden="true">
+  <img id="icon-artes" src="assets/img/E.png" alt="Artes" />
+  <img id="icon-ciencia" src="assets/img/CT.png" alt="Ciências" />
+  <img id="icon-esportes" src="assets/img/EL.png" alt="Esportes" />
+  <img id="icon-mundo" src="assets/img/M.png" alt="Mundo" />
+  <img id="icon-variedades" src="assets/img/V.png" alt="Variedades" />
+  <img id="icon-sociedade" src="assets/img/S.png" alt="Sociedade" />
+</div>
+
+<div class="roleta-wrap">
+  <div class="result-display" aria-hidden="true"></div>
+
+  <div class="roleta" role="application" aria-label="Roleta">
+    <div class="pointer-top" aria-hidden="true"></div>
+    <div class="disco" #disco id="disco">
+      <svg #wheel id="wheel" viewBox="0 0 420 420" width="100%" height="100%" preserveAspectRatio="xMidYMid meet" aria-hidden="false"></svg>
+    </div>
+    <button #girar id="girar" class="girar-central" aria-label="Girar" (click)="onGirar()">Girar</button>
+    <div class="miolo" aria-hidden="true"></div>
+  </div>
+</div>
+
+<div #resultModal id="resultModal" class="result-modal" [style.display]="showingModal ? 'flex' : 'none'">
+  <div class="modal-card">
+    <img #modalImg id="modalImg" [src]="modalImageSrc" alt="" class="modal-img" />
+    <div #modalLabel id="modalLabel" class="modal-label">{{ modalLabelText }}</div>
+  </div>
+</div>
