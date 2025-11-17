@@ -1,11 +1,944 @@
-.lobby-container { min-height:100vh; color:#fff; font-family:Arial,sans-serif; }
-.lobby-header { background:rgba(0,0,0,0.6); backdrop-filter:blur(8px); padding:15px 30px; position:relative; }
-.player-avatar { width:50px; height:50px; border-radius:50%; border:2px solid #fff; object-fit:cover; cursor:pointer; }
-.profile-dropdown { position:absolute; top:60px; left:0; background:rgba(255,255,255,0.95); border-radius:12px; padding:10px; box-shadow:0 4px 12px rgba(0,0,0,0.3); z-index:20; flex-wrap:wrap; gap:10px; width:220px; }
-.profile-dropdown img { width:50px; height:50px; border-radius:50%; cursor:pointer; transition:transform .2s; object-fit:cover; }
-.profile-dropdown img:hover { transform:scale(1.1); }
-.panel { background:rgba(255,255,255,0.1); border-radius:16px; }
-.player-card { background:rgba(255,255,255,0.15); padding:10px; border-radius:12px; display:flex; align-items:center; gap:12px; }
-.player-card img { width:40px; height:40px; border-radius:50%; border:2px solid #fff; object-fit:cover; }
-.sidebar .card { cursor:pointer; transition:transform .2s; background:rgba(255,255,255,0.1); color:#fff; }
-.sidebar .card:hover { transform:translateY(-5px); background:rgba(255,255,255,0.25); }
+body {
+  background: linear-gradient(135deg, #030f3c, #3a1f5f);
+  color: #fff;
+  margin: 0;
+  min-height: 100vh;
+  font-family: Arial, sans-serif;
+  position: relative;
+  overflow-x: hidden;
+}
+
+.page-container {
+  background: linear-gradient(135deg, #030f3c, #3a1f5f);
+  display: flex; /* Transforma em um contêiner flexível */
+  flex-direction: column; /* Organiza os itens verticalmente */
+  min-height: 100vh; /* Garante que ocupe, no mínimo, 100% da altura visível */
+}
+
+/* 3. O conteúdo principal deve 'crescer' e empurrar o rodapé para baixo */
+.content-wrap {
+  flex-grow: 1; /* Faz com que esta seção ocupe todo o espaço livre */
+  /* espaço de fundo para o rodapé fixo (evita sobreposição e barra de rolagem) */
+  padding-bottom: 240px;
+}
+
+/* ---------------------------
+   HEADER (maior + central title)
+   --------------------------- */
+header {
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(8px);
+  padding: 28px 36px; /* aumentado para ser mais imponente */
+  position: relative;
+  z-index: 10;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.45);
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+
+/* area esquerda (avatar + nome) */
+header .left-area {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+/* player avatar no header - aumentado */
+.player-avatar {
+  width: 120px;   /* maior */
+  height: 120px;  /* maior */
+  object-fit: cover;
+  cursor: pointer;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+}
+
+/* hover/seleção mais evidente no avatar */
+.player-avatar:hover {
+  transform: scale(1.06);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.55);
+}
+
+/* nome jogador no topo */
+#playerName {
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: #fff;
+  cursor: pointer;
+  user-select: none;
+  letter-spacing: 0.2px;
+}
+
+/* recursos no canto direito do header */
+.resource-icon {
+  width: 70px;   /* ligeiramente maior */
+  height: 70px;
+  margin-right: 8px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* wrapper do header para alinhas os itens corretamente */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  font-weight: 600;
+}
+
+/* ---------------------------
+   TÍTULO CENTRAL "QUEST"
+   --------------------------- */
+/* Centralizado heroicamente */
+#gameTitle {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  color: #ffd700;
+  text-shadow: 0 2px 8px rgba(255,215,0,0.08), 0 8px 26px rgba(0,0,0,0.6);
+  text-transform: uppercase;
+  z-index: 9;
+}
+
+/* leve brilho animado no título */
+@keyframes titleGlow {
+  0% { text-shadow: 0 2px 6px rgba(255,215,0,0.06); transform: translate(-50%,-50%) scale(1); }
+  50% { text-shadow: 0 6px 22px rgba(255,215,0,0.18); transform: translate(-50%,-50%) scale(1.02); }
+  100% { text-shadow: 0 2px 6px rgba(255,215,0,0.06); transform: translate(-50%,-50%) scale(1); }
+}
+#gameTitle { animation: titleGlow 3.6s ease-in-out infinite; }
+
+/* ---------------------------
+   SIDEBAR CARDS (mantidos, apenas ajuste visual)
+   --------------------------- */
+.sidebar .card {
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.04);
+}
+.sidebar .card:hover {
+  transform: translateY(-6px);
+  background: rgba(255,255,255,0.12);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.45);
+}
+
+/* ---------------------------
+   PLAYER CARD (LOBBY) - mais presença + animações
+   --------------------------- */
+.player-card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03));
+  padding: 18px;         /* aumentado */
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  gap: 18px;             /* maior para dar ar */
+  width: 320px;
+  justify-content: flex-start;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 10px 22px rgba(0,0,0,0.45);
+  transition: transform 0.28s cubic-bezier(.2,.9,.3,1), box-shadow 0.28s;
+  opacity: 0;
+  transform: translateY(18px);
+}
+
+/* avatar maior no player-card */
+.player-card img {
+  width: 150px;  /* AVATAR GRANDE */
+  height: 150px; /* AVATAR GRANDE */
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+/* efeito hover nos cards */
+.player-card:hover {
+  transform: translateY(-6px) scale(1.01);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.6);
+}
+
+/* aparecimento suave sequencial */
+.player-card.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* texto dentro do card */
+.player-card h6 { font-size: 1.05rem; margin: 0; }
+.player-card small { color: rgba(255,255,255,0.75); }
+
+/* ---------------------------
+   LAYOUT DOS JOGADORES: lado-a-lado (responsivo)
+   --------------------------- */
+#playersBox {
+  display: flex;
+  flex-direction: row;           /* lado a lado */
+  gap: 28px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* quando a tela for pequena, empilha verticalmente */
+@media (max-width: 720px) {
+  #playersBox {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .player-card {
+    width: 100%;
+    max-width: 380px;
+    padding: 12px;
+  }
+  .player-card img {
+    width: 80px;
+    height: 80px;
+  }
+}
+
+/* ---------------------------
+   MODAIS (mantidos os estilos, só reuso)
+   --------------------------- */
+.modal-content {
+  background: linear-gradient(135deg, #030f3c, #3a1f5f);
+  color: #fff;
+  border-radius: 20px;
+  border: 2px solid rgba(255,255,255,0.2);
+  box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+.modal-header { border-bottom: none; text-align: center; }
+.btn-close { filter: invert(1); }
+
+/* ---------------------------
+   PASSE DE TEMPORADA
+   --------------------------- */
+#trilhaNiveis {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  overflow-x: auto;
+  padding: 10px;
+}
+.nivel-card {
+  min-width: 250px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  padding: 10px;
+  text-align: center;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+.recompensa {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 8px;
+  padding: 5px;
+  border-radius: 10px;
+  background: rgba(0,0,0,0.25);
+}
+.recompensa.free { border-left: 5px solid #1e90ff; }
+.recompensa.premium { border-left: 5px solid #ffbf00; }
+.recompensa img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.recompensa button {
+  border: none;
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-weight: bold;
+  cursor: pointer;
+}
+.recompensa.free button { background-color: #1e90ff; color: white; }
+.recompensa.premium button { background-color: #ffbf00; color: black; }
+.recompensa button:hover { filter: brightness(1.2); }
+
+/* ---------------------------
+   XP BAR
+   --------------------------- */
+#xpContainer {
+  background: rgba(255,255,255,0.1);
+  border-radius: 10px;
+  padding: 10px;
+  margin-bottom: 15px;
+}
+#xpProgress {
+  height: 20px;
+  background: #1e90ff;
+  border-radius: 8px;
+  transition: width 0.4s ease;
+}
+
+/* efeito de brilho ao ganhar XP */
+@keyframes shineXP {
+  0% { filter: brightness(1); transform: translateY(0); }
+  50% { filter: brightness(1.6); transform: translateY(-2px); }
+  100% { filter: brightness(1); transform: translateY(0); }
+}
+.xp-glow { animation: shineXP 0.9s linear; }
+
+/* ---------------------------
+   LOJA
+   --------------------------- */
+.produtos-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.produto {
+  background: rgba(255,255,255,0.15);
+  border-radius:16px;
+  text-align:center;
+  padding:20px;
+  transition:0.3s;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+.produto:hover { transform: translateY(-5px); background: rgba(255,255,255,0.25); }
+.produto img {
+   width: 80px;
+   height: 80px;
+   margin-bottom:12px;
+   margin: 0 auto;
+  }
+.produto h3 { font-size:18px; margin-bottom:10px; }
+.produto button {
+  padding:10px 15px;
+  border:none;
+  border-radius:10px;
+  background:#5cb85c;
+  color:#fff;
+  cursor:pointer;
+}
+.produto button:hover { background:#4cae4c; }
+
+/* Estilos para preços dos pacotes */
+.price-container {
+  margin: 1rem 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.original-price {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+
+  .strike {
+    text-decoration: line-through;
+    font-weight: normal;
+  }
+}
+
+.final-price {
+  font-size: 1.5rem;
+  color: #fff;
+  margin: 0;
+
+  &.has-discount {
+    color: #4caf50;
+  }
+
+  strong {
+    font-weight: 700;
+  }
+}
+
+.discount-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #ff4444, #cc0000);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(255, 68, 68, 0.4);
+  animation: pulse-badge 2s ease-in-out infinite;
+}
+
+@keyframes pulse-badge {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 2px 8px rgba(255, 68, 68, 0.4);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(255, 68, 68, 0.6);
+  }
+}
+
+/* ---------------------------
+   MISSÕES
+   --------------------------- */
+#missoesLista {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+.missao {
+  background: rgba(255,255,255,0.1);
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.2);
+}
+.missao h6 { margin: 0 0 5px 0; color: #ffd700; }
+
+/* ---------------------------
+   ANIMAÇÕES ADICIONAIS (FANCY)
+   --------------------------- */
+/* partículas sutis no fundo - efeito visual */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-image: radial-gradient(rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 80px 80px;
+  opacity: 0.7;
+  pointer-events: none;
+  animation: moveGrid 16s linear infinite;
+}
+@keyframes moveGrid {
+  0% { transform: translateY(0); opacity: 0.6; }
+  50% { transform: translateY(-40px); opacity: 0.8; }
+  100% { transform: translateY(0); opacity: 0.6; }
+}
+
+/* botão com "energy sweep" */
+.btn-energy {
+  position: relative;
+  overflow: hidden;
+}
+.btn-energy::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -40%;
+  width: 40%;
+  height: 200%;
+  background: linear-gradient(90deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02));
+  transform: rotate(-20deg);
+  transition: left .6s ease;
+}
+.btn-energy:hover::before { left: 150%; }
+
+/* loading text (pontos animados) */
+.loading-text::after {
+  content: "";
+  display: inline-block;
+  width: 0.75em;
+  text-align: left;
+  animation: dots 1.2s steps(4, end) infinite;
+}
+@keyframes dots {
+  0% { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
+  25% { box-shadow: 0 0 8px 6px rgba(255,255,255,0.02); }
+  50% { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
+  75% { box-shadow: 0 0 6px 4px rgba(255,255,255,0.02); }
+  100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
+}
+
+
+.halloween-footer {
+  /* CAMINHO CORRETO PARA A IMAGEM DE FUNDO (Se img está dentro da pasta do CSS) */
+  background-image: url('/assets/img/rodape.png');
+
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center bottom;
+
+  /* Use uma altura fixa que se ajuste à sua imagem */
+  height: 220px;
+  min-height: 120px; /* Garante altura mínima */
+
+  width: 100%;
+  padding: 0; /* Remove padding que pode atrapalhar o background-image */
+
+  /* Remova a cor magenta de teste */
+  background-color: transparent;
+  /* fixa o rodapé na parte inferior da janela para não aumentar a altura do documento */
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 6;
+}
+
+/* Ajuste o texto do copyright */
+.halloween-footer p {
+  margin-bottom: 0;
+  padding-top: 80px; /* Aumente este valor se a imagem for alta */
+  font-size: 0.8rem;
+}
+
+
+/* util */
+.text-muted-ghost { color: rgba(255,255,255,0.6); font-size: 0.95rem; }
+
+.quest-title {
+  font-family: 'Luckiest Guy', cursive;
+  font-size: clamp(56px, 7vw, 70px);
+  letter-spacing: 2px;
+  color: white;
+  text-shadow: 3px 3px 8px rgba(0,0,0,0.7);
+}
+.quest-title span.q { color: red; }
+.quest-title span.u { color: blue; }
+.quest-title span.e { color: gold; }
+.quest-title span.s { color: purple; }
+.quest-title span.t { color: green; }
+
+
+/* --- Brilho / luz de fundo (estilo semelhante à roleta) --- */
+.player-avatar,
+.player-card img,
+.recompensa img {
+  position: relative;
+  display: inline-block;
+  border-radius: 50%;
+  /* glow similar to roleta */
+  // box-shadow: 0 0 60px rgba(255,210,58,0.45), inset 0 0 0 6px rgba(0,0,0,0.35);
+  transition: box-shadow .32s ease, transform .25s ease;
+}
+
+/* soft radial halo behind the icon for extra depth */
+.player-avatar::after,
+.player-card img::after,
+.recompensa img::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 160%;
+  height: 160%;
+  background: radial-gradient(circle at 30% 20%, rgba(255,210,58,0.22), rgba(255,210,58,0.06) 35%, transparent 55%);
+  filter: blur(16px);
+  z-index: -1;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* respect user preference for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .player-avatar, .player-card img { transition: none; }
+  .player-avatar::after, .player-card img::after { filter: blur(6px); }
+}
+
+.ranking-container {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.ranking-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Cabeçalho */
+.ranking-header {
+  display: grid;
+  grid-template-columns: 25% 50% 25%;
+  gap: .5rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #d8b4fe;
+  border-bottom: 1px solid rgba(168, 85, 247, 0.3);
+}
+
+.header-position {
+  text-align: center;
+}
+
+.header-score {
+  text-align: right;
+}
+
+/* Linhas */
+.ranking-row {
+  display: grid;
+  grid-template-columns: 25% 50% 25%;
+  gap: .5rem;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(109, 40, 217, 0.3);
+  background: rgba(88, 28, 135, 0.3);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  overflow: hidden;
+  align-items: center;
+}
+
+.ranking-row:hover {
+  transform: scale(1.02);
+  box-shadow: 0 10px 30px rgba(168, 85, 247, 0.2);
+}
+
+/* Classes especiais para top 3 */
+.ranking-row.position-1 {
+  background: linear-gradient(to right, rgba(234, 179, 8, 0.2), rgba(202, 138, 4, 0.2));
+  border-color: rgba(234, 179, 8, 0.5);
+}
+
+.ranking-row.position-2 {
+  background: linear-gradient(to right, rgba(156, 163, 175, 0.2), rgba(107, 114, 128, 0.2));
+  border-color: rgba(156, 163, 175, 0.5);
+}
+
+.ranking-row.position-3 {
+  background: linear-gradient(to right, rgba(217, 119, 6, 0.2), rgba(180, 83, 9, 0.2));
+  border-color: rgba(217, 119, 6, 0.5);
+}
+
+/* Posição */
+.row-position {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.medal {
+  font-size: 1.5rem;
+}
+
+.position-number {
+  font-size: 1.125rem;
+  font-weight: bold;
+  color: white;
+}
+
+/* Jogador */
+.row-player {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.avatar {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.player-name {
+  color: white;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Pontuação */
+.row-score {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.25rem;
+  overflow: hidden;
+  padding-right: 1rem;
+}
+
+.score-value {
+  font-size: 1.125rem;
+  font-weight: bold;
+  color: #e9d5ff;
+  white-space: nowrap;
+}
+
+.score-label {
+  font-size: 0.875rem;
+  color: #c084fc;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Rodapé */
+.ranking-footer {
+  margin-top: 1.5rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: #c084fc;
+}
+
+/* Responsivo */
+@media (max-width: 640px) {
+  .ranking-header,
+  .ranking-row {
+    grid-template-columns: 25% 50% 25%;
+    gap: 0.5rem;
+    padding: 0.5rem;
+  }
+
+  .medal {
+    font-size: 1.25rem;
+  }
+
+  .player-name {
+    font-size: 0.875rem;
+  }
+}
+
+// ========================================
+// CAROUSEL STYLES
+// ========================================
+.carousel-container {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px 0;
+}
+
+.carousel-wrapper {
+  position: relative;
+  width: 100%;
+  height: 500px;
+  overflow: hidden;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.carousel-slides {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.carousel-slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+
+  &.active {
+    opacity: 1;
+    visibility: visible;
+    z-index: 1;
+  }
+}
+
+.carousel-image {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.carousel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.7);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  font-size: 24px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  user-select: none;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.6);
+    transform: translateY(-50%) scale(1.1);
+  }
+
+  &:active {
+    transform: translateY(-50%) scale(0.95);
+  }
+}
+
+.carousel-btn-prev {
+  left: 15px;
+}
+
+.carousel-btn-next {
+  right: 15px;
+}
+
+.carousel-indicators {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+  padding: 10px;
+}
+
+.carousel-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.7);
+    transform: scale(1.2);
+  }
+
+  &.active {
+    background: #ffd700;
+    border-color: #ffd700;
+    transform: scale(1.4);
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+  }
+}
+
+.carousel-counter {
+  text-align: center;
+  margin-top: 15px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .carousel-wrapper {
+    height: 350px;
+  }
+
+  .carousel-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+
+  .carousel-btn-prev {
+    left: 10px;
+  }
+
+  .carousel-btn-next {
+    right: 10px;
+  }
+
+  .carousel-dot {
+    width: 12px;
+    height: 12px;
+  }
+
+  .carousel-counter {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .carousel-wrapper {
+    height: 250px;
+  }
+
+  .carousel-slide {
+    padding: 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  .carousel-wrapper {
+    max-width: 100%;
+    padding-bottom: 40px;
+  }
+
+  .carousel-img {
+    max-height: 350px;
+  }
+
+  .carousel-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 1.5rem;
+    padding: 5px 10px;
+  }
+
+  .carousel-indicators span {
+    width: 10px;
+    height: 10px;
+  }
+}
+.quantity-display {
+  display: flex;
+  width: 100%;
+  gap: .5rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.quantity-badge {
+  display: inline-block;
+  background: transparent;
+  border: 2px solid #fbbf24;
+  border-radius: 6px;
+  padding: 0.4rem 0.9rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #fbbf24;
+  text-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+  box-shadow: 0 0 15px rgba(251, 191, 36, 0.3),
+              inset 0 0 10px rgba(251, 191, 36, 0.1);
+  margin: 0.5rem 0;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+}
+
+.quantity-badge:hover {
+  border-color: #f59e0b;
+  color: #f59e0b;
+  text-shadow: 0 0 15px rgba(245, 158, 11, 0.7);
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.5),
+              inset 0 0 15px rgba(245, 158, 11, 0.2);
+}
+
+.img-item {
+  border-radius: 50%;
+}
