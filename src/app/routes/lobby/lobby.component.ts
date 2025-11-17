@@ -9,15 +9,13 @@ import {
   ViewChild,
   ViewChildren
 } from '@angular/core';
-import { Router } from "@angular/router";
+import { Router } from '@angular/router';
 import { BlockUI, NgBlockUI } from 'ng-block-ui';
 import { switchMap } from 'rxjs';
-import { JogadorService, RankingJogador } from '../../services/jogador.service';
+import { JogadorService, RankingJogador, TipoJogadorEnum } from '../../services/jogador.service';
 import { ItemLoja, LojaService, Pacote, TipoItemEnum } from '../../services/loja.service';
 import { StompService } from "../../services/stomp.service";
 declare const bootstrap: any;
-
-
 
 interface Sala {
   nome: string;
@@ -42,6 +40,7 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
     avatar: 'assets/img/Variedades F.png',
     moeda: 0,
     status: 'Conectado',
+    tipo: TipoJogadorEnum.CADASTRADO,
     active: false,
     email: ""
   };
@@ -51,6 +50,8 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
     avatar: 'assets/img/Mundo M.png', status: 'Aguardando...',
     active: false
   };
+
+  tipoJogadorEnum = TipoJogadorEnum;
 
   @BlockUI() blockUI!: NgBlockUI;
 
@@ -65,7 +66,7 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
   novaSala = { nome: '', senha: '' };
   requestedRoomCode = '';
 
- 
+  // Carousel
   currentSlide = 0;
   slides: string[] = [
     'assets/img/TUTORIAL.png',
@@ -78,21 +79,6 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
     'assets/img/TUTORIAL8.png',
     'assets/img/TUTORIAL9.png',
   ];
-  
-  // função para ir para o próximo slide
-  nextSlide() {
-    this.currentSlide = (this.currentSlide + 1) % this.slides.length;
-  }
-
-  // função para ir para o slide anterior
-  prevSlide() {
-    this.currentSlide = (this.currentSlide - 1 + this.slides.length) % this.slides.length;
-  }
-
-  // função para ir direto para um slide específico (usada pelos indicadores)
-  goToSlide(index: number) {
-    this.currentSlide = index;
-  }
 
   avataresInventario: ItemLoja[] = [];
   poderesInventario: ItemLoja[] = [];
@@ -180,16 +166,15 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
     this.modalInstances.clear();
   }
 
-  stompRoomSubscription(roomCode: string) {
-    console.log('me inscrevi no room ' + roomCode)
-    this.stompService.subscribe(`/room/${roomCode}`, (message) => {
-      console.log(message)
-      console.log(message.headers["event"])
+  stompRoomSubscription(roomCode?: string) {
+    const finalRoomCode = roomCode || this.roomInfos.roomCode;
+
+    this.stompService.subscribe(`/room/${finalRoomCode}`, (message) => {
       this.player2 = { ...this.player2, active: true, status: 'Conectado' }
       this.EnterText = 'Entrando na Sala...'
       setTimeout(() => {
-        this.router.navigate(['/room/', this.roomInfos.roomCode])
-      }, 5000)
+        this.router.navigate(['/room/', finalRoomCode])
+      }, 5000);
     });
   }
 
@@ -199,13 +184,9 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
       console.log(tipoEvento)
       if (tipoEvento == "ROOM_CREATED") {
         this.roomInfos = JSON.parse(message.body);
-        this.stompRoomSubscription(this.roomInfos.roomCode);
+        this.stompRoomSubscription();
 
         const userID = message.headers["user-id"];
-
-        console.log(this.roomInfos);
-        console.log("User ID: " + userID);
-        console.log("Id vindo do stomp: " + this.stompService.userID);
 
         if (this.isSalaEmCriacao && userID == this.stompService.userID) {
           console.log("navegando para sala")
@@ -242,6 +223,8 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
 
   // ---------- AVATAR / NOME ----------
   openAvatarModal(target: number) {
+
+
     this.avatarTarget = target === 2 ? 2 : 1;
     // atualiza label no modal (o template exibe avatarTarget diretamente)
     const inst = this.modalInstances.get('avatarModal');
@@ -282,6 +265,7 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
 
   accessRoom(): void {
     this.requestedRoomCode = this.requestedRoomCode.trim().toUpperCase();
+    this.stompRoomSubscription(this.requestedRoomCode);
     this.stompService.publish({ destination: `/room/${this.requestedRoomCode}/${this.stompService.userID}` });
   }
 
@@ -364,6 +348,19 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
 
   entrarSalada() {
     this.pulseCard(this.playerCard2Ref);
+  }
+
+  // ---------- CAROUSEL CONTROLS ----------
+  nextSlide() {
+    this.currentSlide = (this.currentSlide + 1) % this.slides.length;
+  }
+
+  prevSlide() {
+    this.currentSlide = (this.currentSlide - 1 + this.slides.length) % this.slides.length;
+  }
+
+  goToSlide(index: number) {
+    this.currentSlide = index;
   }
 
   comprarProduto(p: any) {
@@ -492,12 +489,19 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.jogadorService.ObterDadosJogador().subscribe({
       next: (data) => {
-        const { avatar, email, moeda, username } = data;
+        const { avatar, email, moeda, username, tipo } = data;
 
-        this.player1.username = username;
-        this.player1.avatar = avatar;
-        this.player1.moeda = moeda;
-        this.player1.email = email;
+        if(tipo == TipoJogadorEnum.CONVIDADO) {
+          this.player1.tipo = TipoJogadorEnum.CONVIDADO;
+          this.player1.username = "Convidado";
+        } else {
+          this.player1.username = username;
+          this.player1.avatar = avatar;
+          this.player1.moeda = moeda;
+          this.player1.email = email;
+          this.player1.tipo = tipo ?? TipoJogadorEnum.CONVIDADO;
+        }
+
       },
       complete: () => {
         this.blockUI.stop();
@@ -594,5 +598,10 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
         this.blockUI.stop();
       }
     });
+  }
+
+  logout() {
+    localStorage.removeItem('userToken');
+    this.router.navigate(['/login']);
   }
 }

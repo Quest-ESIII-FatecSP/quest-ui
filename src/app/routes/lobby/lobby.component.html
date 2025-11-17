@@ -4,8 +4,11 @@
 
       <header class="d-flex justify-content-between align-items-center">
         <div class="left-area d-flex align-items-center gap-3 position-relative">
-          <img [src]="player1.avatar" alt="Avatar" class="player-avatar" #headerAvatar (click)="openAvatarModal(1)" />
-          <span class="fw-bold fs-5 ms-2" id="playerName" (click)="mudarNome()">
+          <img *ngIf="player1.tipo == tipoJogadorEnum.CADASTRADO; else convidado" [src]="player1.avatar" alt="Avatar" class="player-avatar" #headerAvatar (click)="openAvatarModal(1)" />
+          <ng-template #convidado>
+            <img src="assets/img/Variedades F.png" alt="Avatar Convidado" class="player-avatar" />
+          </ng-template>
+          <span class="fw-bold fs-5 ms-2" id="playerName">
             {{ player1.username }}
           </span>
         </div>
@@ -19,11 +22,12 @@
         </h1>
 
         <div class="header-right d-flex gap-4 align-items-center">
-          <div class="d-flex align-items-center">
+          <div *ngIf="player1.tipo == tipoJogadorEnum.CADASTRADO" class="d-flex align-items-center">
             <img src="assets/img/moeda.png" class="resource-icon" />
             <span style="font-size: 40px;" class="text-white">{{ player1.moeda }}</span>
           </div>
           <!-- energia comentada: futuro uso -->
+          <button class="btn btn-danger" (click)="logout()">Sair</button>
         </div>
       </header>
 
@@ -77,7 +81,7 @@
           </div>
 
           <div class="col-lg-4 d-flex flex-column gap-3 sidebar">
-            <div class="card p-3 d-flex align-items-center gap-2" (click)="openModal('lojaModal')">
+            <div *ngIf="player1.tipo == tipoJogadorEnum.CADASTRADO" class="card p-3 d-flex align-items-center gap-2" (click)="openModal('lojaModal')">
               <i class="bi bi-cart fs-3"></i><span class="fs-5">Loja</span>
             </div>
 
@@ -89,7 +93,7 @@
               <i class="bi bi-trophy-fill fs-3"></i><span class="fs-5">Ranking</span>
             </div>
 
-            <div class="card p-3 d-flex align-items-center gap-2" (click)="openModal('InventarioModal')">
+            <div *ngIf="player1.tipo == tipoJogadorEnum.CADASTRADO" class="card p-3 d-flex align-items-center gap-2" (click)="openModal('InventarioModal')">
               <i class="bi-backpack-fill fs-3"></i><span class="fs-5">Inventario de Poderes</span>
             </div>
           </div>
@@ -211,7 +215,7 @@
 
   <!-- Tutorial Modal -->
   <div class="modal fade" id="TutorialModal" tabindex="-1" #tutorialModal>
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
       <div class="modal-content p-4">
         <div class="modal-header justify-content-center">
           <h4 class="modal-title text-center">Tutorial</h4>
@@ -219,37 +223,52 @@
             style="position: absolute; right: 2rem;"></button>
         </div>
         <div class="modal-body">
-          <div class="carousel-wrapper">
-            <div class="carousel-track" [style.transform]="'translateX(-' + (currentSlide * 100) + '%)'">
-              <div class="carousel-item" *ngFor="let slide of slides">
-                <img [src]="slide" class="carousel-img" alt="Slide">
+          <div class="carousel-container">
+            <div class="carousel-wrapper">
+              <button class="carousel-btn carousel-btn-prev" (click)="prevSlide()" aria-label="Anterior">
+                &#10094;
+              </button>
+
+              <div class="carousel-slides">
+                <div class="carousel-slide"
+                     *ngFor="let slide of slides; let i = index"
+                     [class.active]="i === currentSlide">
+                  <img [src]="slide" [alt]="'Tutorial slide ' + (i + 1)" class="carousel-image">
+                </div>
               </div>
+
+              <button class="carousel-btn carousel-btn-next" (click)="nextSlide()" aria-label="Próximo">
+                &#10095;
+              </button>
             </div>
 
-            <button class="carousel-btn left" (click)="prevSlide()">❮</button>
-            <button class="carousel-btn right" (click)="nextSlide()">❯</button>
-
             <div class="carousel-indicators">
-              <span *ngFor="let slide of slides; let i = index" [class.active]="i === currentSlide"
-                (click)="goToSlide(i)">
-              </span>
+              <button *ngFor="let slide of slides; let i = index"
+                      class="carousel-dot"
+                      [class.active]="i === currentSlide"
+                      (click)="goToSlide(i)"
+                      [attr.aria-label]="'Ir para slide ' + (i + 1)">
+              </button>
+            </div>
+
+            <div class="carousel-counter">
+              <!-- {{ currentSlide + 1 }} / {{ slides.length }} -->
             </div>
           </div>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- Premium Modal -->
-    <div class="modal fade" id="premiumModal" tabindex="-1" #premiumModal>
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content text-center p-4">
-          <h4 class="mb-3">Plano Premium</h4>
-          <p>Desbloqueie recompensas exclusivas e skins especiais!</p>
-          <button class="btn btn-warning" (click)="adquirirPremium()">Adquirir Agora</button>
-        </div>
+  <!-- Premium Modal -->
+  <div class="modal fade" id="premiumModal" tabindex="-1" #premiumModal>
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content text-center p-4">
+        <h4 class="mb-3">Plano Premium</h4>
+        <p>Desbloqueie recompensas exclusivas e skins especiais!</p>
+        <button class="btn btn-warning" (click)="adquirirPremium()">Adquirir Agora</button>
       </div>
     </div>
-
   </div>
 
 

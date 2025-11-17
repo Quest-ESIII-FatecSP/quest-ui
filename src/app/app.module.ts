@@ -8,9 +8,10 @@ import { RegisterComponent } from './routes/register/register.component';
 import { LobbyComponent } from './routes/lobby/lobby.component';
 import { LoginComponent } from './routes/login/login.component';
 import { LoginSuccessComponent } from './routes/login-success/login-success.component';
-import {HttpClientModule} from "@angular/common/http";
+import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { RoomComponent } from './routes/room/room.component';
 import { BlockUIModule } from 'ng-block-ui';
+import { AuthInterceptor } from './interceptors/auth.interceptor';
 import { QuestWheelComponent } from './components/quest-wheel/quest-wheel.component';
 
 @NgModule({
@@ -33,6 +34,11 @@ import { QuestWheelComponent } from './components/quest-wheel/quest-wheel.compon
   providers: [
     {
       provide: LOCALE_ID, useValue: 'pt-BR'
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
+      multi: true
     }
   ],
   bootstrap: [AppComponent]
