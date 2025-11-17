@@ -34,9 +34,20 @@
             "inlineStyleLanguage": "scss",
             "assets": [
               "src/favicon.ico",
-              "src/assets"
+              "src/assets",
+              {
+                "glob": "*.{png,svg,jpg,jpeg,gif}",
+                "input": "inicio/teste",
+                "output": "assets/quest"
+              },
+              {
+                "glob": "**/*",
+                "input": "inicio/teste/img",
+                "output": "assets/quest/img"
+              }
             ],
             "styles": [
+              "node_modules/bootstrap-icons/font/bootstrap-icons.css",
               "src/styles.scss",
               "node_modules/bootstrap/dist/css/bootstrap.min.css"
             ],
@@ -54,11 +65,17 @@
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "2kb",
-                  "maximumError": "4kb"
+                  "maximumWarning": "10kb",
+                  "maximumError": "15kb"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.prod.ts"
+                }
+              ]
             },
             "development": {
               "optimization": false,
@@ -107,5 +124,8 @@
         }
       }
     }
+  },
+  "cli": {
+    "analytics": "17b17146-096d-41f8-9c64-9fdfc3d88ddd"
   }
 }

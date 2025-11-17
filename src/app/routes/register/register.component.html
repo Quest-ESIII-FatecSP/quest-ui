@@ -1,1 +1,38 @@
-<p>register works!</p>
+<div class="register-wrapper">
+	<canvas id="backgroundCanvas"></canvas>
+	<div class="overlay"></div>
+	<div class="login-card container-fluid p-4">
+		<div class="row align-items-center">
+			<div class="col-md-5 bg-light rounded-4 p-4 login-box">
+				<h2 class="fw-bold mb-4 text-center">Crie sua conta</h2>
+				<form (ngSubmit)="onSubmit()" #cadastroForm="ngForm">
+					<label>Email</label>
+					<input name="email" [(ngModel)]="model.email" type="email" placeholder="Digite seu email" required>
+					<label>Senha</label>
+						<input name="senha" [(ngModel)]="model.senha" type="password" placeholder="Digite sua senha" required>
+					<label>Confirmar Senha</label>
+					<input name="confirmar" [(ngModel)]="model.confirmar" type="password" placeholder="Confirme sua senha" required>
+					<button type="submit" class="btn btn-cadastrar btn-glow" [disabled]="cadastroForm.invalid">Cadastrar</button>
+				</form>
+				<div class="text-center mt-3">
+					<small>Já tem uma conta? <a routerLink="/login" class="fw-bold">Voltar ao login</a></small>
+				</div>
+			</div>
+			<div class="col-md-7 text-center text-white p-4">
+				<h1 class="quest-title mb-3">
+					<span class="q">Q</span>
+					<span class="u">U</span>
+					<span class="e">E</span>
+					<span class="s">S</span>
+					<span class="t">T</span>
+				</h1>
+				<p class="descricao">
+					Cadastre-se para jogar o <strong>Quest</strong>, um jogo de perguntas e respostas.
+				</p>
+				<div class="motivacional">{{ frase }}</div>
+				<div class="clock">{{ clock }}</div>
+				<div class="footer-msg">⚡ Prepare-se para o desafio!</div>
+			</div>
+		</div>
+	</div>
+</div>

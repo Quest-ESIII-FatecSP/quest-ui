@@ -1,4 +1,61 @@
-<button type="button" class="btn btn-primary" style="margin-bottom: 30%">Test button</button>
-<div class="col-6 d-flex justify-content-center align-items-center" style="margin-left: 30%">
-  <z-progress-bar [zType]="'accent'"  [progress]="50" [zShape]="'default'" [zIndeterminate]="true" [zSize]="'lg'"></z-progress-bar>
+<canvas id="backgroundCanvas"></canvas>
+<div class="overlay"></div>
+
+<!-- Ícones escondidos -->
+<div class="hidden-icons">
+  <img id="icon-artes" src="../../../assets/img/E.png" alt="Artes"/>
+  <img id="icon-ciencia" src="../../../assets/img/CT.png" alt="Ciências"/>
+  <img id="icon-esportes" src="../../../assets/img/EL.png" alt="Esportes"/>
+  <img id="icon-mundo" src="../../../assets/img/M.png" alt="Mundo"/>
+  <img id="icon-variedades" src="../../../assets/img/V.png" alt="Variedades"/>
+  <img id="icon-sociedade" src="../../../assets/img/S.png" alt="Sociedade"/>
+</div>
+<div class="page">
+  <div class="login-card container-fluid p-4">
+    <div class="row align-items-center">
+
+      <!-- Esquerda: Login -->
+      <div class="col-md-5 bg-light rounded-4 p-4">
+        <h2 class="fw-bold mb-3 text-center">Bem-vindo!</h2>
+
+        <button type="button" class="btn btn-warning w-100 btn-glow" (click)="playAsGuest()">
+          Jogar como Convidado
+        </button>
+
+        <button type="button" class="btn btn-outline-dark w-100 mt-2 btn-glow" (click)="googleSignIn()">
+          <i class="bi bi-google"></i> Entrar com Google
+        </button>
+      </div>
+
+      <!-- Direita: Título e descrição -->
+      <div class="col-md-7 text-center text-white p-4 d-flex flex-column align-items-center">
+        <h1 class="quest-title mb-4">
+          <span class="q">Q</span>
+          <span class="u">U</span>
+          <span class="e">E</span>
+          <span class="s">S</span>
+          <span class="t">T</span>
+        </h1>
+
+        <p class="fs-5">
+          O <strong>Quest</strong> é um jogo de perguntas e respostas que desafia seu conhecimento
+          em diversas categorias como Artes, Ciências, Esportes, Mundo, Variedades e Sociedade.
+        </p>
+
+        <div class="category-icons mt-3 d-flex">
+          <img src="assets/img/E.png" alt="Artes">
+          <img src="assets/img/CT.png" alt="Ciências">
+          <img src="assets/img/EL.png" alt="Esportes">
+          <img src="assets/img/M.png" alt="Mundo">
+          <img src="assets/img/V.png" alt="Variedades">
+          <img src="assets/img/S.png" alt="Sociedade">
+        </div>
+
+        <div class="motivacional">{{ fraseAtual }}</div>
+        <div class="clock">{{ horaAtual }}</div>
+        <div class="footer-msg">⚡ Prepare-se para o desafio!</div>
+      </div>
+
+    </div>
+  </div>
 </div>
