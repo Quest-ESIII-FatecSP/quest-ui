@@ -9,7 +9,7 @@ import {
   ViewChild,
   ViewChildren
 } from '@angular/core';
-import { Router } from "@angular/router";
+import { Router } from '@angular/router';
 import { BlockUI, NgBlockUI } from 'ng-block-ui';
 import { switchMap } from 'rxjs';
 import { JogadorService, RankingJogador } from '../../services/jogador.service';
@@ -588,5 +588,10 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
         this.blockUI.stop();
       }
     });
+  }
+
+  logout() {
+    localStorage.removeItem('userToken');
+    this.router.navigate(['/login']);
   }
 }
