@@ -1,5 +1,4 @@
 <block-ui>
-  <!-- lobby.component.html -->
   <div class="page-container">
     <div class="content-wrap">
 
@@ -97,244 +96,251 @@
         </div>
       </div>
 
-      <!-- Avatar Modal -->
-      <div class="modal fade" id="avatarModal" tabindex="-1" #avatarModal>
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-          <div class="modal-content bg-dark text-light">
-            <div class="modal-header">
-              <h5 class="modal-title">Escolher Avatar — <span id="avatarModalTarget">{{ player1.username }}</span>
-              </h5>
-              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                (click)="closeBootstrapModal('avatarModal')"></button>
+      <!-- Criar Sala Modal -->
+      <div class="modal fade" id="criarSalaModal" tabindex="-1" #criarSalaModal>
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content p-4 text-center">
+            <h4 class="mb-3">Criar Nova Sala</h4>
+            <div class="mb-3 text-start">
+              <label class="form-label">Nome da Sala:</label>
+              <input type="text" class="form-control" placeholder="Ex: Desafio Épico" [(ngModel)]="novaSala.nome" />
             </div>
-            <div class="modal-body d-flex flex-wrap justify-content-center gap-3">
-              <img *ngFor="let avatar of avataresInventario" [src]="avatar.avatarImagem" class="player-avatar"
-                (click)="changeProfilePic(avatar.id)" style="cursor: pointer;" />
-            </div>
+            <button class="btn btn-success w-100 mb-2" (click)="confirmarCriacaoSala()">Criar e Aguardar Jogador
+              2</button>
+            <button class="btn btn-secondary w-100" (click)="closeBootstrapModal('criarSalaModal')">Cancelar</button>
           </div>
         </div>
       </div>
 
-      <!-- Loja Modal -->
-      <div class="modal fade" id="lojaModal" tabindex="-1" #lojaModal>
-        <div class="modal-dialog modal-dialog-centered modal-xl">
-          <div class="modal-content p-4">
-            <div class="modal-header justify-content-center">
-              <h4 class="modal-title text-center">Loja</h4>
-              <button type="button" class="btn-close btn-close-white" (click)="closeBootstrapModal('lojaModal')"
-                style="position: absolute; right: 2rem;"></button>
+      <!-- Entrar Sala Modal -->
+      <div class="modal fade" id="entrarSalaModal" tabindex="-1" #entrarSalaModal>
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content p-4 text-center">
+            <h4 class="mb-3">Entrar em uma Sala</h4>
+            <div class="mb-3 text-start">
+              <label class="form-label">Senha da sala:</label>
+              <input type="text" class="form-control" maxlength="4" placeholder="Cole aqui o código passado para você"
+                [(ngModel)]="requestedRoomCode" />
             </div>
-            <div class="modal-body">
-              <div class="produtos-container">
-                <div class="produto" *ngFor="let pacote of pacotesMoeda">
-                  <img [src]="pacote.img" />
-                  <h3>{{ pacote.descricao }}</h3>
-                  <div class="quantity-display">
-                    <span class="quantity-badge">{{ pacote.quantidade }} </span> <span class="quantity-label">moedas</span>
-                  </div>
-                  <div class="price-container">
-                    <p *ngIf="pacote.desconto > 0" class="original-price">De: <span class="strike">{{ pacote.preco | currency:'BRL' }}</span></p>
-                    <p class="final-price" [class.has-discount]="pacote.desconto > 0">
-                      <span *ngIf="pacote.desconto > 0">Por: </span>
-                      <strong>{{ (pacote.preco - pacote.desconto) | currency:'BRL' }}</strong>
-                    </p>
-                    <span *ngIf="pacote.desconto > 0" class="discount-badge">{{ (pacote.desconto / pacote.preco * 100) | number:'1.0-0' }}% de desconto</span>
-                  </div>
-                  <button (click)="ComprarMoedas(pacote)">Comprar</button>
-                </div>
-                <div class="produto" *ngFor="let item of itensCompra">
-                  <img class="img-item" [src]="item.avatarImagem" [style.border-radius]="item.tipo === 'AVATAR' ? '50% !important' : '4px !important'" />
-                  <h3>{{ item.nome }}</h3>
-                  <h3>{{ item.preco }} moedas</h3>
-                  <button (click)="ComprarItemLoja(item)">Comprar</button>
-                </div>
-              </div>
-            </div>
+            <button class="btn btn-success w-100 mb-2" [disabled]="requestedRoomCode.length < 4" (click)="accessRoom()">
+              {{ EnterText }}</button>
+            <button class="btn btn-secondary w-100" (click)="closeBootstrapModal('entrarSalaModal')">Sair</button>
           </div>
         </div>
       </div>
 
-    <!-- Tutorial Modal -->
-    <div class="modal fade" id="TutorialModal" tabindex="-1" #tutorialModal>
-      <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content p-4">
-          <div class="modal-header justify-content-center">
-            <h4 class="modal-title text-center">Tutorial</h4>
-            <button type="button" class="btn-close btn-close-white" (click)="closeBootstrapModal('TutorialModal')"
-             style="position: absolute; right: 2rem;"></button>
+      <!-- Senha Entrada Modal -->
+      <div class="modal fade" id="senhaEntradaModal" tabindex="-1" #senhaEntradaModal>
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content p-4 text-center">
+            <h4 class="mb-3" id="tituloSalaEntrada">Entrar na Sala</h4>
+            <input type="password" class="form-control mb-3" placeholder="Digite a senha da sala"
+              [(ngModel)]="senhaEntrada" />
+            <button class="btn btn-primary w-100 mb-2" (click)="confirmarEntradaSala()">Entrar</button>
+            <button class="btn btn-secondary w-100" (click)="closeBootstrapModal('senhaEntradaModal')">Cancelar</button>
           </div>
-          <div class="modal-body">
-         <div class="carousel-wrapper">
-  <div class="carousel-track" 
-       [style.transform]="'translateX(-' + (currentSlide * 100) + '%)'">
-    <div class="carousel-item" *ngFor="let slide of slides">
-      <img [src]="slide" class="carousel-img" alt="Slide">
+        </div>
+      </div>
+
+      <footer class="halloween-footer text-center">
+        <div class="container p-2"></div>
+      </footer>
     </div>
   </div>
 
-  <button class="carousel-btn left" (click)="prevSlide()">❮</button>
-  <button class="carousel-btn right" (click)="nextSlide()">❯</button>
 
-  <div class="carousel-indicators">
-    <span *ngFor="let slide of slides; let i = index" 
-          [class.active]="i === currentSlide" 
-          (click)="goToSlide(i)">
-    </span>
+  <!-- Avatar Modal -->
+  <div class="modal fade" id="avatarModal" tabindex="-1" #avatarModal>
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content bg-dark text-light">
+        <div class="modal-header">
+          <h5 class="modal-title">Escolher Avatar — <span id="avatarModalTarget">{{ player1.username }}</span>
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+            (click)="closeBootstrapModal('avatarModal')"></button>
+        </div>
+        <div class="modal-body d-flex flex-wrap justify-content-center gap-3">
+          <img *ngFor="let avatar of avataresInventario" [src]="avatar.avatarImagem" class="player-avatar"
+            (click)="changeProfilePic(avatar.id)" style="cursor: pointer;" />
+        </div>
+      </div>
+    </div>
   </div>
-</div>
+
+  <!-- Loja Modal -->
+  <div class="modal fade" id="lojaModal" tabindex="-1" #lojaModal>
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+      <div class="modal-content p-4">
+        <div class="modal-header justify-content-center">
+          <h4 class="modal-title text-center">Loja</h4>
+          <button type="button" class="btn-close btn-close-white" (click)="closeBootstrapModal('lojaModal')"
+            style="position: absolute; right: 2rem;"></button>
+        </div>
+        <div class="modal-body">
+          <div class="produtos-container">
+            <div class="produto" *ngFor="let pacote of pacotesMoeda">
+              <img [src]="pacote.img" />
+              <h3>{{ pacote.descricao }}</h3>
+              <div class="quantity-display">
+                <span class="quantity-badge">{{ pacote.quantidade }} </span> <span class="quantity-label">moedas</span>
+              </div>
+              <div class="price-container">
+                <p *ngIf="pacote.desconto > 0" class="original-price">De: <span class="strike">{{ pacote.preco |
+                    currency:'BRL' }}</span></p>
+                <p class="final-price" [class.has-discount]="pacote.desconto > 0">
+                  <span *ngIf="pacote.desconto > 0">Por: </span>
+                  <strong>{{ (pacote.preco - pacote.desconto) | currency:'BRL' }}</strong>
+                </p>
+                <span *ngIf="pacote.desconto > 0" class="discount-badge">{{ (pacote.desconto / pacote.preco * 100) |
+                  number:'1.0-0' }}% de desconto</span>
+              </div>
+              <button (click)="ComprarMoedas(pacote)">Comprar</button>
+            </div>
+            <div class="produto" *ngFor="let item of itensCompra">
+              <img class="img-item" [src]="item.avatarImagem"
+                [style.border-radius]="item.tipo === 'AVATAR' ? '50% !important' : '4px !important'" />
+              <h3>{{ item.nome }}</h3>
+              <h3>{{ item.preco }} moedas</h3>
+              <button (click)="ComprarItemLoja(item)">Comprar</button>
+            </div>
           </div>
         </div>
       </div>
+    </div>
+  </div>
 
-      <!-- Ranking Modal -->
-      <div class="modal fade" id="RankingModal" tabindex="-1" #rankingModal>
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-          <div class="modal-content p-4">
-            <div class="modal-header justify-content-center">
-              <h4 class="modal-title text-center">Ranking</h4>
-              <button type="button" class="btn-close btn-close-white" (click)="closeBootstrapModal('RankingModal')"
-                style="position: absolute; right: 2rem;"></button>
+  <!-- Tutorial Modal -->
+  <div class="modal fade" id="TutorialModal" tabindex="-1" #tutorialModal>
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content p-4">
+        <div class="modal-header justify-content-center">
+          <h4 class="modal-title text-center">Tutorial</h4>
+          <button type="button" class="btn-close btn-close-white" (click)="closeBootstrapModal('TutorialModal')"
+            style="position: absolute; right: 2rem;"></button>
+        </div>
+        <div class="modal-body">
+          <div class="carousel-wrapper">
+            <div class="carousel-track" [style.transform]="'translateX(-' + (currentSlide * 100) + '%)'">
+              <div class="carousel-item" *ngFor="let slide of slides">
+                <img [src]="slide" class="carousel-img" alt="Slide">
+              </div>
             </div>
-            <div class="modal-body">
-              <div class="ranking-container">
-                <div class="ranking-content">
-                  <!-- Cabeçalho -->
-                  <div class="ranking-header">
-                    <div class="header-position">Posição</div>
-                    <div class="header-player">Jogador</div>
-                    <div class="header-score">Pontuação</div>
+
+            <button class="carousel-btn left" (click)="prevSlide()">❮</button>
+            <button class="carousel-btn right" (click)="nextSlide()">❯</button>
+
+            <div class="carousel-indicators">
+              <span *ngFor="let slide of slides; let i = index" [class.active]="i === currentSlide"
+                (click)="goToSlide(i)">
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Premium Modal -->
+    <div class="modal fade" id="premiumModal" tabindex="-1" #premiumModal>
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content text-center p-4">
+          <h4 class="mb-3">Plano Premium</h4>
+          <p>Desbloqueie recompensas exclusivas e skins especiais!</p>
+          <button class="btn btn-warning" (click)="adquirirPremium()">Adquirir Agora</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+
+  <!-- Ranking Modal -->
+  <div class="modal fade" id="RankingModal" tabindex="-1" #rankingModal>
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content p-4">
+        <div class="modal-header justify-content-center">
+          <h4 class="modal-title text-center">Ranking</h4>
+          <button type="button" class="btn-close btn-close-white" (click)="closeBootstrapModal('RankingModal')"
+            style="position: absolute; right: 2rem;"></button>
+        </div>
+        <div class="modal-body">
+          <div class="ranking-container">
+            <div class="ranking-content">
+              <!-- Cabeçalho -->
+              <div class="ranking-header">
+                <div class="header-position">Posição</div>
+                <div class="header-player">Jogador</div>
+                <div class="header-score">Pontuação</div>
+              </div>
+
+              <!-- Linhas da tabela -->
+              <div *ngFor="let player of playersRanking" class="ranking-row"
+                [ngClass]="getPositionClass(player.posicao)">
+
+                <!-- Posição -->
+                <div class="row-position">
+                  <span *ngIf="player.pontuacao" class="medal">
+                    {{ getMedalIcon(player.posicao) }}
+                  </span>
+                  <span class="position-number">{{ player.posicao }}º</span>
+                </div>
+
+                <!-- Jogador -->
+                <div class="row-player">
+                  <div class="avatar">
+                    <img [src]="player.avatar || 'assets/img/Variedades F.png'" [alt]="player.username" />
                   </div>
+                  <span class="player-name">{{ player.username }}</span>
+                </div>
 
-                  <!-- Linhas da tabela -->
-                  <div *ngFor="let player of playersRanking" class="ranking-row"
-                    [ngClass]="getPositionClass(player.posicao)">
-
-                    <!-- Posição -->
-                    <div class="row-position">
-                      <span *ngIf="player.pontuacao" class="medal">
-                        {{ getMedalIcon(player.posicao) }}
-                      </span>
-                      <span class="position-number">{{ player.posicao }}º</span>
-                    </div>
-
-                    <!-- Jogador -->
-                    <div class="row-player">
-                      <div class="avatar">
-                        <img [src]="player.avatar || 'assets/img/Variedades F.png'" [alt]="player.username" />
-                      </div>
-                      <span class="player-name">{{ player.username }}</span>
-                    </div>
-
-                    <!-- Pontuação -->
-                    <div class="row-score">
-                      <span class="score-value">{{ player.pontuacao | number:'1.0-0':'pt-BR' }}</span>
-                      <span class="score-label">pts</span>
-                    </div>
-                  </div>
+                <!-- Pontuação -->
+                <div class="row-score">
+                  <span class="score-value">{{ player.pontuacao | number:'1.0-0':'pt-BR' }}</span>
+                  <span class="score-label">pts</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+    </div>
+  </div>
 
-      <!-- Premium Modal -->
-      <div class="modal fade" id="premiumModal" tabindex="-1" #premiumModal>
-        <div class="modal-dialog modal-dialog-centered">
-          <div class="modal-content text-center p-4">
-            <h4 class="mb-3">Plano Premium</h4>
-            <p>Desbloqueie recompensas exclusivas e skins especiais!</p>
-            <button class="btn btn-warning" (click)="adquirirPremium()">Adquirir Agora</button>
-          </div>
+
+
+  <!-- Inventário de Poderes Modal -->
+  <div class="modal fade" id="InventarioModal" tabindex="-1" #inventarioModal>
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+      <div class="modal-content p-4">
+        <div class="modal-header justify-content-center">
+          <h4 class="modal-title text-center">Inventário de Poderes</h4>
+          <button type="button" class="btn-close btn-close-white" (click)="closeBootstrapModal('InventarioModal')"
+            style="position: absolute; right: 2rem;"></button>
         </div>
-      </div>
-
-      <!-- Inventário de Poderes Modal -->
-      <div class="modal fade" id="InventarioModal" tabindex="-1" #inventarioModal>
-        <div class="modal-dialog modal-dialog-centered modal-xl">
-          <div class="modal-content p-4">
-            <div class="modal-header justify-content-center">
-              <h4 class="modal-title text-center">Inventário de Poderes</h4>
-              <button type="button" class="btn-close btn-close-white" (click)="closeBootstrapModal('InventarioModal')"
-                style="position: absolute; right: 2rem;"></button>
-            </div>
-            <div class="modal-body">
-              <div class="text-center mb-4" *ngIf="poderesInventario.length === 0">
-                <p class="text-muted-ghost fs-5">Você ainda não possui poderes no seu inventário.</p>
-                <p class="text-muted-ghost">Visite a loja para adquirir poderes especiais!</p>
-                <button class="btn btn-primary mt-3" (click)="closeBootstrapModal('InventarioModal'); openModal('lojaModal')">
-                  <i class="bi bi-cart"></i> Ir para a Loja
-                </button>
+        <div class="modal-body">
+          <div class="text-center mb-4" *ngIf="poderesInventario.length === 0">
+            <p class="text-muted-ghost fs-5">Você ainda não possui poderes no seu inventário.</p>
+            <p class="text-muted-ghost">Visite a loja para adquirir poderes especiais!</p>
+            <button class="btn btn-primary mt-3"
+              (click)="closeBootstrapModal('InventarioModal'); openModal('lojaModal')">
+              <i class="bi bi-cart"></i> Ir para a Loja
+            </button>
+          </div>
+          <div class="produtos-container" *ngIf="poderesInventario.length > 0">
+            <div class="produto" *ngFor="let poder of poderesInventario">
+              <img class="img-item" [src]="poder.avatarImagem" style="border-radius: 12px !important;" />
+              <h3>{{ poder.nome }}</h3>
+              <p class="text-muted-ghost" style="font-size: 0.9rem;">{{ poder.descricao || 'Poder especial' }}</p>
+              <div class="quantity-display">
+                <span class="quantity-badge">{{ poder.quantidadeInventario || 1 }}</span>
+                <span class="quantity-label">disponível(is)</span>
               </div>
-              <div class="produtos-container" *ngIf="poderesInventario.length > 0">
-                <div class="produto" *ngFor="let poder of poderesInventario">
-                  <img class="img-item" [src]="poder.avatarImagem" style="border-radius: 12px !important;" />
-                  <h3>{{ poder.nome }}</h3>
-                  <p class="text-muted-ghost" style="font-size: 0.9rem;">{{ poder.descricao || 'Poder especial' }}</p>
-                  <div class="quantity-display">
-                    <span class="quantity-badge">{{ poder.quantidadeInventario || 1 }}</span>
-                    <span class="quantity-label">disponível(is)</span>
-                  </div>
-                  <!-- <button class="btn btn-outline-light mt-2" disabled>
+              <!-- <button class="btn btn-outline-light mt-2" disabled>
                     <i class="bi bi-check-circle"></i> No Inventário
                   </button> -->
-                </div>
-              </div>
             </div>
           </div>
         </div>
       </div>
-
     </div>
-
-    <!-- Criar Sala Modal -->
-    <div class="modal fade" id="criarSalaModal" tabindex="-1" #criarSalaModal>
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content p-4 text-center">
-          <h4 class="mb-3">Criar Nova Sala</h4>
-          <div class="mb-3 text-start">
-            <label class="form-label">Nome da Sala:</label>
-            <input type="text" class="form-control" placeholder="Ex: Desafio Épico" [(ngModel)]="novaSala.nome" />
-          </div>
-          <button class="btn btn-success w-100 mb-2" (click)="confirmarCriacaoSala()">Criar e Aguardar Jogador
-            2</button>
-          <button class="btn btn-secondary w-100" (click)="closeBootstrapModal('criarSalaModal')">Cancelar</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Entrar Sala Modal -->
-    <div class="modal fade" id="entrarSalaModal" tabindex="-1" #entrarSalaModal>
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content p-4 text-center">
-          <h4 class="mb-3">Entrar em uma Sala</h4>
-          <div class="mb-3 text-start">
-            <label class="form-label">Senha da sala:</label>
-            <input type="text" class="form-control" maxlength="4" placeholder="Cole aqui o código passado para você"
-              [(ngModel)]="requestedRoomCode" />
-          </div>
-          <button class="btn btn-success w-100 mb-2" [disabled]="requestedRoomCode.length < 4" (click)="accessRoom()">
-            {{ EnterText }}</button>
-          <button class="btn btn-secondary w-100" (click)="closeBootstrapModal('entrarSalaModal')">Sair</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Senha Entrada Modal -->
-    <div class="modal fade" id="senhaEntradaModal" tabindex="-1" #senhaEntradaModal>
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content p-4 text-center">
-          <h4 class="mb-3" id="tituloSalaEntrada">Entrar na Sala</h4>
-          <input type="password" class="form-control mb-3" placeholder="Digite a senha da sala"
-            [(ngModel)]="senhaEntrada" />
-          <button class="btn btn-primary w-100 mb-2" (click)="confirmarEntradaSala()">Entrar</button>
-          <button class="btn btn-secondary w-100" (click)="closeBootstrapModal('senhaEntradaModal')">Cancelar</button>
-        </div>
-      </div>
-    </div>
-
-    <footer class="halloween-footer text-center">
-      <div class="container p-2"></div>
-    </footer>
   </div>
 </block-ui>
