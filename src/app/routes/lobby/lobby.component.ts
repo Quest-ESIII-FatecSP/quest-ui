@@ -65,7 +65,7 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
   novaSala = { nome: '', senha: '' };
   requestedRoomCode = '';
 
- 
+  // Carousel
   currentSlide = 0;
   slides: string[] = [
     'assets/img/TUTORIAL.png',
@@ -78,21 +78,6 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
     'assets/img/TUTORIAL8.png',
     'assets/img/TUTORIAL9.png',
   ];
-  
-  // função para ir para o próximo slide
-  nextSlide() {
-    this.currentSlide = (this.currentSlide + 1) % this.slides.length;
-  }
-
-  // função para ir para o slide anterior
-  prevSlide() {
-    this.currentSlide = (this.currentSlide - 1 + this.slides.length) % this.slides.length;
-  }
-
-  // função para ir direto para um slide específico (usada pelos indicadores)
-  goToSlide(index: number) {
-    this.currentSlide = index;
-  }
 
   avataresInventario: ItemLoja[] = [];
   poderesInventario: ItemLoja[] = [];
@@ -364,6 +349,19 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
 
   entrarSalada() {
     this.pulseCard(this.playerCard2Ref);
+  }
+
+  // ---------- CAROUSEL CONTROLS ----------
+  nextSlide() {
+    this.currentSlide = (this.currentSlide + 1) % this.slides.length;
+  }
+
+  prevSlide() {
+    this.currentSlide = (this.currentSlide - 1 + this.slides.length) % this.slides.length;
+  }
+
+  goToSlide(index: number) {
+    this.currentSlide = index;
   }
 
   comprarProduto(p: any) {

@@ -211,7 +211,7 @@
 
   <!-- Tutorial Modal -->
   <div class="modal fade" id="TutorialModal" tabindex="-1" #tutorialModal>
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
       <div class="modal-content p-4">
         <div class="modal-header justify-content-center">
           <h4 class="modal-title text-center">Tutorial</h4>
@@ -219,37 +219,52 @@
             style="position: absolute; right: 2rem;"></button>
         </div>
         <div class="modal-body">
-          <div class="carousel-wrapper">
-            <div class="carousel-track" [style.transform]="'translateX(-' + (currentSlide * 100) + '%)'">
-              <div class="carousel-item" *ngFor="let slide of slides">
-                <img [src]="slide" class="carousel-img" alt="Slide">
+          <div class="carousel-container">
+            <div class="carousel-wrapper">
+              <button class="carousel-btn carousel-btn-prev" (click)="prevSlide()" aria-label="Anterior">
+                &#10094;
+              </button>
+
+              <div class="carousel-slides">
+                <div class="carousel-slide"
+                     *ngFor="let slide of slides; let i = index"
+                     [class.active]="i === currentSlide">
+                  <img [src]="slide" [alt]="'Tutorial slide ' + (i + 1)" class="carousel-image">
+                </div>
               </div>
+
+              <button class="carousel-btn carousel-btn-next" (click)="nextSlide()" aria-label="Próximo">
+                &#10095;
+              </button>
             </div>
 
-            <button class="carousel-btn left" (click)="prevSlide()">❮</button>
-            <button class="carousel-btn right" (click)="nextSlide()">❯</button>
-
             <div class="carousel-indicators">
-              <span *ngFor="let slide of slides; let i = index" [class.active]="i === currentSlide"
-                (click)="goToSlide(i)">
-              </span>
+              <button *ngFor="let slide of slides; let i = index"
+                      class="carousel-dot"
+                      [class.active]="i === currentSlide"
+                      (click)="goToSlide(i)"
+                      [attr.aria-label]="'Ir para slide ' + (i + 1)">
+              </button>
+            </div>
+
+            <div class="carousel-counter">
+              <!-- {{ currentSlide + 1 }} / {{ slides.length }} -->
             </div>
           </div>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- Premium Modal -->
-    <div class="modal fade" id="premiumModal" tabindex="-1" #premiumModal>
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content text-center p-4">
-          <h4 class="mb-3">Plano Premium</h4>
-          <p>Desbloqueie recompensas exclusivas e skins especiais!</p>
-          <button class="btn btn-warning" (click)="adquirirPremium()">Adquirir Agora</button>
-        </div>
+  <!-- Premium Modal -->
+  <div class="modal fade" id="premiumModal" tabindex="-1" #premiumModal>
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content text-center p-4">
+        <h4 class="mb-3">Plano Premium</h4>
+        <p>Desbloqueie recompensas exclusivas e skins especiais!</p>
+        <button class="btn btn-warning" (click)="adquirirPremium()">Adquirir Agora</button>
       </div>
     </div>
-
   </div>
 
 
