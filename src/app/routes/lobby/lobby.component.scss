@@ -62,6 +62,7 @@ header .left-area {
 #playerName {
   font-weight: 700;
   font-size: 1.15rem;
+  color: #fff;
   cursor: pointer;
   user-select: none;
   letter-spacing: 0.2px;
@@ -301,7 +302,12 @@ header .left-area {
   border: 1px solid rgba(255,255,255,0.2);
 }
 .produto:hover { transform: translateY(-5px); background: rgba(255,255,255,0.25); }
-.produto img { width: 80px; height: 80px; margin-bottom:12px; }
+.produto img {
+   width: 80px;
+   height: 80px;
+   margin-bottom:12px;
+   margin: 0 auto;
+  }
 .produto h3 { font-size:18px; margin-bottom:10px; }
 .produto button {
   padding:10px 15px;
@@ -312,6 +318,63 @@ header .left-area {
   cursor:pointer;
 }
 .produto button:hover { background:#4cae4c; }
+
+/* Estilos para preços dos pacotes */
+.price-container {
+  margin: 1rem 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.original-price {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+
+  .strike {
+    text-decoration: line-through;
+    font-weight: normal;
+  }
+}
+
+.final-price {
+  font-size: 1.5rem;
+  color: #fff;
+  margin: 0;
+
+  &.has-discount {
+    color: #4caf50;
+  }
+
+  strong {
+    font-weight: 700;
+  }
+}
+
+.discount-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, #ff4444, #cc0000);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(255, 68, 68, 0.4);
+  animation: pulse-badge 2s ease-in-out infinite;
+}
+
+@keyframes pulse-badge {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 2px 8px rgba(255, 68, 68, 0.4);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(255, 68, 68, 0.6);
+  }
+}
 
 /* ---------------------------
    MISSÕES
@@ -443,7 +506,7 @@ body::after {
   display: inline-block;
   border-radius: 50%;
   /* glow similar to roleta */
-  box-shadow: 0 0 60px rgba(255,210,58,0.45), inset 0 0 0 6px rgba(0,0,0,0.35);
+  // box-shadow: 0 0 60px rgba(255,210,58,0.45), inset 0 0 0 6px rgba(0,0,0,0.35);
   transition: box-shadow .32s ease, transform .25s ease;
 }
 
@@ -638,4 +701,41 @@ body::after {
   .player-name {
     font-size: 0.875rem;
   }
+}
+
+.quantity-display {
+  display: flex;
+  width: 100%;
+  gap: .5rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.quantity-badge {
+  display: inline-block;
+  background: transparent;
+  border: 2px solid #fbbf24;
+  border-radius: 6px;
+  padding: 0.4rem 0.9rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #fbbf24;
+  text-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
+  box-shadow: 0 0 15px rgba(251, 191, 36, 0.3),
+              inset 0 0 10px rgba(251, 191, 36, 0.1);
+  margin: 0.5rem 0;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+}
+
+.quantity-badge:hover {
+  border-color: #f59e0b;
+  color: #f59e0b;
+  text-shadow: 0 0 15px rgba(245, 158, 11, 0.7);
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.5),
+              inset 0 0 15px rgba(245, 158, 11, 0.2);
+}
+
+.img-item {
+  border-radius: 50%;
 }

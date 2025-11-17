@@ -11,6 +11,7 @@ import {ZardProgressBarComponent} from "@shared/components/progress-bar/progress
 import { LoginSuccessComponent } from './routes/login-success/login-success.component';
 import {HttpClientModule} from "@angular/common/http";
 import { RoomComponent } from './routes/room/room.component';
+import { BlockUIModule } from 'ng-block-ui';
 
 @NgModule({
   declarations: [
@@ -26,7 +27,8 @@ import { RoomComponent } from './routes/room/room.component';
     AppRoutingModule,
     FormsModule,
     ZardProgressBarComponent,
-    HttpClientModule
+    HttpClientModule,
+    BlockUIModule.forRoot()
   ],
   providers: [
     {
