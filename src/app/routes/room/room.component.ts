@@ -40,6 +40,8 @@ export class RoomComponent implements OnInit, AfterViewInit, OnDestroy {
     this.roletaTravada = true;
   }
 
+  temaSelecionado = "EL";
+
   themeModalOpen = false;
   selectedSector: WheelSector | null = null;
   private autoCloseTimer: any = null;

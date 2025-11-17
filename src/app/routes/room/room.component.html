@@ -40,8 +40,12 @@
     <div class="fw-modal-like" style="overflow:visible;position:relative;">
       <!-- <app-roleta id="roletaIframe"></app-roleta> -->
 
-      <app-quest-wheel [locked]="roletaTravada" (spinStart)="roletaComecouSpin($event)"
-        (spinEnd)="onSpinEnd($event)"></app-quest-wheel>
+      <app-quest-wheel
+        [locked]="roletaTravada"
+        (spinStart)="roletaComecouSpin($event)"
+        (spinEnd)="onSpinEnd($event)"
+        [targetIndex]="temaSelecionado"
+        ></app-quest-wheel>
 
       <div id="roletaOverlay">O oponente está girando a roleta</div>
     </div>

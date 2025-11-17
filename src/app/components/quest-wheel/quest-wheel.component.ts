@@ -1,4 +1,4 @@
-import { Component, ElementRef, EventEmitter, Input, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, Output, ViewChild, SimpleChanges } from '@angular/core';
 
 export interface WheelSector {
   id?: string | number;
@@ -13,18 +13,20 @@ export interface WheelSector {
   styleUrl: './quest-wheel.component.scss'
 })
 export class QuestWheelComponent {
+
   @Input() sectors: WheelSector[] = [
-    { id: 'mundo', label: 'Mundo', color: '#ffd23a', iconUrl: '../../../assets/img/M.png' },
-    { id: 'esportes', label: 'Esportes e Lazer', color: '#18a558', iconUrl: '../../../assets/img/EL.png' },
-    { id: 'ciencias', label: 'Ciências', color: '#0f7bff', iconUrl: '../../../assets/img/CT.png' },
-    { id: 'sociedade', label: 'Sociedade', color: '#8b2be2', iconUrl: '../../../assets/img/S.png' },
-    { id: 'arte', label: 'Arte e Entretenimento', color: '#ff4d4d', iconUrl: '../../../assets/img/E.png' },
-    { id: 'variedades', label: 'Variedades', color: '#a65b2b', iconUrl: '../../../assets/img/V.png' }
+    { id: 'M', label: 'Mundo', color: '#ffd23a', iconUrl: '../../../assets/img/M.png' },
+    { id: 'EL', label: 'Esportes e Lazer', color: '#18a558', iconUrl: '../../../assets/img/EL.png' },
+    { id: 'CT', label: 'Ciências', color: '#0f7bff', iconUrl: '../../../assets/img/CT.png' },
+    { id: 'S', label: 'Sociedade', color: '#8b2be2', iconUrl: '../../../assets/img/S.png' },
+    { id: 'AE', label: 'Arte e Entretenimento', color: '#ff4d4d', iconUrl: '../../../assets/img/E.png' },
+    { id: 'V', label: 'Variedades', color: '#a65b2b', iconUrl: '../../../assets/img/V.png' }
   ];
 
+  @Input() targetIndex: string | null = null;
   @Input() locked = false;
-  @Input() showControl = true; // (not used deeply, button respects locked)
-  @Input() spinDuration = 5200; // default ms (used as base when forcing spinToIndex without duration)
+  @Input() showControl = true;
+  @Input() spinDuration = 5200;
   @Output() spinStart = new EventEmitter<void>();
   @Output() spinEnd = new EventEmitter<{ index: number; sector: WheelSector }>();
 
@@ -64,6 +66,19 @@ export class QuestWheelComponent {
     const svgEl = this.svgRef.nativeElement;
     svgEl.addEventListener('transitionend', this.transitionEndHandler);
   }
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['targetIndex']) {
+      const newIndex = changes['targetIndex'].currentValue;
+
+      const sectionIndex = this.sectors.findIndex(s => s.id === newIndex);
+
+      if (!this.locked && !this.spinning && sectionIndex !== -1) {
+        this.spinToIndex(sectionIndex);
+      }
+    }
+  }
+
 
   ngOnDestroy(): void {
     try { this.svgRef.nativeElement.removeEventListener('transitionend', this.transitionEndHandler); } catch { }
