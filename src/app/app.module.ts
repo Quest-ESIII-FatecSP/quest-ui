@@ -7,25 +7,24 @@ import { AppComponent } from './app.component';
 import { RegisterComponent } from './routes/register/register.component';
 import { LobbyComponent } from './routes/lobby/lobby.component';
 import { LoginComponent } from './routes/login/login.component';
-import {ZardProgressBarComponent} from "@shared/components/progress-bar/progress-bar.component";
 import { LoginSuccessComponent } from './routes/login-success/login-success.component';
 import {HttpClientModule} from "@angular/common/http";
 import { RoomComponent } from './routes/room/room.component';
+import { RoletaComponent } from './routes/roleta/roleta.component';
 
 @NgModule({
   declarations: [
-    AppComponent,
     RegisterComponent,
     LoginComponent,
     LobbyComponent,
     LoginSuccessComponent,
-    RoomComponent
+    RoomComponent,
+    RoletaComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     FormsModule,
-    ZardProgressBarComponent,
     HttpClientModule
   ],
   providers: [
@@ -33,6 +32,6 @@ import { RoomComponent } from './routes/room/room.component';
       provide: LOCALE_ID, useValue: 'pt-BR'
     }
   ],
-  bootstrap: [AppComponent]
+  bootstrap: []
 })
 export class AppModule { }
