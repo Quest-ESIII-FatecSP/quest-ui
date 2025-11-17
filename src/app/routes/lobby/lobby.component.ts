@@ -165,16 +165,15 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
     this.modalInstances.clear();
   }
 
-  stompRoomSubscription(roomCode: string) {
-    console.log('me inscrevi no room ' + roomCode)
-    this.stompService.subscribe(`/room/${roomCode}`, (message) => {
-      console.log(message)
-      console.log(message.headers["event"])
+  stompRoomSubscription(roomCode?: string) {
+    const finalRoomCode = roomCode || this.roomInfos.roomCode;
+
+    this.stompService.subscribe(`/room/${finalRoomCode}`, (message) => {
       this.player2 = { ...this.player2, active: true, status: 'Conectado' }
       this.EnterText = 'Entrando na Sala...'
       setTimeout(() => {
-        this.router.navigate(['/room/', this.roomInfos.roomCode])
-      }, 5000)
+        this.router.navigate(['/room/', finalRoomCode])
+      }, 5000);
     });
   }
 
@@ -184,13 +183,9 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
       console.log(tipoEvento)
       if (tipoEvento == "ROOM_CREATED") {
         this.roomInfos = JSON.parse(message.body);
-        this.stompRoomSubscription(this.roomInfos.roomCode);
+        this.stompRoomSubscription();
 
         const userID = message.headers["user-id"];
-
-        console.log(this.roomInfos);
-        console.log("User ID: " + userID);
-        console.log("Id vindo do stomp: " + this.stompService.userID);
 
         if (this.isSalaEmCriacao && userID == this.stompService.userID) {
           console.log("navegando para sala")
@@ -267,6 +262,7 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
 
   accessRoom(): void {
     this.requestedRoomCode = this.requestedRoomCode.trim().toUpperCase();
+    this.stompRoomSubscription(this.requestedRoomCode);
     this.stompService.publish({ destination: `/room/${this.requestedRoomCode}/${this.stompService.userID}` });
   }
 
