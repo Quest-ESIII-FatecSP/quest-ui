@@ -10,7 +10,6 @@ import { LoginComponent } from './routes/login/login.component';
 import { LoginSuccessComponent } from './routes/login-success/login-success.component';
 import {HttpClientModule} from "@angular/common/http";
 import { RoomComponent } from './routes/room/room.component';
-import { RoletaComponent } from './routes/roleta/roleta.component';
 import { BlockUIModule } from 'ng-block-ui';
 import { QuestWheelComponent } from './components/quest-wheel/quest-wheel.component';
 
@@ -22,7 +21,6 @@ import { QuestWheelComponent } from './components/quest-wheel/quest-wheel.compon
     LobbyComponent,
     LoginSuccessComponent,
     RoomComponent,
-    RoletaComponent,
     QuestWheelComponent
   ],
   imports: [
