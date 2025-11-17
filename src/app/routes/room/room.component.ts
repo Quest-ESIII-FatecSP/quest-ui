@@ -1,4 +1,5 @@
-import { Component, OnInit, AfterViewInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy, ViewChild } from '@angular/core';
+import { QuestWheelComponent, WheelSector } from '../../components/quest-wheel/quest-wheel.component';
 
 declare global {
   interface Window {
@@ -16,12 +17,78 @@ declare global {
   }
 }
 
+export interface Sector {
+  index: number;
+  sector: string;
+  color: string;
+  iconUrl: string;
+  id: string;
+  label: string;
+}
+
 @Component({
   selector: 'app-room',
   templateUrl: './room.component.html',
   styleUrls: ['./room.component.scss']
 })
 export class RoomComponent implements OnInit, AfterViewInit, OnDestroy {
+  @ViewChild(QuestWheelComponent) wheel?: QuestWheelComponent;
+
+  roletaTravada: boolean = false;
+
+  roletaComecouSpin(event: any) {
+    this.roletaTravada = true;
+  }
+
+  temaSelecionado = "EL";
+
+  themeModalOpen = false;
+  selectedSector: WheelSector | null = null;
+  private autoCloseTimer: any = null;
+
+  // opcional: tempo para fechar automaticamente (ms)
+  autoCloseMs = 2200;
+
+  onSpinStart() {
+    // bloquear UI se necessário, mostrar "girando..."
+    console.log('spin started');
+    // ex: this.isSpinning = true;
+  }
+
+  onSpinEnd(result: { index: number; sector: WheelSector }) {
+    console.log('spin ended', result);
+    this.selectedSector = result.sector;
+    this.openThemeModal();
+    this.roletaTravada = false;
+  }
+
+  openThemeModal() {
+    this.themeModalOpen = true;
+    // auto-close after X ms
+    if (this.autoCloseMs > 0) {
+      if (this.autoCloseTimer) clearTimeout(this.autoCloseTimer);
+      this.autoCloseTimer = setTimeout(() => this.confirmTheme(), this.autoCloseMs);
+    }
+  }
+
+  closeThemeModal() {
+    if (this.autoCloseTimer) { clearTimeout(this.autoCloseTimer); this.autoCloseTimer = null; }
+    this.themeModalOpen = false;
+  }
+
+  confirmTheme() {
+    // chamado ao fechar (botão OK ou auto)
+    this.closeThemeModal();
+
+    // notificar backend que o tema foi exibido / aceito (exemplo STOMP)
+    // this.stompService.send('/app/game/theme-shown', JSON.stringify({ categoryId: this.selectedSector?.id }));
+
+    // seguir próximo passo do fluxo (ex: mostrar seleção de cartas)
+    // this.startCardSelectionPhase();
+
+    console.log('Tema confirmado:', this.selectedSector);
+  }
+
 
   // Audio storage
   private SFX: Record<string, HTMLAudioElement> = {};
@@ -37,9 +104,9 @@ export class RoomComponent implements OnInit, AfterViewInit, OnDestroy {
   private roundCount = 0;
 
   // intervals / handlers to cleanup
-  private storageListener = (ev: StorageEvent) => {};
-  private clickOutsideListener = (ev: MouseEvent) => {};
-  private messageListener = (e: MessageEvent) => {};
+  private storageListener = (ev: StorageEvent) => { };
+  private clickOutsideListener = (ev: MouseEvent) => { };
+  private messageListener = (e: MessageEvent) => { };
   private powerTrayWatchInterval: any = null;
 
   // Example question bank (kept from original)
@@ -76,6 +143,24 @@ export class RoomComponent implements OnInit, AfterViewInit, OnDestroy {
           const newSrc = ev.newValue;
           const p2 = document.getElementById('player2-icon') as HTMLImageElement;
           if (p2 && newSrc) p2.src = newSrc;
+        }
+        // handle power events (e.g. jumpscare) saved through localStorage
+        if (typeof ev.key === 'string' && ev.key.indexOf('power_') === 0) {
+          try {
+            const val = ev.newValue ? JSON.parse(ev.newValue) : null;
+            if (!val) return;
+            // only act when target is this player (payload.target)
+            if (ev.key === 'power_jumpscare') {
+              try {
+                const payload = val as any;
+                const target = Number(payload && payload.target);
+                if (Number.isFinite(target) && target === this.localPlayerId) {
+                  // show jumpscare overlay and play a random jumpscare SFX
+                  try { this.triggerJumpScareEffect(); } catch (e) { }
+                }
+              } catch (e) { }
+            }
+          } catch (e) { }
         }
         // other storage reactions are handled by hydrateFromStorage / other handlers where needed
       } catch (e) { }
@@ -134,17 +219,22 @@ export class RoomComponent implements OnInit, AfterViewInit, OnDestroy {
   // Lifecycle
   // -----------------------
   ngOnInit(): void {
-    // load audio immediately
-    this.loadAudio('musica_quiz', 'sons/musica_quiz.m4a', true, 0.32);
-    this.loadAudio('roleta', 'sons/roleta.m4a', false, 0.85);
-    this.loadAudio('carta', 'sons/carta.m4a', false, 0.9);
-    this.loadAudio('resposta_correta', 'sons/resposta_correta.m4a', false, 0.9);
-    this.loadAudio('resposta_errada', 'sons/resposta_errada.m4a', false, 0.9);
-    this.loadAudio('cronometro', 'sons/cronometro.m4a', true, 0.5);
-    this.loadAudio('vencedor', 'sons/vencedor.m4a', false, 0.95);
-    this.loadAudio('derrota', 'sons/derrota.m4a', false, 0.95);
-    this.loadAudio('click', 'sons/click.m4a', false, 0.9);
-    this.loadAudio('erro', 'sons/erro.m4a', false, 0.9);
+    // load audio immediately (serve from /assets)
+    this.loadAudio('musica_quiz', 'assets/sons/musica_quiz.m4a', true, 0.32);
+    this.loadAudio('roleta', 'assets/sons/roleta.m4a', false, 0.85);
+    this.loadAudio('carta', 'assets/sons/carta.m4a', false, 0.9);
+    this.loadAudio('resposta_correta', 'assets/sons/resposta_correta.m4a', false, 0.9);
+    this.loadAudio('resposta_errada', 'assets/sons/resposta_errada.m4a', false, 0.9);
+    this.loadAudio('cronometro', 'assets/sons/cronometro.m4a', true, 0.5);
+    this.loadAudio('vencedor', 'assets/sons/vencedor.m4a', false, 0.95);
+    this.loadAudio('derrota', 'assets/sons/derrota.m4a', false, 0.95);
+    this.loadAudio('click', 'assets/sons/click.m4a', false, 0.9);
+    this.loadAudio('erro', 'assets/sons/erro.m4a', false, 0.9);
+
+    // load power-related SFX (poderes subfolder)
+    this.loadAudio('poder_jumpscare_1', 'assets/sons/poderes/jumpscare 1.m4a', false, 0.95);
+    this.loadAudio('poder_jumpscare_2', 'assets/sons/poderes/jumpscare 2.m4a', false, 0.95);
+    this.loadAudio('poder_jumpscare_3', 'assets/sons/poderes/jumpscare 3.m4a', false, 0.95);
 
     // storage listener
     window.addEventListener('storage', this.storageListener);
@@ -239,6 +329,8 @@ export class RoomComponent implements OnInit, AfterViewInit, OnDestroy {
 
     // clear queued timeouts
     this.timeouts.forEach(t => { try { clearTimeout(t); } catch (e) { } });
+
+    if (this.autoCloseTimer) clearTimeout(this.autoCloseTimer);
   }
 
   // -----------------------
@@ -268,6 +360,43 @@ export class RoomComponent implements OnInit, AfterViewInit, OnDestroy {
       const a = this.SFX[id];
       if (!a) return;
       a.pause();
+    } catch (e) { }
+  }
+
+  // -----------------------
+  // Powers / visual effects
+  // -----------------------
+  private triggerJumpScareEffect() {
+    try {
+      // choose a random jumpscare audio among loaded ones
+      const candidates = ['poder_jumpscare_1', 'poder_jumpscare_2', 'poder_jumpscare_3'];
+      const avail = candidates.filter(c => !!this.SFX[c]);
+      if (avail.length > 0) {
+        const pick = avail[Math.floor(Math.random() * avail.length)];
+        try { this.playSFX(pick); } catch (e) { }
+      }
+
+      // Show randomized jumpscare image overlay from assets/jumpscare
+      const overlay = document.createElement('div');
+      overlay.id = 'jumpscare-overlay';
+      overlay.style.position = 'fixed';
+      overlay.style.inset = '0';
+      overlay.style.display = 'flex';
+      overlay.style.alignItems = 'center';
+      overlay.style.justifyContent = 'center';
+      overlay.style.background = 'rgba(0,0,0,0.85)';
+      overlay.style.zIndex = '20000';
+      const img = document.createElement('img');
+      const pool = ['assets/jumpscare/jump1.jpg', 'assets/jumpscare/jump2.jpg', 'assets/jumpscare/jump3.jpg'];
+      img.src = pool[Math.floor(Math.random() * pool.length)];
+      img.style.maxWidth = '80%'; img.style.maxHeight = '80%'; img.style.borderRadius = '8px';
+      img.style.boxShadow = '0 10px 40px rgba(0,0,0,0.8)';
+      overlay.appendChild(img);
+      document.body.appendChild(overlay);
+
+      setTimeout(() => {
+        try { if (overlay && overlay.parentNode) overlay.parentNode.removeChild(overlay); } catch (e) { }
+      }, 5000);
     } catch (e) { }
   }
 
@@ -696,24 +825,24 @@ export class RoomComponent implements OnInit, AfterViewInit, OnDestroy {
       const isQ = qa && window.getComputedStyle(qa).display !== 'none';
       const isC = cards && window.getComputedStyle(cards).display !== 'none';
       if (!isQ && !isC) {
-        try { const iframe = document.getElementById('roletaIframe') as HTMLIFrameElement; if (iframe) iframe.src = 'roleta.html?_=' + Date.now(); } catch (e) { }
+        try { const iframe = document.getElementById('roletaIframe') as HTMLIFrameElement; if (iframe) iframe.src = '/roleta?_=' + Date.now(); } catch (e) { }
         this.showModalRoleta();
         const sendSetup = () => {
-         try {
-              const iframe = document.getElementById('roletaIframe') as HTMLIFrameElement;
-              iframe.contentWindow!.postMessage(
-             { type: 'setSpinEnabled', enabled: (this.localPlayerId === this.currentPlayer) }, 
+          try {
+            const iframe = document.getElementById('roletaIframe') as HTMLIFrameElement;
+            iframe.contentWindow!.postMessage(
+              { type: 'setSpinEnabled', enabled: (this.localPlayerId === this.currentPlayer) },
               '*'
-              );
-            } catch (e) { }
+            );
+          } catch (e) { }
 
-            try {
-              const iframe = document.getElementById('roletaIframe') as HTMLIFrameElement;
-              iframe.contentWindow!.postMessage(
-                { type: 'resetWheel' }, 
-                '*'
-              );
-            } catch (e) { }
+          try {
+            const iframe = document.getElementById('roletaIframe') as HTMLIFrameElement;
+            iframe.contentWindow!.postMessage(
+              { type: 'resetWheel' },
+              '*'
+            );
+          } catch (e) { }
         };
         try {
           const iframe = document.getElementById('roletaIframe') as HTMLIFrameElement;
@@ -740,20 +869,20 @@ export class RoomComponent implements OnInit, AfterViewInit, OnDestroy {
         const isQuestionVisible = qa ? (window.getComputedStyle(qa).display !== 'none') : false;
         if (ro && !isQuestionVisible) { ro.style.display = 'flex'; }
       } catch (e) { }
-      try { iframe.src = 'roleta.html?_=' + Date.now(); } catch (e) { }
+      try { iframe.src = '/roleta?_=' + Date.now(); } catch (e) { }
       const sendSetup = () => {
-       try {
-  iframe.contentWindow!.postMessage(
-    { type: 'setSpinEnabled', enabled: (this.localPlayerId === this.currentPlayer) }, 
-    '*'
-  );
-} catch (e) {}
-try {
-  iframe.contentWindow!.postMessage(
-    { type: 'resetWheel' }, 
-    '*'
-  );
-} catch (e) {}
+        try {
+          iframe.contentWindow!.postMessage(
+            { type: 'setSpinEnabled', enabled: (this.localPlayerId === this.currentPlayer) },
+            '*'
+          );
+        } catch (e) { }
+        try {
+          iframe.contentWindow!.postMessage(
+            { type: 'resetWheel' },
+            '*'
+          );
+        } catch (e) { }
         try {
           const overlay = document.getElementById('roletaOverlay');
           if (overlay) overlay.style.display = (this.localPlayerId === this.currentPlayer) ? 'none' : 'flex';
@@ -1127,31 +1256,31 @@ try {
   // Misc: confetti, rematch helpers preserved (you can expand UI later)
   // -----------------------
   private finalizeIfRoundLimitOrWinner() {
-  try {
-    // já ganhou por pontos?
-    if (this.points[1] >= 15 || this.points[2] >= 15) return;
+    try {
+      // já ganhou por pontos?
+      if (this.points[1] >= 15 || this.points[2] >= 15) return;
 
-    // limite de rounds (5 rounds)
-    if (this.roundCount >= 5) {
-      let winnerId;
+      // limite de rounds (5 rounds)
+      if (this.roundCount >= 5) {
+        let winnerId;
 
-      // empate → vitória do player 1
-      if (this.points[1] === this.points[2]) {
-        winnerId = 1;
-      } else {
-        winnerId = (this.points[1] > this.points[2]) ? 1 : 2;
+        // empate → vitória do player 1
+        if (this.points[1] === this.points[2]) {
+          winnerId = 1;
+        } else {
+          winnerId = (this.points[1] > this.points[2]) ? 1 : 2;
+        }
+
+        const winner = {
+          id: winnerId,
+          name: document.getElementById(`player${winnerId}-name`)?.textContent || ('Jogador ' + winnerId),
+          pts: this.points[winnerId]
+        };
+
+        this.showFinalWinner(winner);
       }
-
-      const winner = {
-        id: winnerId,
-        name: document.getElementById(`player${winnerId}-name`)?.textContent || ('Jogador ' + winnerId),
-        pts: this.points[winnerId]
-      };
-
-      this.showFinalWinner(winner);
-    }
-  } catch (e) { }
-}
+    } catch (e) { }
+  }
 
   private randomColor() {
     const palette = ['#FFD700', '#FF5E5E', '#5EE0FF', '#8AFF8A', '#C686FF', '#FFB86B'];

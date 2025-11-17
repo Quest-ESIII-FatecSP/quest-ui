@@ -1,5 +1,3 @@
-
-
 <div class="top-bar">
   <div class="player-info">
     <img id="player1-icon" src="https://i.pravatar.cc/50?img=3" />
@@ -11,12 +9,15 @@
     <div class="timer-container">
       <svg width="60" height="60">
         <circle cx="30" cy="30" r="27" stroke="#333" />
-        <circle id="timer-circle" class="timer-circle" cx="30" cy="30" r="27" stroke="#00FF00" stroke-dasharray="170" stroke-dashoffset="0" />
+        <circle id="timer-circle" class="timer-circle" cx="30" cy="30" r="27" stroke="#00FF00" stroke-dasharray="170"
+          stroke-dashoffset="0" />
       </svg>
       <div id="timer-text" class="timer-text">15</div>
     </div>
     <button id="help-btn">Ajuda</button>
-    <button id="backBtn" title="Voltar ao Lobby" [routerLink]="'/lobby'" style="margin-left:8px;padding:6px 8px;border-radius:8px;border:none;cursor:pointer;background:#2b2b5a;color:#fff">Voltar ao Lobby</button>
+    <button id="backBtn" title="Voltar ao Lobby" routerLink="/lobby"
+      style="margin-left:8px;padding:6px 8px;border-radius:8px;border:none;cursor:pointer;background:#2b2b5a;color:#fff">Voltar
+      ao Lobby</button>
   </div>
 
   <div class="player-info">
@@ -37,7 +38,15 @@
   <div id="category" style="min-height:22px;"></div>
   <div id="roleta-area" style="display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:-40px;">
     <div class="fw-modal-like" style="overflow:visible;position:relative;">
-      <iframe id="roletaIframe" src="roleta.html"></iframe>
+      <!-- <app-roleta id="roletaIframe"></app-roleta> -->
+
+      <app-quest-wheel
+        [locked]="roletaTravada"
+        (spinStart)="roletaComecouSpin($event)"
+        (spinEnd)="onSpinEnd($event)"
+        [targetIndex]="temaSelecionado"
+        ></app-quest-wheel>
+
       <div id="roletaOverlay">O oponente está girando a roleta</div>
     </div>
   </div>
@@ -65,34 +74,47 @@
   <div class="power-row">
     <div class="powers-group powers-left" data-side="left">
       <button class="power-btn power-btn--freeze local-only" id="btn-freeze" data-player="1" title="Congelar questão">
-        <img src="img/congelar.png" alt="Congelar" class="power-icon" />
+        <img src="assets/img/congelar.png" alt="Congelar" class="power-icon" />
       </button>
       <button class="power-btn local-only" data-player="1" title="Trocar alternativa correta">
-        <img src="img/4cliques.png" alt="4 Cliques" class="power-icon" />
+        <img src="assets/img/4cliques.png" alt="4 Cliques" class="power-icon" />
       </button>
       <button class="power-btn local-only" data-player="1" title="Jump Scare">
-        <img src="img/jumpscare.png" alt="Jump Scare" class="power-icon" />
+        <img src="assets/img/jumpscare.png" alt="Jump Scare" class="power-icon" />
       </button>
       <button class="power-btn local-only" data-player="1" title="X Mask">
-        <img src="img/x.png" alt="X Mask" class="power-icon" />
+        <img src="assets/img/x.png" alt="X Mask" class="power-icon" />
       </button>
     </div>
     <button class="power-btn power-btn--steal" id="btn-steal" title="Roubar Pergunta" data-power="steal">
-      <img src="img/roubarpergunta.png" alt="Roubar Pergunta" class="power-icon" />
+      <img src="assets/img/roubarpergunta.png" alt="Roubar Pergunta" class="power-icon" />
     </button>
     <div class="powers-group powers-right" data-side="right">
       <button class="power-btn power-btn--freeze local-only" data-player="2" title="Congelar questão (Jogador 2)">
-        <img src="img/congelar.png" alt="Congelar" class="power-icon" />
+        <img src="assets/img/congelar.png" alt="Congelar" class="power-icon" />
       </button>
       <button class="power-btn local-only" data-player="2" title="Trocar alternativa correta (Jogador 2)">
-        <img src="img/4cliques.png" alt="4 Cliques" class="power-icon" />
+        <img src="assets/img/4cliques.png" alt="4 Cliques" class="power-icon" />
       </button>
       <button class="power-btn local-only" data-player="2" title="Jump Scare (Jogador 2)">
-        <img src="img/jumpscare.png" alt="Jump Scare" class="power-icon" />
+        <img src="assets/img/jumpscare.png" alt="Jump Scare" class="power-icon" />
       </button>
       <button class="power-btn local-only" data-player="2" title="X Mask (Jogador 2)">
-        <img src="img/x.png" alt="X Mask" class="power-icon" />
+        <img src="assets/img/x.png" alt="X Mask" class="power-icon" />
       </button>
+    </div>
+  </div>
+</div>
+
+<div style="z-index: 999999;" class="theme-modal-backdrop" *ngIf="themeModalOpen" (click)="closeThemeModal()">
+  <div class="theme-modal" (click)="$event.stopPropagation()" role="dialog" aria-modal="true"
+    aria-labelledby="themeTitle">
+    <img class="theme-icon" *ngIf="selectedSector?.iconUrl" [src]="'assets/img/' + selectedSector?.iconUrl" alt="" />
+    <h2 id="themeTitle">{{ selectedSector?.label || 'Tema' }}</h2>
+    <p class="theme-sub">Categoria sorteada</p>
+
+    <div class="theme-actions">
+      <button class="btn-primary" (click)="confirmTheme()">OK</button>
     </div>
   </div>
 </div>

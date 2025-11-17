@@ -7,12 +7,12 @@ import { AppComponent } from './app.component';
 import { RegisterComponent } from './routes/register/register.component';
 import { LobbyComponent } from './routes/lobby/lobby.component';
 import { LoginComponent } from './routes/login/login.component';
-import {ZardProgressBarComponent} from '@shared/components/progress-bar/progress-bar.component';
 import { LoginSuccessComponent } from './routes/login-success/login-success.component';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { RoomComponent } from './routes/room/room.component';
 import { BlockUIModule } from 'ng-block-ui';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
+import { QuestWheelComponent } from './components/quest-wheel/quest-wheel.component';
 
 @NgModule({
   declarations: [
@@ -21,13 +21,13 @@ import { AuthInterceptor } from './interceptors/auth.interceptor';
     LoginComponent,
     LobbyComponent,
     LoginSuccessComponent,
-    RoomComponent
+    RoomComponent,
+    QuestWheelComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     FormsModule,
-    ZardProgressBarComponent,
     HttpClientModule,
     BlockUIModule.forRoot()
   ],
