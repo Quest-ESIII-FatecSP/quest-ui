@@ -13,6 +13,8 @@ import { RoomComponent } from './routes/room/room.component';
 import { BlockUIModule } from 'ng-block-ui';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
 import { QuestWheelComponent } from './components/quest-wheel/quest-wheel.component';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { ToastrModule } from 'ngx-toastr';
 
 @NgModule({
   declarations: [
@@ -29,7 +31,9 @@ import { QuestWheelComponent } from './components/quest-wheel/quest-wheel.compon
     AppRoutingModule,
     FormsModule,
     HttpClientModule,
-    BlockUIModule.forRoot()
+    BlockUIModule.forRoot(),
+    BrowserAnimationsModule,
+    ToastrModule.forRoot({ positionClass: 'toast-top-right', timeOut: 3000 })
   ],
   providers: [
     {
