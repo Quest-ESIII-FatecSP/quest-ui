@@ -15,6 +15,7 @@ import { switchMap } from 'rxjs';
 import { JogadorService, RankingJogador, TipoJogadorEnum } from '../../services/jogador.service';
 import { ItemLoja, LojaService, Pacote, TipoItemEnum } from '../../services/loja.service';
 import { StompService } from "../../services/stomp.service";
+import { ToastrService } from 'ngx-toastr';
 declare const bootstrap: any;
 
 interface Sala {
@@ -111,7 +112,8 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
     private stompService: StompService,
     private router: Router,
     private jogadorService: JogadorService,
-    private lojaService: LojaService
+    private lojaService: LojaService,
+    private toastr: ToastrService
   ) { }
 
   ngOnInit(): void {
@@ -491,11 +493,16 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
       next: (data) => {
         const { avatar, email, moeda, username, tipo } = data;
 
-        this.player1.username = username;
-        this.player1.avatar = avatar;
-        this.player1.moeda = moeda;
-        this.player1.email = email;
-        this.player1.tipo = tipo ?? TipoJogadorEnum.CONVIDADO;
+        if(tipo == TipoJogadorEnum.CONVIDADO) {
+          this.player1.tipo = TipoJogadorEnum.CONVIDADO;
+          this.player1.username = "Convidado";
+        } else {
+          this.player1.username = username;
+          this.player1.avatar = avatar;
+          this.player1.moeda = moeda;
+          this.player1.email = email;
+          this.player1.tipo = tipo ?? TipoJogadorEnum.CONVIDADO;
+        }
 
       },
       complete: () => {
@@ -539,6 +546,7 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
     this.lojaService.ComprarMoedas(pacote.quantidade).subscribe({
       next: (data) => {
         this.ObterDadosJogador();
+        this.toastr.success('Pacote de moedas comprado com sucesso!');
       }
     });
   }
@@ -556,10 +564,14 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
 
         this.player1.moeda -= item.preco ?? 0;
 
+        this.toastr.success('Item comprado com sucesso!');
+
         this.ObterItensLoja();
       },
       error: (err) => {
-        console.error('Erro ao comprar item:', err);
+        const errMsg = err.error?.mensagem;
+        const msg = (errMsg).substring(0, errMsg?.length - 8);
+        this.toastr.error('Erro ao comprar item: ' + msg);
         this.blockUI.stop();
       },
       complete: () => {
