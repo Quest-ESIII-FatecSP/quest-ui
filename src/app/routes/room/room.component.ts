@@ -80,13 +80,13 @@ export class RoomComponent implements OnInit, AfterViewInit, OnDestroy {
     // chamado ao fechar (botão OK ou auto)
     this.closeThemeModal();
 
-    // notificar backend que o tema foi exibido / aceito (exemplo STOMP)
-    // this.stompService.send('/app/game/theme-shown', JSON.stringify({ categoryId: this.selectedSector?.id }));
+  if (this.selectedSector) {
+    const categoria = this.selectedSector.label; 
+    const pontos = 1; // ou o valor que quiser usar
+    this.showCardSelection(categoria, pontos);
+  }
 
-    // seguir próximo passo do fluxo (ex: mostrar seleção de cartas)
-    // this.startCardSelectionPhase();
-
-    console.log('Tema confirmado:', this.selectedSector);
+  console.log('Tema confirmado:', this.selectedSector);
   }
 
 
@@ -655,7 +655,25 @@ export class RoomComponent implements OnInit, AfterViewInit, OnDestroy {
           if (this.localPlayerId !== by) {
             btn.disabled = true;
           } else {
-            btn.onclick = () => { if (this.localPlayerId !== this.currentPlayer) return; this.answerQuestion(idx === correct, pointsValue, category, idx, correct); };
+           btn.onclick = () => {
+              if (this.localPlayerId !== this.currentPlayer) return;
+
+              const isCorrect = idx === correct;
+
+              // aplicar a classe no botão clicado
+              if (isCorrect) {
+                btn.classList.add("ans-correct");
+              } else {
+                btn.classList.add("ans-wrong");
+              }
+
+              // desabilitar todos os botões
+              const all = ansDiv.querySelectorAll("button");
+              all.forEach(b => (b as HTMLButtonElement).disabled = true);
+
+              // chamar a lógica original
+              this.answerQuestion(isCorrect, pointsValue, category, idx, correct);
+            };
           }
           ansDiv.appendChild(btn);
         });
