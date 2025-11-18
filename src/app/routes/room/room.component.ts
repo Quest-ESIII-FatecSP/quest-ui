@@ -1,5 +1,7 @@
 import { Component, OnInit, AfterViewInit, OnDestroy, ViewChild } from '@angular/core';
 import { QuestWheelComponent, WheelSector } from '../../components/quest-wheel/quest-wheel.component';
+import {StompService} from "../../services/stomp.service";
+import {RoomService} from "./room.service";
 
 declare global {
   interface Window {
@@ -45,6 +47,12 @@ export class RoomComponent implements OnInit, AfterViewInit, OnDestroy {
   themeModalOpen = false;
   selectedSector: WheelSector | null = null;
   private autoCloseTimer: any = null;
+
+  useFreezeQuestions() { this.roomService.usePower('FREEZE_QUESTIONS', 'id') }
+  useStealQuestion() { this.roomService.usePower('STEAL_QUESTION', 'id') }
+  useMouseEscape() { this.roomService.usePower('MOUSE_ESCAPE', 'id') }
+  useJumpScare() { this.roomService.usePower('JUMP_SCARE', 'id') }
+  useVowelX() { this.roomService.usePower('VOWEL_X', 'id') }
 
   // opcional: tempo para fechar automaticamente (ms)
   autoCloseMs = 2200;
@@ -121,7 +129,7 @@ export class RoomComponent implements OnInit, AfterViewInit, OnDestroy {
   // keep references to timeouts to clear later
   private timeouts: any[] = [];
 
-  constructor() {
+  constructor(private roomService: RoomService) {
     // Parse localPlayerId from query string (exact same logic as original)
     try {
       const p = new URLSearchParams(location.search).get('p') || '1';
