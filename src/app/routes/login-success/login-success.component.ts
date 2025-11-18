@@ -1,6 +1,7 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
 import {AuthService} from "../../services/auth.service";
+import {interval, Subscription} from "rxjs";
 
 
 @Component({
@@ -8,7 +9,13 @@ import {AuthService} from "../../services/auth.service";
   templateUrl: './login-success.component.html',
   styleUrl: './login-success.component.scss'
 })
-export class LoginSuccessComponent implements OnInit{
+export class LoginSuccessComponent implements OnInit, OnDestroy{
+  redirectSeconds = 3;
+  remaining = this.redirectSeconds;
+  progress = 0;
+  errorMessage = '';
+
+  timerSub?: Subscription;
 
   constructor(
     private route: ActivatedRoute,
@@ -16,46 +23,63 @@ export class LoginSuccessComponent implements OnInit{
     private authService: AuthService
   ) {}
 
+
   ngOnInit() {
-    console.log("fui chamado")
+    this.authenticateUser()
+    const tick$ = interval(1000);
+    this.timerSub = tick$.subscribe(i => {
+      this.remaining = Math.max(0, this.redirectSeconds - (i + 1));
+      this.progress = (100 * (this.redirectSeconds - this.remaining)) / this.redirectSeconds;
+    });
+  }
+
+  authenticateUser(): void {
     const email = this.route.snapshot.queryParamMap.get('email');
     const name = this.route.snapshot.queryParamMap.get('name');
     const userId = this.route.snapshot.queryParamMap.get('userId');
     const avatar = this.route.snapshot.queryParamMap.get('avatar');
 
     if (!email || !userId) {
-      alert('Erro no login pelo Google.');
+      this.errorMessage = 'Erro no login pelo Google.'
+      this.goToPage('login');
       return;
     }
 
     const userData = { email, name, userId, avatar };
-    console.log(userData)
-    // Primeiro tenta login
     this.authService.login(userData).subscribe({
       next: res => {
         if (res.isSuccess) {
           console.log('Login bem-sucedido');
-          this.router.navigate(['/lobby']);
-        } else {
-          alert('Usuário não encontrado, criando conta...');
-
+          this.goToPage('lobby');
         }
       }, error: err => {
-        console.log(err)
-        console.log(err.error)
         if (err.error && !err.error.isSuccess) {
           this.authService.signUp(userData).subscribe({
             next: resp => {
               if (resp.isSuccess) {
                 console.log('Cadastro e login bem-sucedido');
-                this.router.navigate(['/lobby']);
+                this.goToPage('lobby');
               } else {
-                alert('Erro ao criar conta.');
+                this.errorMessage = 'Erro ao criar conta.';
+                this.goToPage('login');
               }
             }
           });
         }
       }
     });
+  }
+
+  ngOnDestroy(): void {
+    this.timerSub?.unsubscribe();
+  }
+
+  goToPage(goTo: string): void {
+    setTimeout(() => {
+      this.remaining = 0;
+      this.progress = 100
+      this.router.navigate([`/${goTo}`]);
+
+    }, 3000)
   }
 }
