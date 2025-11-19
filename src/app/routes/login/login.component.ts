@@ -2,6 +2,7 @@ import { Component, HostListener, OnInit } from '@angular/core';
 import {AuthService} from "../../services/auth.service";
 import {Router} from "@angular/router";
 import {StompService} from "../../services/stomp.service";
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-login',
@@ -35,7 +36,7 @@ export class LoginComponent implements OnInit {
   }
 
   googleSignIn(): void {
-    window.location.href = "http://localhost:8080/api/auth/oauth2/google"
+    window.location.href = `${environment.apiUrl}/api/auth/oauth2/google`;
   }
 
   playAsGuest() {

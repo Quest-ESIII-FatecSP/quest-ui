@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Client, IPublishParams, Message, StompSubscription } from '@stomp/stompjs';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +13,7 @@ export class StompService {
   client: Client;
 
   constructor() {
-    this.client = new Client({brokerURL: 'http://localhost:8080/conectar'});
+    this.client = new Client({brokerURL: `${environment.apiUrl}/conectar`});
     this.client.onConnect = () => {
       this.subscribeRequests.forEach(sub => this.client.subscribe(sub.broker, sub.callback));
     }
