@@ -112,9 +112,5 @@
     <img class="theme-icon" *ngIf="selectedSector?.iconUrl" [src]="'assets/img/' + selectedSector?.iconUrl" alt="" />
     <h2 id="themeTitle">{{ selectedSector?.label || 'Tema' }}</h2>
     <p class="theme-sub">Categoria sorteada</p>
-
-    <div class="theme-actions">
-      <button class="btn-primary" (click)="confirmTheme()">OK</button>
-    </div>
   </div>
 </div>
