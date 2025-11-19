@@ -1,5 +1,7 @@
 import { Component, OnInit, AfterViewInit, OnDestroy, ViewChild } from '@angular/core';
 import { QuestWheelComponent, WheelSector } from '../../components/quest-wheel/quest-wheel.component';
+import {StompService} from "../../services/stomp.service";
+import {RoomService} from "./room.service";
 
 declare global {
   interface Window {
@@ -46,6 +48,12 @@ export class RoomComponent implements OnInit, AfterViewInit, OnDestroy {
   selectedSector: WheelSector | null = null;
   private autoCloseTimer: any = null;
 
+  useFreezeQuestions() { this.roomService.usePower('FREEZE_QUESTIONS', 'id') }
+  useStealQuestion() { this.roomService.usePower('STEAL_QUESTION', 'id') }
+  useMouseEscape() { this.roomService.usePower('MOUSE_ESCAPE', 'id') }
+  useJumpScare() { this.roomService.usePower('JUMP_SCARE', 'id') }
+  useVowelX() { this.roomService.usePower('VOWEL_X', 'id') }
+
   // opcional: tempo para fechar automaticamente (ms)
   autoCloseMs = 2200;
 
@@ -80,13 +88,13 @@ export class RoomComponent implements OnInit, AfterViewInit, OnDestroy {
     // chamado ao fechar (botão OK ou auto)
     this.closeThemeModal();
 
-    // notificar backend que o tema foi exibido / aceito (exemplo STOMP)
-    // this.stompService.send('/app/game/theme-shown', JSON.stringify({ categoryId: this.selectedSector?.id }));
+  if (this.selectedSector) {
+    const categoria = this.selectedSector.label; 
+    const pontos = 1; // ou o valor que quiser usar
+    this.showCardSelection(categoria, pontos);
+  }
 
-    // seguir próximo passo do fluxo (ex: mostrar seleção de cartas)
-    // this.startCardSelectionPhase();
-
-    console.log('Tema confirmado:', this.selectedSector);
+  console.log('Tema confirmado:', this.selectedSector);
   }
 
 
@@ -121,7 +129,7 @@ export class RoomComponent implements OnInit, AfterViewInit, OnDestroy {
   // keep references to timeouts to clear later
   private timeouts: any[] = [];
 
-  constructor() {
+  constructor(private roomService: RoomService) {
     // Parse localPlayerId from query string (exact same logic as original)
     try {
       const p = new URLSearchParams(location.search).get('p') || '1';
@@ -655,7 +663,25 @@ export class RoomComponent implements OnInit, AfterViewInit, OnDestroy {
           if (this.localPlayerId !== by) {
             btn.disabled = true;
           } else {
-            btn.onclick = () => { if (this.localPlayerId !== this.currentPlayer) return; this.answerQuestion(idx === correct, pointsValue, category, idx, correct); };
+           btn.onclick = () => {
+              if (this.localPlayerId !== this.currentPlayer) return;
+
+              const isCorrect = idx === correct;
+
+              // aplicar a classe no botão clicado
+              if (isCorrect) {
+                btn.classList.add("ans-correct");
+              } else {
+                btn.classList.add("ans-wrong");
+              }
+
+              // desabilitar todos os botões
+              const all = ansDiv.querySelectorAll("button");
+              all.forEach(b => (b as HTMLButtonElement).disabled = true);
+
+              // chamar a lógica original
+              this.answerQuestion(isCorrect, pointsValue, category, idx, correct);
+            };
           }
           ansDiv.appendChild(btn);
         });
