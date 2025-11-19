@@ -1,0 +1,198 @@
+:host {
+  display: block;
+  position: relative;
+  pointer-events: auto;
+  box-sizing: border-box;
+}
+
+/* Panels fixed to sides and vertically centered */
+.cards-panel {
+  position: fixed;
+  top: 50%;
+  /* centraliza verticalmente */
+  transform: translateY(-50%);
+  width: 160px;
+  z-index: 100;
+  pointer-events: auto;
+  display: flex;
+  justify-content: center;
+  box-sizing: border-box;
+  width: fit-content;
+}
+
+.panel-inner {
+  width: 100%;
+  background: rgba(6, 6, 6, 0.548);
+  border: 1px solid rgba(255, 210, 58, 0.95);
+  padding: 16px 20px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), inset 0 0 18px rgba(0, 0, 0, 0.18);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  overflow: visible;
+  position: relative;
+}
+
+
+.left-panel {
+  left: -4px;
+  border-left: 0 !important;
+
+  .panel-inner {
+    border-radius: 0 12px 12px 0 !important;
+    // padding-left: 12px;
+    // padding-right: 20px;
+  }
+}
+
+.right-panel {
+  right: -4px;
+  border-right: 0 !important;
+
+  .panel-inner {
+    border-radius: 12px 0 0 12px !important;
+    // padding-left: 12px;
+    // padding-right: 20px;
+  }
+}
+
+/* Ensure panel has enough implicit height for centered stack */
+.cards-panel {
+  min-height: 260px;
+}
+
+/* Title */
+.panel-title {
+  color: #ffd23a;
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: .4px;
+  text-align: center;
+}
+
+/* Two-column layout (A: left column, B: right column) */
+.columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+  justify-items: center;
+}
+
+/* Each col is a vertical stack that is vertically centered */
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  /* center the column content vertically */
+  min-height: 180px;
+  /* reserve vertical space to avoid reflow when scale */
+}
+
+/* Small card visual */
+.card.small {
+  width: 84px;
+  height: 112px;
+  border-radius: 10px;
+  border: 2px solid rgba(255, 210, 58, 0.9);
+  background: linear-gradient(180deg, #0b0b0b, #121217);
+  color: #ffd23a;
+  font-weight: 900;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform .16s ease, box-shadow .16s ease, opacity .12s ease;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+  position: relative;
+  /* keep in normal flow, allow z-index change */
+  will-change: transform;
+  /* hint to browser */
+}
+
+/* value size */
+.card.small .val {
+  font-size: 36px;
+  line-height: 1;
+}
+
+/* hover should not push layout (only visual transform and z-index) */
+.card.small:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.6);
+}
+
+/* disabled/used */
+.card.small:disabled,
+.card.small[disabled] {
+  opacity: 0.58;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.card.small.used {
+  opacity: 0.36;
+  filter: grayscale(0.4);
+}
+
+/* selected: raise via z-index but keep document flow stable */
+.card.small.selected {
+  transform: scale(1.06);
+  z-index: 9999;
+  /* float above siblings without reflow */
+  position: relative;
+  box-shadow: 0 20px 46px rgba(0, 0, 0, 0.7), 0 0 14px rgba(255, 215, 0, 0.12);
+  outline: 2px solid rgba(255, 215, 0, 0.06);
+}
+
+/* Active panel subtle lift */
+.cards-panel.active .panel-inner {
+  transform: none;
+  /* avoid adding transform that creates clipping/staking issues */
+  box-shadow: 0 18px 54px rgba(0, 0, 0, 0.75), 0 0 18px rgba(255, 200, 40, 0.05);
+}
+
+/* Host disabled state */
+.card-selection-v2.disabled {
+  opacity: 0.88;
+  pointer-events: none;
+}
+
+/* Responsive */
+@media (max-width: 920px) {
+  .cards-panel {
+    width: 140px;
+    min-height: 220px;
+  }
+
+  .card.small {
+    width: 72px;
+    height: 96px;
+  }
+
+  .card.small .val {
+    font-size: 30px;
+  }
+}
+
+@media (max-width: 520px) {
+  .cards-panel {
+    width: 112px;
+    min-height: 200px;
+    top: 46%;
+  }
+
+  .card.small {
+    width: 64px;
+    height: 86px;
+  }
+
+  .card.small .val {
+    font-size: 26px;
+  }
+}

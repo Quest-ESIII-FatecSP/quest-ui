@@ -26,13 +26,12 @@ export class QuestWheelComponent {
   @Input() targetIndex: string | null = null;
   @Input() locked = false;
   @Input() showControl = true;
-  @Input() spinDuration = 5200;
+  @Input() spinDuration = 500;
   @Output() spinStart = new EventEmitter<void>();
   @Output() spinEnd = new EventEmitter<{ index: number; sector: WheelSector }>();
 
   @ViewChild('svgEl', { static: true }) svgRef!: ElementRef<SVGElement>;
   @ViewChild('discoEl', { static: true }) discoRef!: ElementRef<HTMLDivElement>;
-  @ViewChild('girarBtn', { static: true }) girarBtnRef!: ElementRef<HTMLButtonElement>;
 
   spinning = false;
 
@@ -190,7 +189,6 @@ export class QuestWheelComponent {
     }
     this.spinning = true;
     this.girando = true;
-    (this.girarBtnRef.nativeElement).disabled = true;
 
     const voltas = (turns ?? (this.baseTurnsMin + this.rndInt(this.turnRandomExtraMax + 1)));
     const centro = this.indiceParaCentro(index);
@@ -228,7 +226,6 @@ export class QuestWheelComponent {
   private finalizar() {
     this.girando = false;
     this.spinning = false;
-    try { (this.girarBtnRef.nativeElement).disabled = false; } catch { }
     const final = this.modulo(this.alvoGraus, 360);
 
     const N = Math.max(1, this.sectors.length);
@@ -250,6 +247,5 @@ export class QuestWheelComponent {
     svgEl.style.transition = '';
     this.alvoGraus = 0;
     this.spinning = false;
-    try { (this.girarBtnRef.nativeElement).disabled = false; } catch { }
   }
 }

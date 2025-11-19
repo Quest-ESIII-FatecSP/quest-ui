@@ -9,8 +9,7 @@
     <div class="timer-container">
       <svg width="60" height="60">
         <circle cx="30" cy="30" r="27" stroke="#333" />
-        <circle id="timer-circle" class="timer-circle" cx="30" cy="30" r="27" stroke="#00FF00" stroke-dasharray="170"
-          stroke-dashoffset="0" />
+        <circle id="timer-circle" class="timer-circle" cx="30" cy="30" r="27" stroke="#00FF00" stroke-dasharray="170" stroke-dashoffset="0" />
       </svg>
       <div id="timer-text" class="timer-text">15</div>
     </div>
@@ -27,90 +26,35 @@
   </div>
 </div>
 
-<div id="help-popup">
-  <button>💡 Dica</button>
-  <button>👥 Mudar pergunta</button>
-  <button>⏩ Pular Questão</button>
-  <button>📊 Eliminar alternativa</button>
-</div>
-
 <div id="game-area">
-  <div id="category" style="min-height:22px;"></div>
   <div id="roleta-area" style="display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:-40px;">
     <div class="fw-modal-like" style="overflow:visible;position:relative;">
-      <!-- <app-roleta id="roletaIframe"></app-roleta> -->
 
-      <app-quest-wheel
-        [locked]="roletaTravada"
-        (spinStart)="roletaComecouSpin($event)"
-        (spinEnd)="onSpinEnd($event)"
-        [targetIndex]="temaSelecionado"
-        ></app-quest-wheel>
+      <app-quest-wheel [locked]="roletaTravada" (spinStart)="roletaComecouSpin($event)" (spinEnd)="onSpinEnd($event)" [targetIndex]="temaSelecionado"></app-quest-wheel>
 
-      <div id="roletaOverlay">O oponente está girando a roleta</div>
     </div>
   </div>
-  <div id="cards"></div>
-  <div id="question-area">
-    <div id="question-box" class="fw-modal-like" style="display:flex;flex-direction:column;gap:10px;">
-      <div id="cat-badge" class="cat-badge" style="display:none"></div>
-      <div class="qp-header">
-        <div id="turn-title" class="turn-title"></div>
-        <div id="current-player-title" class="current-player-title"></div>
-      </div>
-      <div class="question" id="question"></div>
-      <div class="answers" id="answers"></div>
-    </div>
-  </div>
-  <div id="waiting-screen">
-    <h2 style="display:none"></h2>
-    <p id="opponent-category" style="display:none"></p>
-  </div>
+
+  <app-card-selection
+    *ngIf="showCardSelectionUI"
+    [leftCards]="leftCards"
+    [rightCards]="rightCards"
+    [activeSide]="isMyTurn ? 'left' : 'right'"
+    [leftTitle]="'Suas Cartas'"
+    [rightTitle]="'Cartas do Oponente'"
+    (pickRequested)="onCardPickRequested($event)"
+    class="cards-containers"
+  ></app-card-selection>
+
 </div>
 
-<div id="result-animation" class="result-animation"></div>
 
-<div id="power-tray" class="power-tray center" aria-label="Poderes disponíveis">
-  <div class="power-row">
-    <div class="powers-group powers-left" data-side="left">
-      <button class="power-btn power-btn--freeze local-only" id="btn-freeze" data-player="1" title="Congelar questão">
-        <img src="assets/img/congelar.png" alt="Congelar" class="power-icon" />
-      </button>
-      <button class="power-btn local-only" data-player="1" title="Trocar alternativa correta">
-        <img src="assets/img/4cliques.png" alt="4 Cliques" class="power-icon" />
-      </button>
-      <button class="power-btn local-only" data-player="1" title="Jump Scare">
-        <img src="assets/img/jumpscare.png" alt="Jump Scare" class="power-icon" />
-      </button>
-      <button class="power-btn local-only" data-player="1" title="X Mask">
-        <img src="assets/img/x.png" alt="X Mask" class="power-icon" />
-      </button>
-    </div>
-    <button class="power-btn power-btn--steal" id="btn-steal" title="Roubar Pergunta" data-power="steal">
-      <img src="assets/img/roubarpergunta.png" alt="Roubar Pergunta" class="power-icon" />
-    </button>
-    <div class="powers-group powers-right" data-side="right">
-      <button class="power-btn power-btn--freeze local-only" data-player="2" title="Congelar questão (Jogador 2)">
-        <img src="assets/img/congelar.png" alt="Congelar" class="power-icon" />
-      </button>
-      <button class="power-btn local-only" data-player="2" title="Trocar alternativa correta (Jogador 2)">
-        <img src="assets/img/4cliques.png" alt="4 Cliques" class="power-icon" />
-      </button>
-      <button class="power-btn local-only" data-player="2" title="Jump Scare (Jogador 2)">
-        <img src="assets/img/jumpscare.png" alt="Jump Scare" class="power-icon" />
-      </button>
-      <button class="power-btn local-only" data-player="2" title="X Mask (Jogador 2)">
-        <img src="assets/img/x.png" alt="X Mask" class="power-icon" />
-      </button>
-    </div>
-  </div>
-</div>
-
+<!-- MODAL DA CATEGORIA SORTEADA -->
 <div style="z-index: 999999;" class="theme-modal-backdrop" *ngIf="themeModalOpen" (click)="closeThemeModal()">
   <div class="theme-modal" (click)="$event.stopPropagation()" role="dialog" aria-modal="true"
     aria-labelledby="themeTitle">
-    <img class="theme-icon" *ngIf="selectedSector?.iconUrl" [src]="'assets/img/' + selectedSector?.iconUrl" alt="" />
-    <h2 id="themeTitle">{{ selectedSector?.label || 'Tema' }}</h2>
+    <img class="theme-icon" *ngIf="categoriaSelecionada?.iconUrl" [src]="'assets/img/' + categoriaSelecionada?.iconUrl" alt="" />
+    <h2 id="themeTitle">{{ categoriaSelecionada?.label || 'Tema' }}</h2>
     <p class="theme-sub">Categoria sorteada</p>
   </div>
 </div>
