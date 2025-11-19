@@ -417,14 +417,15 @@
 }
 
 .answers button {
-  background: #1a4cd7;
-  color: white;
-  border: none;
-  padding: 10px;
-  border-radius: 8px;
-  font-size: 16px;
+  background: linear-gradient(145deg, #1a1f4b, #0b0f30);
+  color: #fff;
+  border: 2px solid #FFD700;
+  padding: 14px 18px;
+  border-radius: 12px;
+  font-size: 18px;
   cursor: pointer;
-  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.18);
 }
 
 .answers button:disabled {
@@ -438,13 +439,13 @@
 }
 
 .answers button.ans-correct {
-  background-color: #28a745 !important;
-  color: #fff !important;
+  background: linear-gradient(145deg, #2ecc71, #27ae60) !important;
+  border-color: #b6ffbf !important;
 }
 
 .answers button.ans-wrong {
-  background-color: #c0392b !important;
-  color: #fff !important;
+  background: linear-gradient(145deg, #c0392b, #a5281d) !important;
+  border-color: #ffb6b6 !important;
 }
 
 #waiting-screen {
@@ -1069,4 +1070,43 @@ button.congelado::after {
   font-weight: 800;
   cursor: pointer;
   color: #1a1200;
+}
+
+.answers button:hover:not(:disabled) {
+  transform: translateY(-4px);
+  box-shadow: 0 0 18px rgba(255, 215, 0, 0.35);
+  background: linear-gradient(145deg, #222a6a, #10143a);
+}
+
+:host ::ng-deep .answers button {
+  background: linear-gradient(145deg, #1a1f4b, #0b0f30) !important;
+  border: 2px solid #FFD700 !important;
+  border-radius: 12px !important;
+  color: #fff !important;
+  padding: 14px 18px !important;
+  font-size: 18px !important;
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.18) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+:host ::ng-deep .answers button:hover:not(:disabled) {
+  transform: translateY(-4px) !important;
+  background: linear-gradient(145deg, #222a6a, #10143a) !important;
+  box-shadow: 0 0 18px rgba(255, 215, 0, 0.35) !important;
+}
+
+:host ::ng-deep .answers button.ans-correct {
+  background: linear-gradient(145deg, #2ecc71, #27ae60) !important;
+  border-color: #b6ffbf !important;
+  color: #fff !important;
+  transform: scale(1.03) !important;
+  box-shadow: 0 0 20px rgba(0, 255, 0, 0.45) !important;
+}
+
+:host ::ng-deep .answers button.ans-wrong {
+  background: linear-gradient(145deg, #c0392b, #a5281d) !important;
+  border-color: #ffb6b6 !important;
+  color: #fff !important;
+  transform: scale(1.03) !important;
+  box-shadow: 0 0 20px rgba(255, 0, 0, 0.45) !important;
 }
