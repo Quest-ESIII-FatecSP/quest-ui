@@ -2,6 +2,7 @@ import { Component, HostListener, OnInit } from '@angular/core';
 import {AuthService} from "../../services/auth.service";
 import {Router} from "@angular/router";
 import {StompService} from "../../services/stomp.service";
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-login',
@@ -9,14 +10,15 @@ import {StompService} from "../../services/stomp.service";
   styleUrls: ['./login.component.scss']
 })
 export class LoginComponent implements OnInit {
+  tempoRestante = 5000
+  fraseAtual = '';
+  horaAtual = '';
 
   constructor(private authService: AuthService,
               private router: Router,
               private stompService: StompService) {
   }
 
-  fraseAtual = '';
-  horaAtual = '';
 
   private frases = [
     "Conhecimento é poder!",
@@ -34,7 +36,7 @@ export class LoginComponent implements OnInit {
   }
 
   googleSignIn(): void {
-    window.location.href = "http://localhost:8080/api/auth/oauth2/google"
+    window.location.href = `${environment.apiUrl}/api/auth/oauth2/google`;
   }
 
   playAsGuest() {
@@ -63,11 +65,17 @@ export class LoginComponent implements OnInit {
 
   // --- RELÓGIO ---
   atualizarRelogio() {
-    const agora = new Date();
-    const h = String(agora.getHours()).padStart(2, '0');
-    const m = String(agora.getMinutes()).padStart(2, '0');
-    const s = String(agora.getSeconds()).padStart(2, '0');
-    this.horaAtual = `${h}:${m}:${s}`;
+    if (this.tempoRestante > 0) {
+      this.tempoRestante--;
+
+      const h = String(Math.floor(this.tempoRestante / 3600)).padStart(2, '0');
+      const m = String(Math.floor((this.tempoRestante % 3600) / 60)).padStart(2, '0');
+      const s = String(this.tempoRestante % 60).padStart(2, '0');
+
+      this.horaAtual = `${h}:${m}:${s}`;
+    } else {
+      this.horaAtual = "00:00:00";
+    }
   }
 
   // --- CANVAS ANIMADO ---
