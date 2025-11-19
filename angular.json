@@ -35,6 +35,7 @@
             "assets": [
               "src/favicon.ico",
               "src/assets",
+              "src/_redirects",
               {
                 "glob": "*.{png,svg,jpg,jpeg,gif}",
                 "input": "inicio/teste",
