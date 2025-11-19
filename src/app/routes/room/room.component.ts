@@ -1,7 +1,7 @@
 import { Component, ViewChild } from '@angular/core';
 import { QuestWheelComponent, WheelSector } from '../../components/quest-wheel/quest-wheel.component';
 import { RoomService } from "./room.service";
-import { Card, Side } from '../../components/card-selection/card-selection.component';
+import { Card, CardSelectionComponent, Side } from '../../components/card-selection/card-selection.component';
 
 export interface Sector {
   index: number;
@@ -18,6 +18,10 @@ export interface Sector {
   styleUrls: ['./room.component.scss']
 })
 export class RoomComponent {
+  constructor(private roomService: RoomService) { }
+
+  // !!! LOGICA DA ROLETA e outras coisas ai !!! //
+
   @ViewChild(QuestWheelComponent) wheel?: QuestWheelComponent;
 
   roletaTravada: boolean = false;
@@ -79,12 +83,11 @@ export class RoomComponent {
     }
   }
 
-  constructor(private roomService: RoomService) { }
-
   // !!! LOGICA DE CARD SELECTION !!! //
+  @ViewChild('cardSelectionRef') cardSelectionRef?: CardSelectionComponent;
 
-  showCardSelectionUI = false;
-  isMyTurn = true; // ajuste sua lógica real
+  showCardSelectionUI = true;
+  isMyTurn = false; // ajuste sua lógica real
   leftCards: Card[] = [
     { id: 'L1', value: 1 }, { id: 'L2', value: 2 }, { id: 'L3', value: 3 }, { id: 'L4', value: 4 }, { id: 'L5', value: 5 }
   ];
@@ -95,19 +98,24 @@ export class RoomComponent {
   startCardSelectionFor(category: any, wheelPoints?: number) {
     this.categoriaSelecionada = category;
     this.showCardSelectionUI = true;
+    this.isMyTurn = true; // ajuste conforme a lógica real
     // garantir que o componente tenha sido mostrado, o jogador escolhe então onCardChosen será chamado
   }
 
-  onCardPickRequested(e: { side: Side; cardId: string; value: number }) {
-    console.log('pick requested', e);
-    // Aqui o pai envia via STOMP ao backend:
-    // stomp.send('/app/room/{roomId}/pick', JSON.stringify(e));
-    // E aguarda confirmação do servidor; quando o servidor confirmar, chame:
-    // this.cardSelectionRef.forcePick(e.side, e.cardId);
-    //
-    // Enquanto aguarda, você pode optar por:
-    // - ignorar (server-authoritative) e só aplicar visual quando confirmar, ou
-    // - aplicar optimistic UI localmente chamando cardSelectionRef.forcePick(...)
+  onCardPickRequested(e: { side: 'left'|'right'; cardId: string; value: number }) {
+    // 1) bloquear UI/indicar "aguardando servidor" se quiser
+    // this.showWaitingForServer = true;
+
+    // 2) enviar para backend (STOMP) — exemplo sem lib específica:
+    // this.stomp.send('/app/room/' + this.roomId + '/pick', JSON.stringify({
+    //   roomId: this.roomId, by: this.myUserId, side: e.side, cardId: e.cardId
+    // }));
+
+    // 3) (opcional) aplicar optimistic UI:
+    // this.cardSelectionRef?.forcePick(e.side, e.cardId);
+
+    // 4) guardar temporariamente qual carta foi escolhida localmente (opcional)
+    // this.lastRequestedPick = e;
   }
 
 }

@@ -64,8 +64,8 @@ export class CardSelectionComponent {
   get leftColB(): Card[] { return (this.leftCards || []).slice(3, 5); }
 
   // right: colA -> first 3, colB -> last 2
-  get rightColA() { return this.rightCards.slice(0,2); }
-  get rightColB() { return this.rightCards.slice(2,5); }
+  get rightColA() { return this.rightCards.slice(0, 2); }
+  get rightColB() { return this.rightCards.slice(2, 5); }
 
 
 
@@ -132,5 +132,26 @@ export class CardSelectionComponent {
 
   ngOnDestroy(): void {
     this.clearAutoTimer();
+  }
+
+  /** Marca uma carta como usada (visual) */
+  markCardUsed(side: 'left' | 'right', cardId: string) {
+    const arr = side === 'left' ? this.leftCards : this.rightCards;
+    const idx = arr.findIndex(c => c.id === cardId);
+    if (idx === -1) return;
+    arr[idx] = { ...arr[idx], used: true };
+
+    // se a carta marcada era a pick visual atual, limpe a seleção
+    if (this.pickedCardId === cardId && this.pickedSide === side) {
+      this.reset();
+    }
+  }
+
+  /** Substitui os arrays de cartas (quando o pai recebe estado do servidor) */
+  setCards(left: Card[], right: Card[]) {
+    this.leftCards = Array.isArray(left) ? left.slice() : [];
+    this.rightCards = Array.isArray(right) ? right.slice() : [];
+    // opcional: limpar pick visual ao re-sincronizar
+    this.reset();
   }
 }
