@@ -126,7 +126,6 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
     this.ObterPacotesMoeda();
     this.ObterItensLoja();
 
-
     // tenta restaurar avatares de localStorage
     try {
       // recuperar salas se existirem (apenas para demo local)
@@ -499,6 +498,10 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
         this.player1.tipo = tipo ?? TipoJogadorEnum.CONVIDADO;
         // }
 
+        if(this.player1.tipo == TipoJogadorEnum.CONVIDADO) {
+          this.ObterAvataresGratuitos();
+        }
+
       },
       complete: () => {
         this.blockUI.stop();
@@ -546,6 +549,23 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
+  ObterAvataresGratuitos() {
+    if(this.player1.tipo == TipoJogadorEnum.CONVIDADO) return;
+
+    this.blockUI.start();
+
+    this.lojaService.ObterAvataresGratuitos().subscribe({
+      next: (data) => {
+        this.avataresInventario = [...data];
+      }, error: () => {
+        this.blockUI.stop();
+      },
+      complete: () => {
+        this.blockUI.stop();
+      }
+    });
+  }
+
   ComprarItemLoja(item: ItemLoja) {
     this.blockUI.start();
 
@@ -565,8 +585,7 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
       },
       error: (err) => {
         const errMsg = err.error?.mensagem;
-        const msg = (errMsg).substring(0, errMsg?.length - 8);
-        this.toastr.error('Erro ao comprar item: ' + msg);
+        this.toastr.error('Erro ao comprar item: ' + errMsg);
         this.blockUI.stop();
       },
       complete: () => {
@@ -603,6 +622,9 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   trocarNome() {
+    if (this.player1.tipo == TipoJogadorEnum.CADASTRADO) {
+      return;
+    }
     this.novoNome = this.player1.username;
     this.openModal('trocarNomeModal');
   }

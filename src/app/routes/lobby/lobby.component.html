@@ -4,10 +4,10 @@
 
       <header class="d-flex justify-content-between align-items-center">
         <div class="left-area d-flex align-items-center gap-3 position-relative">
-          <img *ngIf="player1.tipo == tipoJogadorEnum.CADASTRADO; else convidado" [src]="player1.avatar" alt="Avatar" class="player-avatar" #headerAvatar (click)="openAvatarModal(1)" />
-          <ng-template #convidado>
+          <img [src]="player1.avatar" alt="Avatar" class="player-avatar" #headerAvatar (click)="openAvatarModal(1)" />
+          <!-- <ng-template #convidado>
             <img src="assets/img/Variedades F.png" alt="Avatar Convidado" class="player-avatar" />
-          </ng-template>
+          </ng-template> -->
           <span class="fw-bold fs-5 ms-2" id="playerName" style="cursor: pointer;" (click)="trocarNome()" title="Clique para trocar o nome">
             {{ player1.username }}
           </span>
@@ -370,7 +370,7 @@
         <h4 class="mb-3">Trocar Nome</h4>
         <div class="mb-3 text-start">
           <label class="form-label">Novo Nome:</label>
-          <input type="text" class="form-control" placeholder="Digite seu novo nome" 
+          <input type="text" class="form-control" placeholder="Digite seu novo nome"
                  [(ngModel)]="novoNome" maxlength="20" />
         </div>
         <button class="btn btn-success w-100 mb-2" (click)="confirmarTrocaNome()">Confirmar</button>
