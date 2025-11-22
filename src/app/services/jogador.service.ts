@@ -56,6 +56,20 @@ export class JogadorService {
     });
   }
 
+  AtualizarNomeJogador(novoNome: string) {
+    const url = `${this.baseUrl}/api/jogador/atualizar-nome`;
+    const token = localStorage.getItem('userToken') || '';
+    const headers = { 'user-id': token };
+    const payload = {
+      "novoNome": novoNome
+    }
+
+    return this.http.post(url, payload, {
+      headers,
+      observe: 'response'
+    });
+  }
+
   ObterRanking(): Observable<RankingJogador[]> {
     const url = `${this.baseUrl}/api/jogador/ranking`;
     const token = localStorage.getItem('userToken') || '';
