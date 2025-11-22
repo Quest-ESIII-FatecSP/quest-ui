@@ -1,7 +1,6 @@
 import { Component, ViewChild } from '@angular/core';
 import { QuestWheelComponent, WheelSector } from '../../components/quest-wheel/quest-wheel.component';
 import {StompService} from "../../services/stomp.service";
-import {RoomService} from "./room.service";
 import { RoomService } from "./room.service";
 import { Card, CardSelectionComponent, Side } from '../../components/card-selection/card-selection.component';
 
@@ -42,7 +41,7 @@ export class RoomComponent {
 
   @ViewChild(QuestWheelComponent) wheel?: QuestWheelComponent;
 
-    
+
   roletaTravada: boolean = false;
 
   roletaComecouSpin(event: any) {
