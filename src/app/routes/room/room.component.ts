@@ -3,6 +3,7 @@ import { QuestWheelComponent, WheelSector } from '../../components/quest-wheel/q
 import {StompService} from "../../services/stomp.service";
 import {RoomService} from "./room.service";
 
+
 declare global {
   interface Window {
     _currentQuestionCtx?: any;
@@ -36,6 +37,7 @@ export interface Sector {
 export class RoomComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild(QuestWheelComponent) wheel?: QuestWheelComponent;
 
+    
   roletaTravada: boolean = false;
 
   roletaComecouSpin(event: any) {

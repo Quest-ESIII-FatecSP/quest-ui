@@ -27,7 +27,7 @@
             <span style="font-size: 40px;" class="text-white">{{ player1.moeda }}</span>
           </div>
           <!-- energia comentada: futuro uso -->
-          <button class="btn btn-danger" (click)="logout()">Sair</button>
+          <button class="btn btn-danger btn-lg" (click)="logout()">Sair</button>
         </div>
       </header>
 
@@ -75,8 +75,8 @@
                 </div>
               </div>
 
-              <button class="btn btn-success w-100 mb-2 btn-energy" (click)="criarSala()">Criar Sala</button>
-              <button class="btn btn-primary w-100 mb-2 btn-energy" (click)="entrarSala()">Entrar na Sala</button>
+              <button class="btn btn-success w-100 mb-2 btn-lg btn-energy" (click)="criarSala()">Criar Sala</button>
+              <button class="btn btn-primary w-100 mb-2 btn-lg btn-energy" (click)="entrarSala()">Entrar na Sala</button>
             </div>
           </div>
 
@@ -94,7 +94,7 @@
             </div>
 
             <div *ngIf="player1.tipo == tipoJogadorEnum.CADASTRADO" class="card p-3 d-flex align-items-center gap-2 w-100" (click)="openModal('InventarioModal')">
-              <i class="bi-backpack-fill fs-3"></i><span class="fs-5">Inventario de Poderes</span>
+              <i class="bi-backpack-fill fs-3"></i><span class="fs-5">Inventário de Poderes</span>
             </div>
           </div>
         </div>
