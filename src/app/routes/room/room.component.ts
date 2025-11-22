@@ -1,7 +1,25 @@
 import { Component, ViewChild } from '@angular/core';
 import { QuestWheelComponent, WheelSector } from '../../components/quest-wheel/quest-wheel.component';
+import {StompService} from "../../services/stomp.service";
+import {RoomService} from "./room.service";
 import { RoomService } from "./room.service";
 import { Card, CardSelectionComponent, Side } from '../../components/card-selection/card-selection.component';
+
+declare global {
+  interface Window {
+    _currentQuestionCtx?: any;
+    _powerTrayWatch?: any;
+    _spinInProgress?: any;
+    _confettiContainer?: any;
+    _confettiInterval?: any;
+    _rematchTimeout?: any;
+    _gameEnded?: any;
+    showCardSelection?: any;
+    ensureRoletaOpenIfIdle?: any;
+    setupRoletaForTurn?: any;
+    openRoletaModal?: any;
+  }
+}
 
 export interface Sector {
   index: number;
@@ -24,6 +42,7 @@ export class RoomComponent {
 
   @ViewChild(QuestWheelComponent) wheel?: QuestWheelComponent;
 
+    
   roletaTravada: boolean = false;
 
   roletaComecouSpin(event: any) {
