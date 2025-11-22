@@ -15,6 +15,8 @@ import { AuthInterceptor } from './interceptors/auth.interceptor';
 import { QuestWheelComponent } from './components/quest-wheel/quest-wheel.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ToastrModule } from 'ngx-toastr';
+import { CardComponent } from './components/card/card.component';
+import { CardSelectionComponent } from './components/card-selection/card-selection.component';
 
 @NgModule({
   declarations: [
@@ -24,7 +26,9 @@ import { ToastrModule } from 'ngx-toastr';
     LobbyComponent,
     LoginSuccessComponent,
     RoomComponent,
-    QuestWheelComponent
+    QuestWheelComponent,
+    CardComponent,
+    CardSelectionComponent
   ],
   imports: [
     BrowserModule,
