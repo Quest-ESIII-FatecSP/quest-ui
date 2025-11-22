@@ -8,7 +8,7 @@
           <ng-template #convidado>
             <img src="assets/img/Variedades F.png" alt="Avatar Convidado" class="player-avatar" />
           </ng-template>
-          <span class="fw-bold fs-5 ms-2" id="playerName">
+          <span class="fw-bold fs-5 ms-2" id="playerName" style="cursor: pointer;" (click)="trocarNome()" title="Clique para trocar o nome">
             {{ player1.username }}
           </span>
         </div>
@@ -359,6 +359,22 @@
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Trocar Nome Modal -->
+  <div class="modal fade" id="trocarNomeModal" tabindex="-1" #trocarNomeModal>
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content p-4 text-center">
+        <h4 class="mb-3">Trocar Nome</h4>
+        <div class="mb-3 text-start">
+          <label class="form-label">Novo Nome:</label>
+          <input type="text" class="form-control" placeholder="Digite seu novo nome" 
+                 [(ngModel)]="novoNome" maxlength="20" />
+        </div>
+        <button class="btn btn-success w-100 mb-2" (click)="confirmarTrocaNome()">Confirmar</button>
+        <button class="btn btn-secondary w-100" (click)="closeBootstrapModal('trocarNomeModal')">Cancelar</button>
       </div>
     </div>
   </div>

@@ -66,6 +66,7 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
   senhaEntrada = '';
   novaSala = { nome: '', senha: '' };
   requestedRoomCode = '';
+  novoNome = '';
 
   // Carousel
   currentSlide = 0;
@@ -94,6 +95,7 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('entrarSalaModal', { read: ElementRef }) entrarSalaModalRef!: ElementRef;
   @ViewChild('senhaEntradaModal', { read: ElementRef }) senhaEntradaModalRef!: ElementRef;
   @ViewChild('inventarioModal', { read: ElementRef }) inventarioModalRef!: ElementRef;
+  @ViewChild('trocarNomeModal', { read: ElementRef }) trocarNomeModalRef!: ElementRef;
 
   @ViewChild('playerCard1', { read: ElementRef }) playerCard1Ref!: ElementRef;
   @ViewChild('playerCard2', { read: ElementRef }) playerCard2Ref!: ElementRef;
@@ -150,6 +152,7 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
     this.safeCreateModal('entrarSalaModal', this.entrarSalaModalRef);
     this.safeCreateModal('senhaEntradaModal', this.senhaEntradaModalRef);
     this.safeCreateModal('InventarioModal', this.inventarioModalRef);
+    this.safeCreateModal('trocarNomeModal', this.trocarNomeModalRef);
 
     // animação inicial dos cards
     this.revealPlayerCards();
@@ -250,14 +253,6 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
       this.blockUI.stop();
       this.closeBootstrapModal('avatarModal');
     }
-  }
-
-  mudarNome() {
-    // const novo = prompt('Digite o novo nome do jogador:', this.playerName);
-    // if (novo && novo.trim().length > 0) {
-    //   this.playerName = novo.trim();
-    //   localStorage.setItem('playerName', this.playerName);
-    // }
   }
 
   // ---------- SALAS (Criar / Entrar) ----------
@@ -605,6 +600,43 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
         this.blockUI.stop();
       }
     });
+  }
+
+  trocarNome() {
+    this.novoNome = this.player1.username;
+    this.openModal('trocarNomeModal');
+  }
+
+  confirmarTrocaNome() {
+    const nome = (this.novoNome || '').trim();
+
+    if (!nome || !nome.length) {
+      this.toastr.error('Por favor, digite um nome válido.');
+      return;
+    }
+
+    if (nome.length < 3) {
+      this.toastr.error('O nome deve ter pelo menos 3 caracteres.');
+      return;
+    }
+
+    this.blockUI.start("Alterando nome...");
+
+    this.jogadorService.AtualizarNomeJogador(nome).subscribe({
+      next: (data) => {
+        this.player1.username = nome;
+        this.closeBootstrapModal('trocarNomeModal');
+        this.toastr.success('Nome alterado com sucesso!');
+        this.novoNome = '';
+      }, error: (err) => {
+        const errMsg = err.error?.mensagem;
+        this.toastr.error('Erro ao alterar nome: ' + errMsg);
+        this.blockUI.stop();
+      }, complete: () => {
+        this.blockUI.stop();
+      }
+    });
+
   }
 
   logout() {
