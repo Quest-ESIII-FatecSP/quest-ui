@@ -550,8 +550,6 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ObterAvataresGratuitos() {
-    if(this.player1.tipo == TipoJogadorEnum.CONVIDADO) return;
-
     this.blockUI.start();
 
     this.lojaService.ObterAvataresGratuitos().subscribe({
