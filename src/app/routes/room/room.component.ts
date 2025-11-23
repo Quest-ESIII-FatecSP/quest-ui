@@ -40,7 +40,6 @@ export class RoomComponent implements OnInit {
 
   @ViewChild(QuestWheelComponent) wheel?: QuestWheelComponent;
 
-
   roomId = '';
   showQuestionSection: boolean = false;
   showWheelSection: boolean = true;
@@ -55,6 +54,7 @@ export class RoomComponent implements OnInit {
   themeForWheel: WheelSector | null = null
   player1: IPlayer = {}
   otherPlayer: IPlayer = {}
+  roomTimeLeft = 15
 
   roletaComecouSpin(event: any) {
     this.roletaTravada = true;
@@ -76,6 +76,21 @@ export class RoomComponent implements OnInit {
     this.roomId = this.route.snapshot.paramMap.get('id') ?? '';
     this.findUserData()
     this.stompRoomSubscription()
+    this.startTimer();
+  }
+
+  startTimer(time?: number) {
+    if (time) {
+      this.roomTimeLeft = time;
+    }
+
+    const interval = setInterval(() => {
+      if (this.roomTimeLeft > 0) {
+        this.roomTimeLeft--;
+      } else {
+        clearInterval(interval);
+      }
+    }, 1000);
   }
 
   findUserData(): void{
@@ -139,13 +154,6 @@ export class RoomComponent implements OnInit {
 
   confirmTheme() {
     this.closeThemeModal();
-
-    // if (this.categoriaSelecionada) {
-    //   // const categoria = this.categoriaSelecionada.label;
-    //   // const pontos = 1; // ou o valor que quiser usar
-    //   // this.showCardSelection(categoria, pontos);
-    //   // this.startCardSelectionFor(this.categoriaSelecionada);
-    // }
   }
 
   // !!! LOGICA DE CARD SELECTION !!! //
