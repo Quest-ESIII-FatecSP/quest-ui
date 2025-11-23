@@ -9,13 +9,15 @@ export class StompService {
 
   userID: string = ""; // TODO: acessar token gerado via login, e enviar nos cabeçalhos user-id
 
-  subscribeRequests: {broker: string, callback: (message: Message) => void}[] = [];
+  subscribeRequests: {broker: string, callback: (message: Message) => void, subscription?: StompSubscription}[] = [];
   client: Client;
 
   constructor() {
     this.client = new Client({brokerURL: `${environment.apiUrl}/conectar`});
     this.client.onConnect = () => {
-      this.subscribeRequests.forEach(sub => this.client.subscribe(sub.broker, sub.callback));
+      this.subscribeRequests.forEach(sub => {
+        sub.subscription = this.client.subscribe(sub.broker, sub.callback)
+      });
     }
 
     this.client.activate();
@@ -23,12 +25,27 @@ export class StompService {
     this.verifyTokenCache();
   }
 
-  subscribe(broker: string, callback: (message: Message) => void) {
+  subscribe(broker: string, callback: (message: Message) => void): StompSubscription | null {
     if (this.client.connected) {
-      this.client.subscribe(broker, callback);
+      console.log('foi no connected')
+      const sub = this.client.subscribe(broker, callback);
+      this.subscribeRequests.push({ broker, callback, subscription: sub });
+      return sub;
     } else {
-      this.subscribeRequests.push({broker, callback});
+      console.log('foi no push')
+
+      this.subscribeRequests.push({ broker, callback, subscription: undefined });
+      return null;
     }
+  }
+
+  unsubscribe(subscription: StompSubscription) {
+    if (!subscription) return;
+
+    subscription.unsubscribe();
+    this.subscribeRequests = this.subscribeRequests.filter(
+      req => req.subscription !== subscription
+    );
   }
 
   verifyTokenCache() {

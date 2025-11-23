@@ -37,10 +37,12 @@ export class CardSelectionComponent {
 
   /** Global disable */
   @Input() disabled = false;
+  @Input() availableCards: number[] = [];
 
   /** Titles shown above panels */
   @Input() leftTitle = 'Suas Cartas';
   @Input() rightTitle = 'Cartas do Oponente';
+
 
   /** Optional: if set, component will auto-clear internal pick state after that ms */
   @Input() autoClearMs?: number;
@@ -81,13 +83,16 @@ export class CardSelectionComponent {
     return this.activeSide !== side;
   }
 
-  isPicked(side: Side, cardId: string) {
-    return this.pickedCardId !== null && this.pickedSide === side && this.pickedCardId === cardId;
+  isPicked(side: Side, card: Card) {
+    return this.pickedCardId !== null && (this.pickedSide === side && this.pickedCardId === card?.id
+      || !this.availableCards.includes(card?.value));
   }
 
   pick(side: Side, card: Card) {
     if (this.isDisabled(side, card)) return;
     // visual update
+    console.log(side)
+    console.log(card)
     this.pickedSide = side;
     this.pickedCardId = card.id;
 

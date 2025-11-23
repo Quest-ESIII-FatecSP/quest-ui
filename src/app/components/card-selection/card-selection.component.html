@@ -8,9 +8,9 @@
       <div class="columns">
         <div class="col col-a">
           <ng-container *ngFor="let c of leftColA">
-            <button class="card small" [class.used]="c.used" [class.selected]="isPicked('left', c.id)"
+            <button class="card small" [class.used]="c.used" [class.selected]="isPicked('left', c)"
               [disabled]="isDisabled('left', c)" (click)="pick('left', c)" type="button"
-              [attr.aria-pressed]="isPicked('left', c.id)" [attr.aria-disabled]="isDisabled('left', c) ? true : null">
+              [attr.aria-pressed]="isPicked('left', c)" [attr.aria-disabled]="isDisabled('left', c) ? true : null">
               <div class="val">{{ c.value }}</div>
             </button>
           </ng-container>
@@ -18,9 +18,9 @@
 
         <div class="col col-b">
           <ng-container *ngFor="let c of leftColB">
-            <button class="card small" [class.used]="c.used" [class.selected]="isPicked('left', c.id)"
+            <button class="card small" [class.used]="c.used" [class.selected]="isPicked('left', c)"
               [disabled]="isDisabled('left', c)" (click)="pick('left', c)" type="button"
-              [attr.aria-pressed]="isPicked('left', c.id)" [attr.aria-disabled]="isDisabled('left', c) ? true : null">
+              [attr.aria-pressed]="isPicked('left', c)" [attr.aria-disabled]="isDisabled('left', c) ? true : null">
               <div class="val">{{ c.value }}</div>
             </button>
           </ng-container>
@@ -37,9 +37,9 @@
       <div class="columns">
         <div class="col col-a">
           <ng-container *ngFor="let c of rightColA">
-            <button class="card small" [class.used]="c.used" [class.selected]="isPicked('right', c.id)"
+            <button class="card small" [class.used]="c.used" [class.selected]="isPicked('right', c)"
               [disabled]="isDisabled('right', c)" (click)="pick('right', c)" type="button"
-              [attr.aria-pressed]="isPicked('right', c.id)" [attr.aria-disabled]="isDisabled('right', c) ? true : null">
+              [attr.aria-pressed]="isPicked('right', c)" [attr.aria-disabled]="isDisabled('right', c) ? true : null">
               <div class="val">{{ c.value }}</div>
             </button>
           </ng-container>
@@ -47,9 +47,9 @@
 
         <div class="col col-b">
           <ng-container *ngFor="let c of rightColB">
-            <button class="card small" [class.used]="c.used" [class.selected]="isPicked('right', c.id)"
+            <button class="card small" [class.used]="c.used" [class.selected]="isPicked('right', c)"
               [disabled]="isDisabled('right', c)" (click)="pick('right', c)" type="button"
-              [attr.aria-pressed]="isPicked('right', c.id)" [attr.aria-disabled]="isDisabled('right', c) ? true : null">
+              [attr.aria-pressed]="isPicked('right', c)" [attr.aria-disabled]="isDisabled('right', c) ? true : null">
               <div class="val">{{ c.value }}</div>
             </button>
           </ng-container>

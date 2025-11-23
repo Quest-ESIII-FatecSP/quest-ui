@@ -16,6 +16,7 @@ import { JogadorService, RankingJogador, TipoJogadorEnum } from '../../services/
 import { ItemLoja, LojaService, Pacote, TipoItemEnum } from '../../services/loja.service';
 import { StompService } from "../../services/stomp.service";
 import { ToastrService } from 'ngx-toastr';
+import {StompSubscription} from "@stomp/stompjs";
 declare const bootstrap: any;
 
 interface Sala {
@@ -35,6 +36,9 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
   isSalaEmCriacao: boolean = false;
   roomInfos = { roomCode: '', nomeSala: '' }
   EnterText = 'Entrar';
+  stompRoomSubscriptioinRef: StompSubscription | null = null;
+  stompLobbySubscriptioinRef: StompSubscription | null = null;
+  stopRoomSub = false
 
   player1 = {
     username: 'Jogador 1',
@@ -168,17 +172,26 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
     this.timeouts.forEach(t => clearTimeout(t));
     this.modalInstances.forEach(m => m?.dispose && m.dispose());
     this.modalInstances.clear();
+
+    if (this.stompRoomSubscriptioinRef) {
+      this.stompService.unsubscribe(this.stompRoomSubscriptioinRef);
+    }
+
+    if (this.stompLobbySubscriptioinRef){
+      this.stompService.unsubscribe(this.stompLobbySubscriptioinRef);
+    }
   }
 
   stompRoomSubscription(roomCode?: string) {
     const finalRoomCode = roomCode || this.roomInfos.roomCode;
 
-    this.stompService.subscribe(`/room/${finalRoomCode}`, (message) => {
+    this.stompRoomSubscriptioinRef = this.stompService.subscribe(`/room/${finalRoomCode}`, (message) => {
+      if (this.stopRoomSub) return
+      console.log(message.headers["event"])
       this.player2 = { ...this.player2, active: true, status: 'Conectado' }
       this.EnterText = 'Entrando na Sala...'
-      setTimeout(() => {
-        this.router.navigate(['/room/', finalRoomCode])
-      }, 5000);
+      this.router.navigate(['/room/', finalRoomCode])
+      this.stopRoomSub = true
     });
   }
 

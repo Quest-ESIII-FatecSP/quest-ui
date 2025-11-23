@@ -1,11 +1,6 @@
 import { Component, ElementRef, EventEmitter, Input, Output, ViewChild, SimpleChanges } from '@angular/core';
-
-export interface WheelSector {
-  id?: string | number;
-  label: string;
-  iconUrl?: string;
-  color?: string;
-}
+import {THEMES} from "@shared/constants/theme.constants";
+import {WheelSector} from "../../model/ITheme";
 
 @Component({
   selector: 'app-quest-wheel',
@@ -14,19 +9,12 @@ export interface WheelSector {
 })
 export class QuestWheelComponent {
 
-  @Input() sectors: WheelSector[] = [
-    { id: 'M', label: 'Mundo', color: '#ffd23a', iconUrl: '../../../assets/img/M.png' },
-    { id: 'EL', label: 'Esportes e Lazer', color: '#18a558', iconUrl: '../../../assets/img/EL.png' },
-    { id: 'CT', label: 'Ciências', color: '#0f7bff', iconUrl: '../../../assets/img/CT.png' },
-    { id: 'S', label: 'Sociedade', color: '#8b2be2', iconUrl: '../../../assets/img/S.png' },
-    { id: 'AE', label: 'Arte e Entretenimento', color: '#ff4d4d', iconUrl: '../../../assets/img/E.png' },
-    { id: 'V', label: 'Variedades', color: '#a65b2b', iconUrl: '../../../assets/img/V.png' }
-  ];
+  sectors: WheelSector[] = THEMES
 
-  @Input() targetIndex: string | null = null;
+  @Input() targetIndex: boolean = true;
   @Input() locked = false;
   @Input() showControl = true;
-  @Input() spinDuration = 500;
+  @Input() spinDuration = 5000;
   @Output() spinStart = new EventEmitter<void>();
   @Output() spinEnd = new EventEmitter<{ index: number; sector: WheelSector }>();
 
@@ -72,8 +60,16 @@ export class QuestWheelComponent {
 
       const sectionIndex = this.sectors.findIndex(s => s.id === newIndex);
 
-      if (!this.locked && !this.spinning && sectionIndex !== -1) {
-        this.spinToIndex(sectionIndex);
+      // if (!this.locked && !this.spinning && sectionIndex !== -1) {
+      //   this.spinToIndex(sectionIndex);
+      // }
+
+      if (!this.locked && !this.spinning) {
+        if (sectionIndex !== -1) {
+          this.spinToIndex(sectionIndex);
+        } else {
+          this.spinRandom(); // fallback
+        }
       }
     }
   }

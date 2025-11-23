@@ -1,8 +1,15 @@
-import { Component, ViewChild } from '@angular/core';
-import { QuestWheelComponent, WheelSector } from '../../components/quest-wheel/quest-wheel.component';
-import {StompService} from "../../services/stomp.service";
+import {Component, OnInit, ViewChild} from '@angular/core';
+import { QuestWheelComponent } from '../../components/quest-wheel/quest-wheel.component';
 import { RoomService } from "./room.service";
 import { Card, CardSelectionComponent, Side } from '../../components/card-selection/card-selection.component';
+import {ActivatedRoute} from "@angular/router";
+import {StompService} from "../../services/stomp.service";
+import {IMessage} from "@stomp/stompjs";
+import {IQuestion} from "../../model/IQuestion";
+import {THEMES} from "@shared/constants/theme.constants";
+import {WheelSector} from "../../model/ITheme";
+import {JogadorService, TipoJogadorEnum} from "../../services/jogador.service";
+import {IPlayer} from "../../model/IPlayer";
 
 declare global {
   interface Window {
@@ -20,29 +27,35 @@ declare global {
   }
 }
 
-export interface Sector {
-  index: number;
-  sector: string;
-  color: string;
-  iconUrl: string;
-  id: string;
-  label: string;
-}
-
 @Component({
   selector: 'app-room',
   templateUrl: './room.component.html',
   styleUrls: ['./room.component.scss']
 })
-export class RoomComponent {
-  constructor(private roomService: RoomService) { }
+export class RoomComponent implements OnInit {
+  constructor(private roomService: RoomService,
+              private route: ActivatedRoute,
+              private stompService: StompService,
+              private jogadorService: JogadorService) { }
 
-  // !!! LOGICA DA ROLETA e outras coisas ai !!! //
+
 
   @ViewChild(QuestWheelComponent) wheel?: QuestWheelComponent;
 
 
+  roomId = '';
+  showQuestionSection: boolean = false;
+  showWheelSection: boolean = true;
+  showCardSection: boolean = false;
   roletaTravada: boolean = false;
+  question: IQuestion | null = null;
+  selectedTheme: string | null = null;
+  availableCards: number[] = []
+  isMyTurn = true;
+  shouldSpin = true;
+  allThemes: WheelSector[] = THEMES;
+  themeForWheel: WheelSector | null = null
+  player1: IPlayer = {}
 
   roletaComecouSpin(event: any) {
     this.roletaTravada = true;
@@ -51,6 +64,8 @@ export class RoomComponent {
   temaSelecionado = "EL";
 
   themeModalOpen = false;
+  // opcional: tempo para fechar automaticamente (ms)
+  autoCloseMs = 3000;
   categoriaSelecionada: WheelSector | null = null;
   private autoCloseTimer: any = null;
 
@@ -60,13 +75,43 @@ export class RoomComponent {
   useJumpScare() { this.roomService.usePower('JUMP_SCARE', 'id') }
   useVowelX() { this.roomService.usePower('VOWEL_X', 'id') }
 
-  // opcional: tempo para fechar automaticamente (ms)
-  autoCloseMs = 500;
+  ngOnInit() {
+    this.roomId = this.route.snapshot.paramMap.get('id') ?? '';
+    this.findUserData()
+    this.stompRoomSubscription()
+  }
 
-  onSpinStart() {
-    // bloquear UI se necessário, mostrar "girando..."
-    console.log('spin started');
-    // ex: this.isSpinning = true;
+  findUserData(): void{
+    this.jogadorService.ObterDadosJogador().subscribe({
+      next: (data) => {
+        const { avatar, email, moeda, username, tipo } = data;
+
+        if(tipo == TipoJogadorEnum.CONVIDADO) {
+          this.player1.tipo = TipoJogadorEnum.CONVIDADO;
+          this.player1.username = "Convidado";
+          this.player1.avatar = 'assets/img/Variedades F.png'
+        } else {
+          this.player1.username = username;
+          this.player1.avatar = avatar;
+          this.player1.moeda = moeda;
+          this.player1.email = email;
+          this.player1.tipo = tipo ?? TipoJogadorEnum.CONVIDADO;
+        }
+
+      }
+    });
+  }
+
+  stompRoomSubscription() {
+    const finalRoomCode = this.route.snapshot.paramMap.get('id');
+
+    this.stompService.subscribe(`/room/${finalRoomCode}`, (message) => {
+      console.log(message)
+      const eventType = message.headers["event"];
+      console.log(message.headers["event"])
+      this.isMyTurn = message.headers["active-player-id"] === this.stompService.userID
+      this.handleEventType(eventType, '', message)
+    });
   }
 
   onSpinEnd(result: { index: number; sector: WheelSector }) {
@@ -85,6 +130,11 @@ export class RoomComponent {
     }
   }
 
+  onAnswerSelected(answerID: number) {
+    console.log(answerID)
+    this.roomService.answerQuestion(answerID.toString(), this.roomId)
+  }
+
   closeThemeModal() {
     if (this.autoCloseTimer) { clearTimeout(this.autoCloseTimer); this.autoCloseTimer = null; }
     this.themeModalOpen = false;
@@ -93,19 +143,17 @@ export class RoomComponent {
   confirmTheme() {
     this.closeThemeModal();
 
-    if (this.categoriaSelecionada) {
-      // const categoria = this.categoriaSelecionada.label;
-      // const pontos = 1; // ou o valor que quiser usar
-      // this.showCardSelection(categoria, pontos);
-      this.startCardSelectionFor(this.categoriaSelecionada);
-    }
+    // if (this.categoriaSelecionada) {
+    //   // const categoria = this.categoriaSelecionada.label;
+    //   // const pontos = 1; // ou o valor que quiser usar
+    //   // this.showCardSelection(categoria, pontos);
+    //   // this.startCardSelectionFor(this.categoriaSelecionada);
+    // }
   }
 
   // !!! LOGICA DE CARD SELECTION !!! //
   @ViewChild('cardSelectionRef') cardSelectionRef?: CardSelectionComponent;
 
-  showCardSelectionUI = true;
-  isMyTurn = false; // ajuste sua lógica real
   leftCards: Card[] = [
     { id: 'L1', value: 1 }, { id: 'L2', value: 2 }, { id: 'L3', value: 3 }, { id: 'L4', value: 4 }, { id: 'L5', value: 5 }
   ];
@@ -115,25 +163,95 @@ export class RoomComponent {
 
   startCardSelectionFor(category: any, wheelPoints?: number) {
     this.categoriaSelecionada = category;
-    this.showCardSelectionUI = true;
     this.isMyTurn = true; // ajuste conforme a lógica real
     // garantir que o componente tenha sido mostrado, o jogador escolhe então onCardChosen será chamado
   }
 
-  onCardPickRequested(e: { side: 'left'|'right'; cardId: string; value: number }) {
-    // 1) bloquear UI/indicar "aguardando servidor" se quiser
-    // this.showWaitingForServer = true;
+  onCardPickRequested(card: { side: Side; cardId: string; value: number }) {
+    if (!this.availableCards.includes(card.value)) return
 
-    // 2) enviar para backend (STOMP) — exemplo sem lib específica:
-    // this.stomp.send('/app/room/' + this.roomId + '/pick', JSON.stringify({
-    //   roomId: this.roomId, by: this.myUserId, side: e.side, cardId: e.cardId
-    // }));
+    this.roomService.choseScoreCard(card.value.toString(), this.roomId)
 
-    // 3) (opcional) aplicar optimistic UI:
-    // this.cardSelectionRef?.forcePick(e.side, e.cardId);
-
-    // 4) guardar temporariamente qual carta foi escolhida localmente (opcional)
-    // this.lastRequestedPick = e;
   }
+
+  handleEventType(eventType: string, activePlayer: string, message: IMessage): void {
+    switch (eventType) {
+      case "AWAITING_THEME_CONFIRMATION_ANIMATION":
+        this.handleAwaitingThemeConfirmationAnimation(activePlayer)
+        break;
+      case "AWAITING_THEME_CONFIRMATION":
+        this.handleAwaitingThemeConfirmation(message);
+        break;
+      case "AWAITING_SCORE_CARD_ANIMATION":
+        this.handleAwaitingScoreCardAnimation(activePlayer);
+        break;
+      case "AWAITING_SCORE_CARD":
+        this.handleAwaitingScoreCard(activePlayer, message)
+        break;
+      case "AWAITING_ANSWER_ANIMATION":
+        this.handleAwaitingAnswerAnimation(activePlayer);
+        break;
+      case "AWAITING_ANSWER":
+        this.handleAwaitingAnswer(message);
+        break;
+      case "ANSWER_RESULT":
+        this.handleAnswerResult('');
+        break;
+      case "FREEZE_QUESTIONS_USED":
+        this.handlePowerUsed(activePlayer, "Suas alternativas foram congeladas por 5 segundos!");
+        break;
+      case "MOUSE_ESCAPE_USED":
+        this.handlePowerUsed(activePlayer, "As alternativas fugirão do seu mouse por 4 cliques!");
+        break;
+      case "JUMP_SCARE_USED":
+        this.handlePowerUsed(activePlayer, "Susto!");
+        break;
+      case "VOWEL_X_USED":
+        this.handlePowerUsed(activePlayer, "As vogais e números pares foram substituídos por X!");
+        break;
+      case "STEAL_QUESTION_USED":
+        this.handlePowerUsed(activePlayer, "Sua pergunta foi roubada!");
+        break;
+    }
+  }
+
+  handleAwaitingThemeConfirmationAnimation(activePlayer: any) {
+    this.showWheelSection = true;
+    this.shouldSpin = !this.shouldSpin;
+    this.showCardSection = false;
+    this.showQuestionSection = false;
+  }
+
+  handleAwaitingThemeConfirmation(message: IMessage) {
+    this.selectedTheme = JSON.parse(message.body)['theme'];
+    this.themeForWheel = this.allThemes.find(value => value.label === this.selectedTheme) ?? null
+    console.log(this.themeForWheel)
+  }
+
+  handleAwaitingScoreCardAnimation(activePlayer: string) {
+    this.showWheelSection = false
+    this.showCardSection = true
+  }
+
+  handleAwaitingScoreCard(activePlayer: string, message: IMessage) {
+    this.availableCards = JSON.parse(message.body) as number[];
+    console.log(this.availableCards)
+  }
+
+  handleAwaitingAnswerAnimation(activePlayer: string) {
+
+  }
+
+  handleAwaitingAnswer(message: IMessage) {
+    this.question = JSON.parse(message.body);
+    console.log(this.question)
+    this.showQuestionSection = true
+  }
+
+  handleAnswerResult(answerResult: any) {
+
+  }
+
+  handlePowerUsed(activePlayer: string, message: string) {}
 
 }
