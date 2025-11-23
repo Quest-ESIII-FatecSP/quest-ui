@@ -3,29 +3,29 @@
 
     <div class="powers-group powers-left">
       
-      <button class="power-btn power-btn--freeze" 
-              [disabled]="!canUsePower("1", 'FREEZE')"
+            <button class="power-btn power-btn--freeze" 
+              [disabled]="!canUsePower('1', 'FREEZE')"
               (click)="activate('FREEZE')"
               title="Congelar questão">
         <img src="assets/img/congelar.png" class="power-icon" alt="Congelar">
       </button>
 
-      <button class="power-btn" 
-              [disabled]="!canUsePower("1", 'RUNAWAY')"
+            <button class="power-btn" 
+              [disabled]="!canUsePower('1', 'RUNAWAY')"
               (click)="activate('RUNAWAY')"
               title="Botões fogem (4 cliques)">
         <img src="assets/img/4cliques.png" class="power-icon" alt="4 Cliques">
       </button>
 
-      <button class="power-btn" 
-              [disabled]="!canUsePower("1", 'JUMPSCARE')"
+            <button class="power-btn" 
+              [disabled]="!canUsePower('1', 'JUMPSCARE')"
               (click)="activate('JUMPSCARE')"
               title="Jump Scare">
         <img src="assets/img/jumpscare.png" class="power-icon" alt="Jump Scare">
       </button>
 
-      <button class="power-btn" 
-              [disabled]="!canUsePower("1", 'XMASK')"
+            <button class="power-btn" 
+              [disabled]="!canUsePower('1', 'XMASK')"
               (click)="activate('XMASK')"
               title="Máscara X">
         <img src="assets/img/x.png" class="power-icon" alt="X Mask">
@@ -41,29 +41,29 @@
 
     <div class="powers-group powers-right">
       
-      <button class="power-btn power-btn--freeze" 
-              [disabled]="!canUsePower("2", 'FREEZE')"
+            <button class="power-btn power-btn--freeze" 
+              [disabled]="!canUsePower('2', 'FREEZE')"
               (click)="activate('FREEZE')"
               title="Congelar questão">
         <img src="assets/img/congelar.png" class="power-icon" alt="Congelar">
       </button>
 
-      <button class="power-btn" 
-              [disabled]="!canUsePower("2", 'RUNAWAY')"
+            <button class="power-btn" 
+              [disabled]="!canUsePower('2', 'RUNAWAY')"
               (click)="activate('RUNAWAY')"
               title="Botões fogem">
         <img src="assets/img/4cliques.png" class="power-icon" alt="4 Cliques">
       </button>
 
-      <button class="power-btn" 
-              [disabled]="!canUsePower("2", 'JUMPSCARE')"
+            <button class="power-btn" 
+              [disabled]="!canUsePower('2', 'JUMPSCARE')"
               (click)="activate('JUMPSCARE')"
               title="Jump Scare">
         <img src="assets/img/jumpscare.png" class="power-icon" alt="Jump Scare">
       </button>
 
-      <button class="power-btn" 
-              [disabled]="!canUsePower("2", 'XMASK')"
+            <button class="power-btn" 
+              [disabled]="!canUsePower('2', 'XMASK')"
               (click)="activate('XMASK')"
               title="Máscara X">
         <img src="assets/img/x.png" class="power-icon" alt="X Mask">
