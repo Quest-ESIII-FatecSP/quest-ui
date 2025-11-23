@@ -1,7 +1,8 @@
 <div class="top-bar">
   <div class="player-info">
-    <img id="player1-icon" src="https://i.pravatar.cc/50?img=3" />
-    <span class="player-name" id="player1-name">Jogador1</span>
+    <img [src]="player1.avatar" alt="Avatar" id="player1-icon" />
+
+    <span class="player-name" id="player1-name">{{ player1.username }}</span>
     <span class="points" id="player1-points">0 pts</span>
   </div>
 
@@ -13,7 +14,6 @@
       </svg>
       <div id="timer-text" class="timer-text">15</div>
     </div>
-    <button id="help-btn">Ajuda</button>
     <button id="backBtn" title="Voltar ao Lobby" routerLink="/lobby"
       style="margin-left:8px;padding:6px 8px;border-radius:8px;border:none;cursor:pointer;background:#2b2b5a;color:#fff">Voltar
       ao Lobby</button>
@@ -27,34 +27,47 @@
 </div>
 
 <div id="game-area">
-  <div id="roleta-area" style="display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:-40px;">
+  <div id="roleta-area" style="display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:-40px;"
+       *ngIf="showWheelSection">
     <div class="fw-modal-like" style="overflow:visible;position:relative;">
-
-      <app-quest-wheel [locked]="roletaTravada" (spinStart)="roletaComecouSpin($event)" (spinEnd)="onSpinEnd($event)" [targetIndex]="temaSelecionado"></app-quest-wheel>
-
+      <app-quest-wheel [locked]="roletaTravada"
+                       (spinStart)="roletaComecouSpin($event)"
+                       (spinEnd)="onSpinEnd($event)"
+                       [targetIndex]="shouldSpin">
+      </app-quest-wheel>
     </div>
   </div>
 
+  <div style="width: 800px;" *ngIf="showQuestionSection">
+    <app-question-section class="full-width"
+                          [question]="question"
+                          [categoryName]="selectedTheme"
+                          [isMyTurn]="true"
+                          [reveal]="false"
+                          (answerSelected)="onAnswerSelected($event)"
+    >
+    </app-question-section>
+  </div>
+
   <app-card-selection
-    *ngIf="showCardSelectionUI"
+    *ngIf="showCardSection"
     [leftCards]="leftCards"
     [rightCards]="rightCards"
     [activeSide]="isMyTurn ? 'left' : 'right'"
-    [leftTitle]="'Suas Cartas'"
-    [rightTitle]="'Cartas do Oponente'"
+    [availableCards]="availableCards"
     (pickRequested)="onCardPickRequested($event)"
     class="cards-containers"
   ></app-card-selection>
 
-</div>
 
+</div>
 
 <!-- MODAL DA CATEGORIA SORTEADA -->
 <div style="z-index: 999999;" class="theme-modal-backdrop" *ngIf="themeModalOpen" (click)="closeThemeModal()">
   <div class="theme-modal" (click)="$event.stopPropagation()" role="dialog" aria-modal="true"
     aria-labelledby="themeTitle">
-    <img class="theme-icon" *ngIf="categoriaSelecionada?.iconUrl" [src]="'assets/img/' + categoriaSelecionada?.iconUrl" alt="" />
-    <h2 id="themeTitle">{{ categoriaSelecionada?.label || 'Tema' }}</h2>
+    <img class="theme-icon" *ngIf="themeForWheel?.iconUrl" [src]="'assets/img/' + themeForWheel?.iconUrl" alt="" />
+    <h2 id="themeTitle">{{ themeForWheel?.label || 'Tema' }}</h2>
     <p class="theme-sub">Categoria sorteada</p>
   </div>
 </div>
