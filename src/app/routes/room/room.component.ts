@@ -11,6 +11,22 @@ import {WheelSector} from "../../model/ITheme";
 import {JogadorService, TipoJogadorEnum} from "../../services/jogador.service";
 import {IPlayer} from "../../model/IPlayer";
 
+declare global {
+  interface Window {
+    _currentQuestionCtx?: any;
+    _powerTrayWatch?: any;
+    _spinInProgress?: any;
+    _confettiContainer?: any;
+    _confettiInterval?: any;
+    _rematchTimeout?: any;
+    _gameEnded?: any;
+    showCardSelection?: any;
+    ensureRoletaOpenIfIdle?: any;
+    setupRoletaForTurn?: any;
+    openRoletaModal?: any;
+  }
+}
+
 @Component({
   selector: 'app-room',
   templateUrl: './room.component.html',
@@ -25,6 +41,8 @@ export class RoomComponent implements OnInit {
 
 
   @ViewChild(QuestWheelComponent) wheel?: QuestWheelComponent;
+
+
   roomId = '';
   showQuestionSection: boolean = false;
   showWheelSection: boolean = true;
@@ -43,6 +61,7 @@ export class RoomComponent implements OnInit {
     this.roletaTravada = true;
   }
 
+  temaSelecionado = "EL";
 
   themeModalOpen = false;
   // opcional: tempo para fechar automaticamente (ms)

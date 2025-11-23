@@ -38,6 +38,7 @@
     </div>
   </div>
 
+
   <div style="width: 800px;" *ngIf="showQuestionSection">
     <app-question-section class="full-width"
                           [question]="question"
@@ -54,6 +55,8 @@
     [leftCards]="leftCards"
     [rightCards]="rightCards"
     [activeSide]="isMyTurn ? 'left' : 'right'"
+    [leftTitle]="'Suas Cartas'"
+    [rightTitle]="'Cartas do Oponente'"
     [availableCards]="availableCards"
     (pickRequested)="onCardPickRequested($event)"
     class="cards-containers"

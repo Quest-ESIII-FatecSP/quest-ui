@@ -4,11 +4,11 @@
 
       <header class="d-flex justify-content-between align-items-center">
         <div class="left-area d-flex align-items-center gap-3 position-relative">
-          <img *ngIf="player1.tipo == tipoJogadorEnum.CADASTRADO; else convidado" [src]="player1.avatar" alt="Avatar" class="player-avatar" #headerAvatar (click)="openAvatarModal(1)" />
-          <ng-template #convidado>
+          <img [src]="player1.avatar" alt="Avatar" class="player-avatar" #headerAvatar (click)="openAvatarModal(1)" />
+          <!-- <ng-template #convidado>
             <img src="assets/img/Variedades F.png" alt="Avatar Convidado" class="player-avatar" />
-          </ng-template>
-          <span class="fw-bold fs-5 ms-2" id="playerName">
+          </ng-template> -->
+          <span class="fw-bold fs-5 ms-2" id="playerName" style="cursor: pointer;" (click)="trocarNome()" title="Clique para trocar o nome">
             {{ player1.username }}
           </span>
         </div>
@@ -27,7 +27,7 @@
             <span style="font-size: 40px;" class="text-white">{{ player1.moeda }}</span>
           </div>
           <!-- energia comentada: futuro uso -->
-          <button class="btn btn-danger" (click)="logout()">Sair</button>
+          <button class="btn btn-danger btn-lg" (click)="logout()">Sair</button>
         </div>
       </header>
 
@@ -75,8 +75,8 @@
                 </div>
               </div>
 
-              <button class="btn btn-success w-100 mb-2 btn-energy" (click)="criarSala()">Criar Sala</button>
-              <button class="btn btn-primary w-100 mb-2 btn-energy" (click)="entrarSala()">Entrar na Sala</button>
+              <button class="btn btn-success w-100 mb-2 btn-lg btn-energy" (click)="criarSala()">Criar Sala</button>
+              <button class="btn btn-primary w-100 mb-2 btn-lg btn-energy" (click)="entrarSala()">Entrar na Sala</button>
             </div>
           </div>
 
@@ -94,7 +94,7 @@
             </div>
 
             <div *ngIf="player1.tipo == tipoJogadorEnum.CADASTRADO" class="card p-3 d-flex align-items-center gap-2 w-100" (click)="openModal('InventarioModal')">
-              <i class="bi-backpack-fill fs-3"></i><span class="fs-5">Inventario de Poderes</span>
+              <i class="bi-backpack-fill fs-3"></i><span class="fs-5">Inventário de Poderes</span>
             </div>
           </div>
         </div>
@@ -359,6 +359,22 @@
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Trocar Nome Modal -->
+  <div class="modal fade" id="trocarNomeModal" tabindex="-1" #trocarNomeModal>
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content p-4 text-center">
+        <h4 class="mb-3">Trocar Nome</h4>
+        <div class="mb-3 text-start">
+          <label class="form-label">Novo Nome:</label>
+          <input type="text" class="form-control" placeholder="Digite seu novo nome"
+                 [(ngModel)]="novoNome" maxlength="20" />
+        </div>
+        <button class="btn btn-success w-100 mb-2" (click)="confirmarTrocaNome()">Confirmar</button>
+        <button class="btn btn-secondary w-100" (click)="closeBootstrapModal('trocarNomeModal')">Cancelar</button>
       </div>
     </div>
   </div>
