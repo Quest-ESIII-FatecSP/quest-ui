@@ -1,0 +1,100 @@
+/* --- CARD PRINCIPAL --- */
+
+.question-card {
+  background: #000000dd;
+  padding: 25px 40px;
+  border-radius: 20px;
+  border: 4px solid #ffd700;
+  width: 100%;               /* <-- maleável */
+  box-sizing: border-box;     /* garante expansão correta */
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  color: white;
+  font-family: "Segoe UI", sans-serif;
+  text-align: center;
+}
+
+/* --- Categoria --- */
+
+.category-label {
+  align-self: flex-start;
+  font-size: 0.9rem;
+  background: #22306b;
+  padding: 6px 14px;
+  border-radius: 15px;
+  border: 2px solid #ffd700;
+}
+
+/* --- Texto "Agora é sua vez" --- */
+
+.turn-label {
+  text-align: left;
+  font-size: 1rem;
+  font-weight: 600;
+  margin-top: -10px;
+}
+
+/* --- Título da pergunta --- */
+
+.question-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-top: 5px;
+}
+
+/* --- Alternativas --- */
+
+.alternatives {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.alternative {
+  background: #0c1445;
+  color: white;
+  padding: 8px;
+  font-size: 1.1rem;
+  border-radius: 14px;
+  border: 3px solid #ffd700;
+  cursor: pointer;
+  transition: 0.15s ease;
+  font-weight: 500;
+
+  &:hover:not(:disabled) {
+    background: #18236b;
+    transform: scale(1.01);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+
+  .correct {
+    background-color: #1eff1e !important;
+    color: #000;
+    animation: blink-green 0.8s ease-in-out infinite;
+  }
+
+  &.wrong {
+    background-color: #ff2626 !important;
+    color: #000;
+    animation: blink-red 0.8s ease-in-out infinite;
+  }
+}
+
+/* --- Animações --- */
+
+@keyframes blink-green {
+  0% { background-color: #1eff1e; }
+  50% { background-color: #7aff7a; }
+  100% { background-color: #1eff1e; }
+}
+
+@keyframes blink-red {
+  0% { background-color: #ff2626; }
+  50% { background-color: #ff7a7a; }
+  100% { background-color: #ff2626; }
+}

@@ -58,6 +58,13 @@ export class LojaService {
     return this.http.get<Pacote[]>(url, { headers } );
   }
 
+  ObterAvataresGratuitos(): Observable<ItemLoja[]> {
+    const url = `${this.baseUrl}/api/loja/listar-avatares-gratuitos`;
+    const token = localStorage.getItem('userToken') || '';
+    const headers = { 'user-id': token };
+    return this.http.get<ItemLoja[]>(url, { headers } );
+  }
+
   ObterItensLoja(): Observable<ItemLoja[]> {
     const url = `${this.baseUrl}/api/loja/itens`;
     const token = localStorage.getItem('userToken') || '';

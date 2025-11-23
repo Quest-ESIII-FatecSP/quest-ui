@@ -1,0 +1,30 @@
+<div class="question-card">
+
+  <div class="category-label">
+    Categoria: {{ categoryName || '---' }}
+  </div>
+
+  <div class="turn-label">
+    Agora é sua vez, responda:
+  </div>
+
+  <div class="question-title">
+    {{ question?.question }}
+  </div>
+
+  <div class="alternatives">
+    <button
+      *ngFor="let alt of question?.answers"
+      class="alternative"
+      [disabled]="isDisabled()"
+      [ngClass]="{
+    'correct': getAlternativeState(alt.answerID) === 'correct',
+    'wrong': getAlternativeState(alt.answerID) === 'wrong'
+  }"
+      (click)="onSelectAlternative(alt)"
+    >
+      {{ alt.answerText }}
+    </button>
+  </div>
+
+</div>

@@ -4,7 +4,6 @@ import { FormsModule } from '@angular/forms';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { RegisterComponent } from './routes/register/register.component';
 import { LobbyComponent } from './routes/lobby/lobby.component';
 import { LoginComponent } from './routes/login/login.component';
 import { LoginSuccessComponent } from './routes/login-success/login-success.component';
@@ -15,16 +14,21 @@ import { AuthInterceptor } from './interceptors/auth.interceptor';
 import { QuestWheelComponent } from './components/quest-wheel/quest-wheel.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ToastrModule } from 'ngx-toastr';
+import {CardComponent} from "./components/card/card.component";
+import {CardSelectionComponent} from "./components/card-selection/card-selection.component";
+import {QuestionSectionComponent} from "./components/question-section/question-section.component";
 
 @NgModule({
   declarations: [
     AppComponent,
-    RegisterComponent,
     LoginComponent,
     LobbyComponent,
     LoginSuccessComponent,
     RoomComponent,
-    QuestWheelComponent
+    QuestWheelComponent,
+    CardComponent,
+    CardSelectionComponent,
+    QuestionSectionComponent
   ],
   imports: [
     BrowserModule,
