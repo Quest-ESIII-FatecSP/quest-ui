@@ -31,21 +31,22 @@
        *ngIf="showWheelSection">
     <div class="fw-modal-like" style="overflow:visible;position:relative;">
       <app-quest-wheel [locked]="roletaTravada"
-                       (spinStart)="roletaComecouSpin($event)"
-                       (spinEnd)="onSpinEnd($event)"
-                       [targetIndex]="shouldSpin">
+         (spinStart)="roletaComecouSpin($event)"
+         (spinEnd)="onSpinEnd($event)"
+         [targetIndex]="shouldSpin">
       </app-quest-wheel>
     </div>
   </div>
 
 
   <div style="width: 800px;" *ngIf="showQuestionSection">
+    <!-- Adicionei [effects] aqui para conectar os efeitos visuais (tremor, congelamento) -->
     <app-question-section class="full-width"
-                          [question]="question"
-                          [categoryName]="selectedTheme"
-                          [isMyTurn]="true"
-                          [reveal]="false"
-                          (answerSelected)="onAnswerSelected($event)"
+      [question]="question"
+      [categoryName]="selectedTheme"
+      [isMyTurn]="true"
+      [reveal]="false"
+      (answerSelected)="onAnswerSelected($event)"
     >
     </app-question-section>
   </div>
@@ -65,6 +66,14 @@
 
 </div>
 
+<!-- BARRA DE PODERES (Adicionado conforme solicitado) -->
+<app-power-tray
+  [localPlayerId]="stompService.userID.toString()"
+  [currentTurnPlayerId]="activePlayerId"
+  [usedPowers]="usedPowers"
+  (onUsePower)="handlePowerAction($event)">
+</app-power-tray>
+
 <!-- MODAL DA CATEGORIA SORTEADA -->
 <div style="z-index: 999999;" class="theme-modal-backdrop" *ngIf="themeModalOpen" (click)="closeThemeModal()">
   <div class="theme-modal" (click)="$event.stopPropagation()" role="dialog" aria-modal="true"
@@ -74,3 +83,4 @@
     <p class="theme-sub">Categoria sorteada</p>
   </div>
 </div>
+

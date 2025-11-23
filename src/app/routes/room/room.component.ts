@@ -10,6 +10,7 @@ import {THEMES} from "@shared/constants/theme.constants";
 import {WheelSector} from "../../model/ITheme";
 import {JogadorService, TipoJogadorEnum} from "../../services/jogador.service";
 import {IPlayer} from "../../model/IPlayer";
+import { PowerType } from 'src/app/components/powers/powers.component';
 
 declare global {
   interface Window {
@@ -35,11 +36,10 @@ declare global {
 export class RoomComponent implements OnInit {
   constructor(private roomService: RoomService,
               private route: ActivatedRoute,
-              private stompService: StompService,
+              public stompService: StompService, // Public para acesso no HTML se necessário
               private jogadorService: JogadorService) { }
 
   @ViewChild(QuestWheelComponent) wheel?: QuestWheelComponent;
-
 
   roomId = '';
   showQuestionSection: boolean = false;
@@ -56,7 +56,18 @@ export class RoomComponent implements OnInit {
   player1: IPlayer = { pontuacao: 0   };
   otherPlayer: IPlayer = { pontuacao: 0   };
   displayTopBar: boolean = false;
-  roomTimeLeft = 15
+  roomTimeLeft = 15;
+
+  // --- STATE DOS PODERES (ADICIONADO) ---
+  activePlayerId: string = '';
+  usedPowers: string[] = [];
+  activeEffects = {
+    frozen: false,
+    masked: false,
+    shaking: false,
+    runawayButtons: false
+  };
+  // --------------------------------------
 
   roletaComecouSpin(event: any) {
     this.roletaTravada = true;
@@ -68,11 +79,12 @@ export class RoomComponent implements OnInit {
   categoriaSelecionada: WheelSector | null = null;
   private autoCloseTimer: any = null;
 
-  useFreezeQuestions() { this.roomService.usePower('FREEZE_QUESTIONS', 'id') }
-  useStealQuestion() { this.roomService.usePower('STEAL_QUESTION', 'id') }
-  useMouseEscape() { this.roomService.usePower('MOUSE_ESCAPE', 'id') }
-  useJumpScare() { this.roomService.usePower('JUMP_SCARE', 'id') }
-  useVowelX() { this.roomService.usePower('VOWEL_X', 'id') }
+  // Métodos antigos mantidos, mas a lógica principal será via handlePowerAction
+  useFreezeQuestions() { this.roomService.usePower('FREEZE_QUESTIONS', this.stompService.userID) }
+  useStealQuestion() { this.roomService.usePower('STEAL_QUESTION', this.stompService.userID) }
+  useMouseEscape() { this.roomService.usePower('MOUSE_ESCAPE', this.stompService.userID) }
+  useJumpScare() { this.roomService.usePower('JUMP_SCARE', this.stompService.userID) }
+  useVowelX() { this.roomService.usePower('VOWEL_X', this.stompService.userID) }
 
   ngOnInit() {
     this.roomId = this.route.snapshot.paramMap.get('id') ?? '';
@@ -123,8 +135,12 @@ export class RoomComponent implements OnInit {
       console.log(message)
       const eventType = message.headers["event"];
       console.log(message.headers["event"])
+      
+      // Captura o ID do jogador ativo para a barra de poderes saber se habilita ou não
+      this.activePlayerId = message.headers["active-player-id"];
+      
       this.isMyTurn = message.headers["active-player-id"] === this.stompService.userID
-      this.handleEventType(eventType, '', message)
+      this.handleEventType(eventType, this.activePlayerId, message)
     });
   }
 
@@ -202,7 +218,7 @@ export class RoomComponent implements OnInit {
         this.handleAwaitingAnswer(message);
         break;
       case "ANSWER_RESULT":
-        this.handleAnswerResult('');
+        this.handleAnswerResult(message);
         break;
       case "FREEZE_QUESTIONS_USED":
         this.handlePowerUsed(activePlayer, "Suas alternativas foram congeladas por 5 segundos!");
@@ -273,6 +289,7 @@ export class RoomComponent implements OnInit {
   }
 
   handleAnswerResult(message: any) {
+    if (!message) return;
     const result = JSON.parse(message.body);
 
     const pontuacao: Map<string, number> = new Map(Object.entries(result.scorePerPlayer));
@@ -285,6 +302,56 @@ export class RoomComponent implements OnInit {
 
   }
 
-  handlePowerUsed(activePlayer: string, message: string) {}
+  // --- IMPLEMENTAÇÃO DA LÓGICA DE PODERES (ADICIONADO) ---
+  handlePowerAction(event: { type: PowerType, fromPlayer: any }) {
+    const { type } = event;
+    
+    const powerKey = `${this.stompService.userID}_${type}`;
+    this.usedPowers.push(powerKey);
 
+    const myId = this.stompService.userID;
+    switch (type) {
+      case 'FREEZE':
+        this.roomService.usePower('FREEZE_QUESTIONS', myId);
+        break;
+      case 'RUNAWAY':
+        this.roomService.usePower('MOUSE_ESCAPE', myId);
+        break;
+      case 'JUMPSCARE':
+        this.roomService.usePower('JUMP_SCARE', myId);
+        break;
+      case 'XMASK':
+        this.roomService.usePower('VOWEL_X', myId);
+        break;
+      case 'STEAL':
+        this.roomService.usePower('STEAL_QUESTION', myId);
+        break;
+    }
+  }
+
+  handlePowerUsed(activePlayer: string, message: string) {
+    
+    if (message.includes("congeladas")) {
+      this.triggerEffect('frozen', 5000); 
+    } 
+    else if (message.includes("fugirão")) {
+      this.triggerEffect('runawayButtons', 10000); 
+    }
+    else if (message.includes("Susto")) {
+      this.triggerEffect('shaking', 2000);
+    }
+    else if (message.includes("substituídos por X")) {
+      this.triggerEffect('masked', 5000);
+    }
+    else if (message.includes("roubada")) {
+      console.log("Pergunta roubada!");
+    }
+  }
+
+  private triggerEffect(effectKey: keyof typeof this.activeEffects, duration: number) {
+    this.activeEffects[effectKey] = true;
+    setTimeout(() => {
+      this.activeEffects[effectKey] = false;
+    }, duration);
+  }
 }

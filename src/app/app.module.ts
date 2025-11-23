@@ -17,6 +17,7 @@ import { ToastrModule } from 'ngx-toastr';
 import {CardComponent} from "./components/card/card.component";
 import {CardSelectionComponent} from "./components/card-selection/card-selection.component";
 import {QuestionSectionComponent} from "./components/question-section/question-section.component";
+import { PowersComponent } from './components/powers/powers.component';
 
 @NgModule({
   declarations: [
@@ -28,7 +29,8 @@ import {QuestionSectionComponent} from "./components/question-section/question-s
     QuestWheelComponent,
     CardComponent,
     CardSelectionComponent,
-    QuestionSectionComponent
+    QuestionSectionComponent,
+    PowersComponent
   ],
   imports: [
     BrowserModule,

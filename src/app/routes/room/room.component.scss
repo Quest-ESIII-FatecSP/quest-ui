@@ -232,3 +232,161 @@
   margin: 0;
   font-size: 13px;
 }
+
+// --- ESTILOS DA BARRA DE PODERES ---
+
+.power-tray {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 18px;
+  display: flex;
+  z-index: 3000;
+  width: 100%;
+  pointer-events: none; // Permite clicar através da área vazia
+
+  &.center,
+  &.left,
+  &.right {
+    transform: none;
+  }
+
+  .power-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 42px;
+    width: 100%;
+    pointer-events: auto; // Reabilita cliques nos botões
+  }
+
+  .powers-group {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  // --- BOTÃO PADRÃO ---
+  .power-btn {
+    width: 84px;
+    height: 84px;
+    position: relative;
+    border-radius: 12px;
+    border: 2px solid #FFD700;
+    color: #fff;
+    cursor: pointer;
+    background: linear-gradient(145deg, #1a1f4b, #0b0f30);
+    box-shadow: 0 0 16px rgba(255, 215, 0, 0.25);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 900;
+    font-size: 22px;
+    overflow: hidden;
+    transition: transform .22s ease, box-shadow .22s ease, filter .22s ease;
+
+    &:hover:not(:disabled) {
+      transform: translateY(-6px);
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.38);
+      filter: brightness(1.06);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      filter: grayscale(25%);
+    }
+
+    &.power-btn--freeze {
+      font-size: 24px;
+    }
+
+    // --- ÍCONE DENTRO DO BOTÃO ---
+    .power-icon {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      pointer-events: none;
+      border-radius: inherit;
+    }
+  }
+
+  // --- BOTÃO DE ROUBAR (CENTRAL) ---
+  .power-btn--steal {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(145deg, #fff1a8, #ffd23a);
+    color: #1a1200;
+    border-width: 3px;
+    box-shadow: 0 0 24px rgba(255, 210, 58, 0.45);
+    z-index: 1;
+
+    // Se precisar de ajustes específicos para o ícone de roubar
+    .power-icon {
+      object-fit: cover;
+    }
+  }
+
+  // Ocultar botões que não são do jogador local se necessário
+  .local-only.hidden-remote {
+    display: none !important;
+  }
+}
+
+// --- RESPONSIVIDADE ---
+@media (max-height: 760px) {
+  .power-tray {
+    .power-btn {
+      width: 72px;
+      height: 72px;
+      font-size: 20px;
+    }
+
+    .power-btn--steal {
+      width: 86px;
+      height: 86px;
+    }
+  }
+}
+
+@media (max-height: 680px) {
+  .power-tray {
+    .power-btn {
+      width: 66px;
+      height: 66px;
+      font-size: 18px;
+    }
+
+    .power-btn--steal {
+      width: 78px;
+      height: 78px;
+    }
+  }
+}
+
+@media (max-width: 900px) {
+  .power-tray {
+    .power-row {
+      gap: 20px; 
+    }
+  }
+}
+
+@media (max-width: 560px) {
+  .power-tray {
+    .power-btn {
+      width: 50px;
+      height: 50px;
+    }
+
+    .power-btn--steal {
+      width: 64px;
+      height: 64px;
+    }
+    
+    .powers-group {
+      gap: 8px;
+    }
+  }
+}
