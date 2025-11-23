@@ -32,7 +32,7 @@ export class AuthInterceptor implements HttpInterceptor {
 
       if (!token) {
         // Redireciona para login se não houver token
-        this.router.navigate(['/login']);
+   //     this.router.navigate(['/login']);
         // Retorna um Observable vazio para cancelar a requisição
         return new Observable<HttpEvent<any>>(observer => {
           observer.complete();
