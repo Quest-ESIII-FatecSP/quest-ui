@@ -3,7 +3,7 @@
     <img [src]="player1.avatar" alt="Avatar" id="player1-icon" />
 
     <span class="player-name" id="player1-name">{{ player1.username }}</span>
-    <span class="points" id="player1-points">0 pts</span>
+    <span class="points" id="player1-points">{{ player1.pontuacao }} pts</span>
   </div>
 
   <div class="timer-area">
@@ -13,6 +13,7 @@
         <circle id="timer-circle" class="timer-circle" cx="30" cy="30" r="27" stroke="#00FF00" stroke-dasharray="170" stroke-dashoffset="0" />
       </svg>
       <div id="timer-text" class="timer-text">15</div>
+<!--      todo mudar tempo dinamicamente de acordo com evento-->
     </div>
     <button id="backBtn" title="Voltar ao Lobby" routerLink="/lobby"
       style="margin-left:8px;padding:6px 8px;border-radius:8px;border:none;cursor:pointer;background:#2b2b5a;color:#fff">Voltar
@@ -20,9 +21,9 @@
   </div>
 
   <div class="player-info">
-    <img id="player2-icon" src="https://i.pravatar.cc/50?img=5" />
-    <span class="player-name" id="player2-name">Jogador2</span>
-    <span class="points" id="player2-points">0 pts</span>
+    <img id="player2-icon" [src]="otherPlayer.avatar" />
+    <span class="player-name" id="player2-name">{{ otherPlayer.username }}</span>
+    <span class="points" id="player2-points">{{ otherPlayer.pontuacao }} pts</span>
   </div>
 </div>
 

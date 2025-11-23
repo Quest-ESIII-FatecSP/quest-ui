@@ -5,5 +5,6 @@ export interface IPlayer {
   status?: string,
   tipo?: string
   active?: false,
-  email?: string
+  email?: string,
+  pontuacao?: number
 }

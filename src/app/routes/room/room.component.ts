@@ -38,8 +38,6 @@ export class RoomComponent implements OnInit {
               private stompService: StompService,
               private jogadorService: JogadorService) { }
 
-
-
   @ViewChild(QuestWheelComponent) wheel?: QuestWheelComponent;
 
 
@@ -56,12 +54,11 @@ export class RoomComponent implements OnInit {
   allThemes: WheelSector[] = THEMES;
   themeForWheel: WheelSector | null = null
   player1: IPlayer = {}
+  otherPlayer: IPlayer = {}
 
   roletaComecouSpin(event: any) {
     this.roletaTravada = true;
   }
-
-  temaSelecionado = "EL";
 
   themeModalOpen = false;
   // opcional: tempo para fechar automaticamente (ms)
@@ -248,7 +245,16 @@ export class RoomComponent implements OnInit {
     this.showQuestionSection = true
   }
 
-  handleAnswerResult(answerResult: any) {
+  handleAnswerResult(message: any) {
+    const result = JSON.parse(message.body);
+
+    const pontuacao: Map<string, number> = new Map(Object.entries(result.scorePerPlayer));
+    this.player1.pontuacao = pontuacao.get(this.stompService.userID)
+    pontuacao.forEach((v, k) => {
+      if (k != this.stompService.userID) {
+        this.otherPlayer.pontuacao = v;
+      }
+    })
 
   }
 
