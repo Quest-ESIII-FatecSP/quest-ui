@@ -1,4 +1,5 @@
 export interface IPlayer {
+  id?: string,
   username?: string,
   avatar?: string,
   moeda?: number,
