@@ -31,10 +31,10 @@ export class JogadorService {
 
   constructor(private http: HttpClient) {}
 
-  ObterDadosJogador(): Observable<Jogador> {
+  ObterDadosJogador(userId?: string): Observable<Jogador> {
     const url = `${this.baseUrl}/api/jogador`;
 
-    const token = localStorage.getItem('userToken') || '';
+    const token = userId || localStorage.getItem('userToken') || '';
     const headers = { 'user-id': token };
 
     return this.http.get<Jogador>(url, { headers });

@@ -40,6 +40,7 @@ export class RoomComponent implements OnInit {
 
   @ViewChild(QuestWheelComponent) wheel?: QuestWheelComponent;
 
+
   roomId = '';
   showQuestionSection: boolean = false;
   showWheelSection: boolean = true;
@@ -51,9 +52,10 @@ export class RoomComponent implements OnInit {
   isMyTurn = true;
   shouldSpin = true;
   allThemes: WheelSector[] = THEMES;
-  themeForWheel: WheelSector | null = null
-  player1: IPlayer = {}
-  otherPlayer: IPlayer = {}
+  themeForWheel: WheelSector | null = null;
+  player1: IPlayer = { pontuacao: 0   };
+  otherPlayer: IPlayer = { pontuacao: 0   };
+  displayTopBar: boolean = false;
   roomTimeLeft = 15
 
   roletaComecouSpin(event: any) {
@@ -74,8 +76,8 @@ export class RoomComponent implements OnInit {
 
   ngOnInit() {
     this.roomId = this.route.snapshot.paramMap.get('id') ?? '';
-    this.findUserData()
-    this.stompRoomSubscription()
+    this.findUserData();
+    this.stompRoomSubscription();
     this.startTimer();
   }
 
@@ -229,8 +231,25 @@ export class RoomComponent implements OnInit {
 
   handleAwaitingThemeConfirmation(message: IMessage) {
     this.selectedTheme = JSON.parse(message.body)['theme'];
-    this.themeForWheel = this.allThemes.find(value => value.label === this.selectedTheme) ?? null
-    console.log(this.themeForWheel)
+    this.themeForWheel = this.allThemes.find(value => value.label === this.selectedTheme) ?? null;
+
+    const players: {id: string, name: string, avatar: string}[] = JSON.parse(message.body)['players'];
+
+    players.forEach(p => {
+      if (p.id == this.stompService.userID) {
+        this.player1.username = p.name;
+        this.player1.avatar = p.avatar;
+        this.player1.id = p.id;
+      } else {
+        this.otherPlayer.username = p.name;
+        this.otherPlayer.avatar = p.avatar;
+        this.otherPlayer.id = p.id;
+      }
+    });
+
+    this.displayTopBar = true;
+
+    console.log(this.themeForWheel);
   }
 
   handleAwaitingScoreCardAnimation(activePlayer: string) {
