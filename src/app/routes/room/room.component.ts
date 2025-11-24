@@ -1,15 +1,15 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { QuestWheelComponent } from '../../components/quest-wheel/quest-wheel.component';
 import { RoomService } from "./room.service";
 import { Card, CardSelectionComponent, Side } from '../../components/card-selection/card-selection.component';
-import {ActivatedRoute} from "@angular/router";
-import {StompService} from "../../services/stomp.service";
-import {IMessage} from "@stomp/stompjs";
-import {IQuestion} from "../../model/IQuestion";
-import {THEMES} from "@shared/constants/theme.constants";
-import {WheelSector} from "../../model/ITheme";
-import {JogadorService, TipoJogadorEnum} from "../../services/jogador.service";
-import {IPlayer} from "../../model/IPlayer";
+import { ActivatedRoute } from "@angular/router";
+import { StompService } from "../../services/stomp.service";
+import { IMessage } from "@stomp/stompjs";
+import { IQuestion } from "../../model/IQuestion";
+import { THEMES } from "@shared/constants/theme.constants";
+import { WheelSector } from "../../model/ITheme";
+import { JogadorService, TipoJogadorEnum } from "../../services/jogador.service";
+import { IPlayer } from "../../model/IPlayer";
 
 declare global {
   interface Window {
@@ -34,13 +34,14 @@ declare global {
 })
 export class RoomComponent implements OnInit {
   constructor(private roomService: RoomService,
-              private route: ActivatedRoute,
-              private stompService: StompService,
-              private jogadorService: JogadorService) { }
+    private route: ActivatedRoute,
+    private stompService: StompService,
+    private jogadorService: JogadorService) { }
 
   @ViewChild(QuestWheelComponent) wheel?: QuestWheelComponent;
 
-
+  showJumpscare = false;
+  jumpscareImage = '';
   roomId = '';
   showQuestionSection: boolean = false;
   showWheelSection: boolean = true;
@@ -53,8 +54,23 @@ export class RoomComponent implements OnInit {
   shouldSpin = true;
   allThemes: WheelSector[] = THEMES;
   themeForWheel: WheelSector | null = null;
-  player1: IPlayer = { pontuacao: 0   };
-  otherPlayer: IPlayer = { pontuacao: 0   };
+  player1: IPlayer = { pontuacao: 0 };
+  otherPlayer: IPlayer = { pontuacao: 0 };
+
+  player1Powers = {
+    freeze: 1,
+    fourclicks: 1,
+    jumpscare: 1,
+    xmask: 1
+  };
+
+  player2Powers = {
+    freeze: 1,
+    fourclicks: 1,
+    jumpscare: 1,
+    xmask: 1
+  }
+
   displayTopBar: boolean = false;
   roomTimeLeft = 0
   disableCardsSection: boolean = false;
@@ -65,17 +81,19 @@ export class RoomComponent implements OnInit {
     this.roletaTravada = true;
   }
 
+  cannotUsePowers = true;
+
   themeModalOpen = false;
   // opcional: tempo para fechar automaticamente (ms)
   autoCloseMs = 5000;
   categoriaSelecionada: WheelSector | null = null;
   private autoCloseTimer: any = null;
 
-  useFreezeQuestions() { this.roomService.usePower('FREEZE_QUESTIONS', 'id') }
-  useStealQuestion() { this.roomService.usePower('STEAL_QUESTION', 'id') }
-  useMouseEscape() { this.roomService.usePower('MOUSE_ESCAPE', 'id') }
-  useJumpScare() { this.roomService.usePower('JUMP_SCARE', 'id') }
-  useVowelX() { this.roomService.usePower('VOWEL_X', 'id') }
+  useFreezeQuestions() { this.roomService.usePower('FREEZE_QUESTIONS', this.roomId) }
+  useStealQuestion() { this.roomService.usePower('STEAL_QUESTION', this.roomId) }
+  useMouseEscape() { this.roomService.usePower('MOUSE_ESCAPE', this.roomId) }
+  useJumpScare() { this.roomService.usePower('JUMP_SCARE', this.roomId) }
+  useVowelX() { this.roomService.usePower('VOWEL_X', this.roomId) }
 
   ngOnInit() {
     this.roomId = this.route.snapshot.paramMap.get('id') ?? '';
@@ -98,12 +116,12 @@ export class RoomComponent implements OnInit {
     }, 1000);
   }
 
-  findUserData(): void{
+  findUserData(): void {
     this.jogadorService.ObterDadosJogador().subscribe({
       next: (data) => {
         const { avatar, email, moeda, username, tipo } = data;
 
-        if(tipo == TipoJogadorEnum.CONVIDADO) {
+        if (tipo == TipoJogadorEnum.CONVIDADO) {
           this.player1.tipo = TipoJogadorEnum.CONVIDADO;
           this.player1.username = "Convidado";
           this.player1.avatar = 'assets/img/Variedades F.png'
@@ -181,7 +199,23 @@ export class RoomComponent implements OnInit {
     if (!this.availableCards.includes(card.value)) return
 
     this.roomService.choseScoreCard(card.value.toString(), this.roomId)
+  }
 
+  checkUsedPower(power: string) {
+    switch (power) {
+      case 'freeze':
+        this.useFreezeQuestions();
+        break;
+      case 'fourclicks':
+        this.useMouseEscape();
+        break;
+      case 'jumpscare':
+        this.useJumpScare();
+        break;
+      case 'xmask':
+        this.useVowelX();
+        break;
+    }
   }
 
   handleEventType(eventType: string, activePlayer: string, message: IMessage): void {
@@ -207,6 +241,9 @@ export class RoomComponent implements OnInit {
       case "ANSWER_RESULT":
         this.handleAnswerResult(message);
         break;
+      case "ENABLE_POWERS":
+        this.cannotUsePowers = false;
+        break;
       case "FREEZE_QUESTIONS_USED":
         this.handlePowerUsed(activePlayer, "Suas alternativas foram congeladas por 5 segundos!");
         break;
@@ -214,7 +251,8 @@ export class RoomComponent implements OnInit {
         this.handlePowerUsed(activePlayer, "As alternativas fugirão do seu mouse por 4 cliques!");
         break;
       case "JUMP_SCARE_USED":
-        this.handlePowerUsed(activePlayer, "Susto!");
+        // this.handlePowerUsed(activePlayer, "Susto!");
+        this.triggerJumpscare();
         break;
       case "VOWEL_X_USED":
         this.handlePowerUsed(activePlayer, "As vogais e números pares foram substituídos por X!");
@@ -233,10 +271,11 @@ export class RoomComponent implements OnInit {
   }
 
   handleAwaitingThemeConfirmation(message: IMessage) {
+    this.cannotUsePowers = true;
     this.selectedTheme = JSON.parse(message.body)['theme'];
     this.themeForWheel = this.allThemes.find(value => value.label === this.selectedTheme) ?? null;
 
-    const players: {id: string, name: string, avatar: string}[] = JSON.parse(message.body)['players'];
+    const players: { id: string, name: string, avatar: string }[] = JSON.parse(message.body)['players'];
 
     players.forEach(p => {
       if (p.id == this.stompService.userID) {
@@ -298,6 +337,40 @@ export class RoomComponent implements OnInit {
     })
   }
 
-  handlePowerUsed(activePlayer: string, message: string) {}
+  handlePowerUsed(activePlayer: any, message: string) {
+  }
+
+  triggerJumpscare() {
+    if(!this.isMyTurn) return;
+
+    const images = [
+      'assets/jumpscare/jump1.jpg',
+      'assets/jumpscare/jump2.jpg',
+      'assets/jumpscare/jump3.jpg',
+    ];
+
+    // áudios disponíveis
+    const sounds = [
+      'assets/sons/poderes/jumpscare 1.m4a',
+      'assets/sons/poderes/jumpscare 2.m4a',
+      'assets/sons/poderes/jumpscare 3.m4a',
+    ];
+
+    const img = images[Math.floor(Math.random() * images.length)];
+    const sound = sounds[Math.floor(Math.random() * sounds.length)];
+
+    this.jumpscareImage = img;
+    this.showJumpscare = true;
+
+    const audio = new Audio(sound);
+    audio.volume = 1;
+    audio.play().catch(err => console.warn("Erro ao tocar jumpscare:", err));
+
+    // remover depois de 1.4s
+    setTimeout(() => {
+      this.showJumpscare = false;
+    }, 1400);
+  }
+
 
 }
