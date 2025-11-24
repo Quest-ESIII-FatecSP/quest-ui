@@ -57,13 +57,18 @@
   <app-card-selection
     *ngIf="showCardSection"
     [disabled]="disableCardsSection"
-    [leftCards]="leftCards"
-    [rightCards]="rightCards"
-    [activeSide]="isMyTurn ? 'left' : 'right'"
+    [isMyTurn]="isMyTurn"
     [availableCards]="availableCards"
+    [opponentCards]="oponnentAvailableCards"
     (pickRequested)="onCardPickRequested($event)"
+    [autoPickValue]="autoPickedValue"
     class="cards-containers"
   ></app-card-selection>
+
+  <pre> {{ autoPickedValue | json }} </pre>
+
+  <pre> {{ availableCards }} </pre>
+  <pre> {{  oponnentAvailableCards }} </pre>
 
   <app-power-tray
     [leftPowers]="player1Powers"

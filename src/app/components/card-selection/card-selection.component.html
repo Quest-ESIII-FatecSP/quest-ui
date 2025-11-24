@@ -1,16 +1,19 @@
 <div class="card-selection-v2" [class.disabled]="disabled">
 
-  <!-- LEFT PANEL -->
-  <aside class="cards-panel left-panel" [class.active]="activeSide === 'left'">
+  <!-- LEFT PANEL (Minhas Cartas) -->
+  <aside class="cards-panel left-panel" [class.active]="isMyTurn">
     <div class="panel-inner">
       <div class="panel-title">{{ leftTitle }}</div>
 
       <div class="columns">
+
         <div class="col col-a">
           <ng-container *ngFor="let c of leftColA">
-            <button class="card small" [class.used]="c.used" [class.selected]="isPicked('left', c)"
-              [disabled]="isDisabled('left', c)" (click)="pick('left', c)" type="button"
-              [attr.aria-pressed]="isPicked('left', c)" [attr.aria-disabled]="isDisabled('left', c) ? true : null">
+            <button class="card small"
+              [class.used]="c.used"
+              [class.selected]="c.picked"
+              [disabled]="c.disabled"
+              (click)="pick('left', c)">
               <div class="val">{{ c.value }}</div>
             </button>
           </ng-container>
@@ -18,28 +21,32 @@
 
         <div class="col col-b">
           <ng-container *ngFor="let c of leftColB">
-            <button class="card small" [class.used]="c.used" [class.selected]="isPicked('left', c)"
-              [disabled]="isDisabled('left', c)" (click)="pick('left', c)" type="button"
-              [attr.aria-pressed]="isPicked('left', c)" [attr.aria-disabled]="isDisabled('left', c) ? true : null">
+            <button class="card small"
+              [class.used]="c.used"
+              [class.selected]="c.picked"
+              [disabled]="c.disabled"
+              (click)="pick('left', c)">
               <div class="val">{{ c.value }}</div>
             </button>
           </ng-container>
         </div>
+
       </div>
     </div>
   </aside>
 
-  <!-- RIGHT PANEL -->
-  <aside class="cards-panel right-panel" [class.active]="activeSide === 'right'">
+  <!-- RIGHT PANEL (Cartas do Oponente) -->
+  <aside class="cards-panel right-panel">
     <div class="panel-inner">
       <div class="panel-title">{{ rightTitle }}</div>
 
       <div class="columns">
+
         <div class="col col-a">
           <ng-container *ngFor="let c of rightColA">
-            <button class="card small" [class.used]="c.used" [class.selected]="isPicked('right', c)"
-              [disabled]="isDisabled('right', c)" (click)="pick('right', c)" type="button"
-              [attr.aria-pressed]="isPicked('right', c)" [attr.aria-disabled]="isDisabled('right', c) ? true : null">
+            <button class="card small"
+              [class.used]="c.used"
+              disabled>
               <div class="val">{{ c.value }}</div>
             </button>
           </ng-container>
@@ -47,13 +54,14 @@
 
         <div class="col col-b">
           <ng-container *ngFor="let c of rightColB">
-            <button class="card small" [class.used]="c.used" [class.selected]="isPicked('right', c)"
-              [disabled]="isDisabled('right', c)" (click)="pick('right', c)" type="button"
-              [attr.aria-pressed]="isPicked('right', c)" [attr.aria-disabled]="isDisabled('right', c) ? true : null">
+            <button class="card small"
+              [class.used]="c.used"
+              disabled>
               <div class="val">{{ c.value }}</div>
             </button>
           </ng-container>
         </div>
+
       </div>
     </div>
   </aside>

@@ -1,17 +1,17 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { QuestWheelComponent } from '../../components/quest-wheel/quest-wheel.component';
-import { RoomService } from "./room.service";
-import { Card, CardSelectionComponent, Side } from '../../components/card-selection/card-selection.component';
 import { ActivatedRoute } from "@angular/router";
-import { StompService } from "../../services/stomp.service";
-import { IMessage } from "@stomp/stompjs";
-import { IQuestion } from "../../model/IQuestion";
 import { THEMES } from "@shared/constants/theme.constants";
-import { WheelSector } from "../../model/ITheme";
-import { JogadorService, TipoJogadorEnum } from "../../services/jogador.service";
+import { IMessage } from "@stomp/stompjs";
+import { Card, CardSelectionComponent } from '../../components/card-selection/card-selection.component';
+import { QuestWheelComponent } from '../../components/quest-wheel/quest-wheel.component';
+import { TipoPoder } from '../../enum/TipoPoder.enum';
 import { IPlayer } from "../../model/IPlayer";
 import { IPlayerAwaitingTheme } from '../../model/IPlayerAwaitingTheme';
-import { TipoPoder } from '../../enum/TipoPoder.enum';
+import { IQuestion } from "../../model/IQuestion";
+import { WheelSector } from "../../model/ITheme";
+import { JogadorService, TipoJogadorEnum } from "../../services/jogador.service";
+import { StompService } from "../../services/stomp.service";
+import { RoomService } from "./room.service";
 
 declare global {
   interface Window {
@@ -42,6 +42,7 @@ export class RoomComponent implements OnInit {
 
   @ViewChild(QuestWheelComponent) wheel?: QuestWheelComponent;
 
+  autoPickedValue: number | null = null;
   showJumpscare = false;
   jumpscareImage = '';
   roomId = '';
@@ -51,7 +52,8 @@ export class RoomComponent implements OnInit {
   roletaTravada: boolean = false;
   question: IQuestion | null = null;
   selectedTheme: string | null = null;
-  availableCards: number[] = []
+  availableCards: number[] = [1, 2, 3, 4, 5];
+  oponnentAvailableCards: number[] = [1, 2, 3, 4, 5];
   isMyTurn = true;
   shouldSpin = true;
   allThemes: WheelSector[] = THEMES;
@@ -186,23 +188,18 @@ export class RoomComponent implements OnInit {
   // !!! LOGICA DE CARD SELECTION !!! //
   @ViewChild('cardSelectionRef') cardSelectionRef?: CardSelectionComponent;
 
-  leftCards: Card[] = [
-    { id: 'L1', value: 1 }, { id: 'L2', value: 2 }, { id: 'L3', value: 3 }, { id: 'L4', value: 4 }, { id: 'L5', value: 5 }
-  ];
-  rightCards: Card[] = [
-    { id: 'R1', value: 1 }, { id: 'R2', value: 2 }, { id: 'R3', value: 3 }, { id: 'R4', value: 4 }, { id: 'R5', value: 5 }
-  ];
-
   startCardSelectionFor(category: any, wheelPoints?: number) {
     this.categoriaSelecionada = category;
     this.isMyTurn = true; // ajuste conforme a lógica real
     // garantir que o componente tenha sido mostrado, o jogador escolhe então onCardChosen será chamado
   }
 
-  onCardPickRequested(card: { side: Side; cardId: string; value: number }) {
-    if (!this.availableCards.includes(card.value)) return
+  onCardPickRequested(card: number) {
+    if (!this.availableCards?.includes(card)) return
 
-    this.roomService.choseScoreCard(card.value.toString(), this.roomId)
+    console.log("Card pick requested:", card);
+
+    this.roomService.choseScoreCard(card.toString(), this.roomId);
   }
 
   checkUsedPower(power: TipoPoder) {
@@ -237,7 +234,7 @@ export class RoomComponent implements OnInit {
         this.handleAwaitingScoreCard(activePlayer, message)
         break;
       case "AWAITING_ANSWER_ANIMATION":
-        this.handleAwaitingAnswerAnimation(activePlayer);
+        this.handleAwaitingAnswerAnimation(activePlayer, message);
         break;
       case "AWAITING_ANSWER":
         this.handleAwaitingAnswer(message);
@@ -328,15 +325,32 @@ export class RoomComponent implements OnInit {
   }
 
   handleAwaitingScoreCard(activePlayer: string, message: IMessage) {
-    this.availableCards = JSON.parse(message.body) as number[];
+    const payload = JSON.parse(message.body).availableScoreCards as number[];
+    if(this.isMyTurn) {
+      this.availableCards = payload
+    } else {
+      this.oponnentAvailableCards = payload
+    }
+
+    // console.log(JSON.parse(message.body));
+
+    // console.log("Available cards updated:", this.availableCards);
+
     this.startTimer(5, () => {
       this.disableCardsSection = true;
-    })
-    console.log(this.availableCards)
+    });
+
+    // console.log(`available cards: `, this.availableCards);
   }
 
-  handleAwaitingAnswerAnimation(activePlayer: string) {
+  handleAwaitingAnswerAnimation(activePlayer: string, message: any) {
+    const payload: { autoSelected: boolean, chosenScoreCard: number } = JSON.parse(message.body);
 
+    if(this.isMyTurn) {
+      this.autoPickedValue = payload.chosenScoreCard;
+    }
+
+    console.log("Auto picked value:", this.autoPickedValue);
   }
 
   handleAwaitingAnswer(message: IMessage) {
