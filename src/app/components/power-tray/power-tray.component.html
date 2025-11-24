@@ -2,17 +2,17 @@
 
   <div class="side left-side">
     <button class="power-btn" *ngFor="let p of powerList"
-      [class.disabled]="isMyTurn || leftPowers[p] <= 0 || disabled" (click)="use(p, 'left')">
+      [class.disabled]="isMyTurn  || disabled" (click)="use(p)">
       <img [src]="icons[p]" />
-      <span class="count" *ngIf="leftPowers[p] > 0">{{ leftPowers[p] }}</span>
+      <span class="count">{{ leftPowers[p] }}</span>
     </button>
   </div>
 
-  <div class="center-area">
+  <!-- <div class="center-area">
     <button class="power-btn steal disabled">
-      <img [src]="icons.steal" />
+      <img [src]="icons[5]" />
     </button>
-  </div>
+  </div> -->
 
   <!-- <div class="side right-side">
     <button class="power-btn" *ngFor="let p of powerList"

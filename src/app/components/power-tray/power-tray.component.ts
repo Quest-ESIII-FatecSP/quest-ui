@@ -1,14 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { TipoPoder } from '../../enum/TipoPoder.enum';
 
-export type PowerType =
-  'freeze' | 'fourclicks' | 'jumpscare' | 'xmask' | 'steal';
-
-export interface PlayerPowers {
-  freeze: number;
-  fourclicks: number;
-  jumpscare: number;
-  xmask: number;
-}
 
 @Component({
   selector: 'app-power-tray',
@@ -17,47 +9,47 @@ export interface PlayerPowers {
 })
 export class PowerTrayComponent {
 
-  readonly powerList: (keyof PlayerPowers)[] = [
-    'freeze',
-    'fourclicks',
-    'jumpscare',
-    'xmask'
+  readonly powerList: TipoPoder[] = [
+    TipoPoder.FREEZE_QUESTIONS,
+    TipoPoder.MOUSE_ESCAPE,
+    TipoPoder.JUMP_SCARE,
+    TipoPoder.VOWEL_X
   ];
 
   @Input() disabled = false;
   @Input() isMyTurn = false;
 
-  @Input() leftPowers: PlayerPowers = {
-    freeze: 1,
-    fourclicks: 1,
-    jumpscare: 1,
-    xmask: 1
+  @Input() leftPowers: Partial<Record<TipoPoder, number>> = {
+    [TipoPoder.FREEZE_QUESTIONS]: 0,
+    [TipoPoder.MOUSE_ESCAPE]: 0,
+    [TipoPoder.JUMP_SCARE]: 0,
+    [TipoPoder.VOWEL_X]: 0,
+    [TipoPoder.STEAL_QUESTION]: 0
   };
 
-  @Input() rightPowers: PlayerPowers = {
-    freeze: 1,
-    fourclicks: 1,
-    jumpscare: 1,
-    xmask: 1
+  @Input() rightPowers: Partial<Record<TipoPoder, number>> = {
+    [TipoPoder.FREEZE_QUESTIONS]: 0,
+    [TipoPoder.MOUSE_ESCAPE]: 0,
+    [TipoPoder.JUMP_SCARE]: 0,
+    [TipoPoder.VOWEL_X]: 0,
+    [TipoPoder.STEAL_QUESTION]: 0
   };
 
-  @Output() powerUsed = new EventEmitter<PowerType>();
+  @Output() powerUsed = new EventEmitter<TipoPoder>();
 
-  readonly icons = {
-    freeze: 'assets/img/congelar.png',
-    fourclicks: 'assets/img/4cliques.png',
-    jumpscare: 'assets/img/jumpscare.png',
-    xmask: 'assets/img/x.png',
-    steal: 'assets/img/roubarpergunta.jpeg'
+  readonly icons: Record<TipoPoder, string> = {
+    [TipoPoder.FREEZE_QUESTIONS]: 'assets/img/congelar.png',
+    [TipoPoder.MOUSE_ESCAPE]: 'assets/img/4cliques.png',
+    [TipoPoder.JUMP_SCARE]: 'assets/img/jumpscare.png',
+    [TipoPoder.VOWEL_X]: 'assets/img/x.png',
+    [TipoPoder.STEAL_QUESTION]: 'assets/img/roubarpergunta.jpeg'
   };
 
-  use(power: keyof PlayerPowers, side: 'left' | 'right') {
-    if (this.disabled) return;
+  use(power: TipoPoder) {
+    if (this.disabled || this.isMyTurn) return;
 
-    if ((side === 'left' ? this.leftPowers[power] : this.rightPowers[power]) <= 0)
-      return;
-
-    if (this.isMyTurn) return;
+    const count = this.leftPowers[power] ?? 0;
+    if (count <= 0) return;
 
     this.powerUsed.emit(power);
   }

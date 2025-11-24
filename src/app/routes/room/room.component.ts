@@ -10,6 +10,8 @@ import { THEMES } from "@shared/constants/theme.constants";
 import { WheelSector } from "../../model/ITheme";
 import { JogadorService, TipoJogadorEnum } from "../../services/jogador.service";
 import { IPlayer } from "../../model/IPlayer";
+import { IPlayerAwaitingTheme } from '../../model/IPlayerAwaitingTheme';
+import { TipoPoder } from '../../enum/TipoPoder.enum';
 
 declare global {
   interface Window {
@@ -57,19 +59,21 @@ export class RoomComponent implements OnInit {
   player1: IPlayer = { pontuacao: 0 };
   otherPlayer: IPlayer = { pontuacao: 0 };
 
-  player1Powers = {
-    freeze: 1,
-    fourclicks: 1,
-    jumpscare: 1,
-    xmask: 1
+  player1Powers: Partial<Record<TipoPoder, number>> = {
+    [TipoPoder.FREEZE_QUESTIONS]: 0,
+    [TipoPoder.MOUSE_ESCAPE]: 0,
+    [TipoPoder.JUMP_SCARE]: 0,
+    [TipoPoder.VOWEL_X]: 0,
+    [TipoPoder.STEAL_QUESTION]: 0
   };
 
-  player2Powers = {
-    freeze: 1,
-    fourclicks: 1,
-    jumpscare: 1,
-    xmask: 1
-  }
+  player2Powers: Partial<Record<TipoPoder, number>> = {
+    [TipoPoder.FREEZE_QUESTIONS]: 0,
+    [TipoPoder.MOUSE_ESCAPE]: 0,
+    [TipoPoder.JUMP_SCARE]: 0,
+    [TipoPoder.VOWEL_X]: 0,
+    [TipoPoder.STEAL_QUESTION]: 0
+  };
 
   displayTopBar: boolean = false;
   roomTimeLeft = 0
@@ -97,7 +101,7 @@ export class RoomComponent implements OnInit {
 
   ngOnInit() {
     this.roomId = this.route.snapshot.paramMap.get('id') ?? '';
-    this.findUserData();
+    // this.findUserData();
     this.stompRoomSubscription();
   }
 
@@ -201,18 +205,18 @@ export class RoomComponent implements OnInit {
     this.roomService.choseScoreCard(card.value.toString(), this.roomId)
   }
 
-  checkUsedPower(power: string) {
+  checkUsedPower(power: TipoPoder) {
     switch (power) {
-      case 'freeze':
+      case TipoPoder.FREEZE_QUESTIONS:
         this.useFreezeQuestions();
         break;
-      case 'fourclicks':
+      case TipoPoder.MOUSE_ESCAPE:
         this.useMouseEscape();
         break;
-      case 'jumpscare':
+      case TipoPoder.JUMP_SCARE:
         this.useJumpScare();
         break;
-      case 'xmask':
+      case TipoPoder.VOWEL_X:
         this.useVowelX();
         break;
     }
@@ -245,20 +249,19 @@ export class RoomComponent implements OnInit {
         this.cannotUsePowers = false;
         break;
       case "FREEZE_QUESTIONS_USED":
-        this.handlePowerUsed(activePlayer, "Suas alternativas foram congeladas por 5 segundos!");
+        this.handlePowerUsed(activePlayer, "Suas alternativas foram congeladas por 5 segundos!", TipoPoder.FREEZE_QUESTIONS);
         break;
       case "MOUSE_ESCAPE_USED":
-        this.handlePowerUsed(activePlayer, "As alternativas fugirão do seu mouse por 4 cliques!");
+        this.handlePowerUsed(activePlayer, "As alternativas fugirão do seu mouse por 4 cliques!", TipoPoder.MOUSE_ESCAPE);
         break;
       case "JUMP_SCARE_USED":
-        // this.handlePowerUsed(activePlayer, "Susto!");
-        this.triggerJumpscare();
+        this.handlePowerUsed(activePlayer, "Susto!", TipoPoder.JUMP_SCARE);
         break;
       case "VOWEL_X_USED":
-        this.handlePowerUsed(activePlayer, "As vogais e números pares foram substituídos por X!");
+        this.handlePowerUsed(activePlayer, "As vogais e números pares foram substituídos por X!", TipoPoder.VOWEL_X);
         break;
       case "STEAL_QUESTION_USED":
-        this.handlePowerUsed(activePlayer, "Sua pergunta foi roubada!");
+        this.handlePowerUsed(activePlayer, "Sua pergunta foi roubada!", TipoPoder.STEAL_QUESTION);
         break;
     }
   }
@@ -275,17 +278,36 @@ export class RoomComponent implements OnInit {
     this.selectedTheme = JSON.parse(message.body)['theme'];
     this.themeForWheel = this.allThemes.find(value => value.label === this.selectedTheme) ?? null;
 
-    const players: { id: string, name: string, avatar: string }[] = JSON.parse(message.body)['players'];
+    const players: IPlayerAwaitingTheme[] = JSON.parse(message.body)['players'];
+
+    console.log(JSON.stringify(players, null, 2));
 
     players.forEach(p => {
       if (p.id == this.stompService.userID) {
         this.player1.username = p.name;
         this.player1.avatar = p.avatar;
         this.player1.id = p.id;
+
+        this.player1Powers = {
+          [TipoPoder.FREEZE_QUESTIONS]: p.inventario?.FREEZE_QUESTIONS,
+          [TipoPoder.MOUSE_ESCAPE]: p.inventario?.MOUSE_ESCAPE,
+          [TipoPoder.JUMP_SCARE]: p.inventario?.JUMP_SCARE,
+          [TipoPoder.VOWEL_X]: p.inventario?.VOWEL_X,
+          [TipoPoder.STEAL_QUESTION]: 0
+        };
+
       } else {
         this.otherPlayer.username = p.name;
         this.otherPlayer.avatar = p.avatar;
         this.otherPlayer.id = p.id;
+
+        this.player2Powers = {
+          [TipoPoder.FREEZE_QUESTIONS]: p.inventario?.FREEZE_QUESTIONS,
+          [TipoPoder.MOUSE_ESCAPE]: p.inventario?.MOUSE_ESCAPE,
+          [TipoPoder.JUMP_SCARE]: p.inventario?.JUMP_SCARE,
+          [TipoPoder.VOWEL_X]: p.inventario?.VOWEL_X,
+          [TipoPoder.STEAL_QUESTION]: 0
+        }
       }
     });
 
@@ -337,7 +359,20 @@ export class RoomComponent implements OnInit {
     })
   }
 
-  handlePowerUsed(activePlayer: any, message: string) {
+  handlePowerUsed(activePlayer: string, message: string, tipo: TipoPoder) {
+    this.player1Powers[tipo] = (this.player1Powers[tipo] || 1) - 1;
+
+    switch(tipo) {
+      case TipoPoder.FREEZE_QUESTIONS:
+        break;
+      case TipoPoder.MOUSE_ESCAPE:
+        break;
+      case TipoPoder.JUMP_SCARE:
+        this.triggerJumpscare();
+        break;
+      case TipoPoder.VOWEL_X:
+        break;
+    }
   }
 
   triggerJumpscare() {
