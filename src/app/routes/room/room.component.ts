@@ -221,13 +221,13 @@ export class RoomComponent implements OnInit {
   handleEventType(eventType: string, activePlayer: string, message: IMessage): void {
     switch (eventType) {
       case "AWAITING_THEME_CONFIRMATION_ANIMATION":
-        this.handleAwaitingThemeConfirmationAnimation(activePlayer)
+        this.handleAwaitingThemeConfirmationAnimation()
         break;
       case "AWAITING_THEME_CONFIRMATION":
         this.handleAwaitingThemeConfirmation(message);
         break;
       case "AWAITING_SCORE_CARD_ANIMATION":
-        this.handleAwaitingScoreCardAnimation(activePlayer);
+        this.handleAwaitingScoreCardAnimation();
         break;
       case "AWAITING_SCORE_CARD":
         this.handleAwaitingScoreCard(activePlayer, message)
@@ -260,14 +260,17 @@ export class RoomComponent implements OnInit {
       case "STEAL_QUESTION_USED":
         this.handlePowerUsed(activePlayer, "Sua pergunta foi roubada!");
         break;
+      case "FINISHED_GAME":
+        this.handleFinishGame(message);
+        break;
     }
   }
 
-  handleAwaitingThemeConfirmationAnimation(activePlayer: any) {
-    this.showWheelSection = true;
-    this.shouldSpin = !this.shouldSpin;
+  handleAwaitingThemeConfirmationAnimation() {
     this.showCardSection = false;
     this.showQuestionSection = false;
+    this.showWheelSection = true;
+    this.shouldSpin = !this.shouldSpin;
   }
 
   handleAwaitingThemeConfirmation(message: IMessage) {
@@ -294,17 +297,18 @@ export class RoomComponent implements OnInit {
     console.log(this.themeForWheel);
   }
 
-  handleAwaitingScoreCardAnimation(activePlayer: string) {
+  handleAwaitingScoreCardAnimation() {
     this.showWheelSection = false
     this.disableCardsSection = false;
     this.showCardSection = true
+    this.disableQuestionSection = false
+    this.showQuestionSection = false
   }
 
   handleAwaitingScoreCard(activePlayer: string, message: IMessage) {
     this.availableCards = JSON.parse(message.body) as number[];
     this.startTimer(5, () => {
       this.disableCardsSection = true;
-      console.log('disableChegou aqui')
     })
     console.log(this.availableCards)
   }
@@ -320,6 +324,7 @@ export class RoomComponent implements OnInit {
     this.startTimer(15, () => {
       if (!this.answeredQuestion){
         this.disableQuestionSection = true
+        this.roomService.answerQuestion(null, this.roomId)
       }
       this.answeredQuestion = false
     })
@@ -370,6 +375,20 @@ export class RoomComponent implements OnInit {
     setTimeout(() => {
       this.showJumpscare = false;
     }, 1400);
+  }
+
+  // colocar em um modal dps
+  handleFinishGame(message: IMessage) {
+    const response = JSON.parse(message.body);
+    const finalScore: Map<string, number> = new Map(Object.entries(response.scorePerPlayer));
+
+    let winner;
+    if (this.player1.id === response['winnerPlayerID']){
+      winner = {...this.player1};
+    } else {
+      winner = {...this.otherPlayer};
+    }
+    alert(`Parabéns, ${winner.username}! Você venceu o jogo com ${finalScore.get(winner.id!)} pontos!`);
   }
 
 

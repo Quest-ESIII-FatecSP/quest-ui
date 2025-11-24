@@ -21,7 +21,7 @@ export class RoomService {
     })
   }
 
-  answerQuestion(choosenAnswerID: string, idSala: string) {
+  answerQuestion(choosenAnswerID: string | null, idSala: string) {
     if (!idSala) return;
     const body = JSON.stringify({
       choosenAnswerID
