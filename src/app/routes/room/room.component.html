@@ -47,7 +47,7 @@
     <app-question-section class="full-width"
                           [question]="question"
                           [categoryName]="selectedTheme"
-                          [isMyTurn]="true"
+                          [isMyTurn]="isMyTurn"
                           [reveal]="false"
                           [disableAlternatives]="disableQuestionSection"
                           (answerSelected)="onAnswerSelected($event)">
