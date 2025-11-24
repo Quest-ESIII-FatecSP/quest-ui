@@ -71,7 +71,6 @@ export class StompService {
     }
 
     if (this.client.connected) {
-      console.log("publicando mensagem")
       this.client.publish(params);
     }
   }}

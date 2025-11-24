@@ -59,6 +59,7 @@ export class RoomComponent implements OnInit {
   roomTimeLeft = 0
   disableCardsSection: boolean = false;
   disableQuestionSection: boolean = false;
+  answeredQuestion: boolean = false
 
   roletaComecouSpin(event: any) {
     this.roletaTravada = true;
@@ -147,7 +148,7 @@ export class RoomComponent implements OnInit {
   }
 
   onAnswerSelected(answerID: number) {
-    console.log(answerID)
+    this.answeredQuestion = true;
     this.roomService.answerQuestion(answerID.toString(), this.roomId)
   }
 
@@ -204,7 +205,7 @@ export class RoomComponent implements OnInit {
         this.handleAwaitingAnswer(message);
         break;
       case "ANSWER_RESULT":
-        this.handleAnswerResult('');
+        this.handleAnswerResult(message);
         break;
       case "FREEZE_QUESTIONS_USED":
         this.handlePowerUsed(activePlayer, "Suas alternativas foram congeladas por 5 segundos!");
@@ -256,6 +257,7 @@ export class RoomComponent implements OnInit {
 
   handleAwaitingScoreCardAnimation(activePlayer: string) {
     this.showWheelSection = false
+    this.disableCardsSection = false;
     this.showCardSection = true
   }
 
@@ -277,9 +279,11 @@ export class RoomComponent implements OnInit {
     console.log(this.question)
     this.showQuestionSection = true
     this.startTimer(15, () => {
-      this.disableQuestionSection = true
+      if (!this.answeredQuestion){
+        this.disableQuestionSection = true
+      }
+      this.answeredQuestion = false
     })
-
   }
 
   handleAnswerResult(message: any) {
@@ -292,7 +296,6 @@ export class RoomComponent implements OnInit {
         this.otherPlayer.pontuacao = v;
       }
     })
-
   }
 
   handlePowerUsed(activePlayer: string, message: string) {}
