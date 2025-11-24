@@ -42,7 +42,6 @@ export class LoginComponent implements OnInit {
   playAsGuest() {
     this.authService.loginAsGuest().subscribe(
       {next: resp => {
-          console.log(resp)
           if (resp.isSuccess) {
             localStorage.setItem('userToken', resp.token);
             this.stompService.setUserId(resp.token);

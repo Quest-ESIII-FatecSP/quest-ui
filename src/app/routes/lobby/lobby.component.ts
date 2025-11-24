@@ -187,7 +187,7 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.stompRoomSubscriptioinRef = this.stompService.subscribe(`/room/${finalRoomCode}`, (message) => {
       if (this.stopRoomSub) return
-      console.log(message.headers["event"])
+      console.log(message.headers["event"]);
       this.player2 = { ...this.player2, active: true, status: 'Conectado' }
       this.EnterText = 'Entrando na Sala...'
       this.router.navigate(['/room/', finalRoomCode])
@@ -206,7 +206,6 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
         const userID = message.headers["user-id"];
 
         if (this.isSalaEmCriacao && userID == this.stompService.userID) {
-          console.log("navegando para sala")
           // this.router.navigate(['/sala', nomeSala])
         }
         // this.salas.push(nomeSala);
@@ -260,7 +259,7 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       });
     } catch (e) {
-      console.log(e);
+      this.toastr.error('Erro ao atualizar avatar.');
     } finally {
       this.blockUI.stop();
       this.closeBootstrapModal('avatarModal');

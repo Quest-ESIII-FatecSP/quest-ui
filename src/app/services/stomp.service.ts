@@ -60,7 +60,7 @@ export class StompService {
   }
 
   publish(params: IPublishParams): void {
-    console.log(params)
+    // console.log(params)
     if (params.headers) {
       params.headers["user-id"] = this.userID;
     } else {

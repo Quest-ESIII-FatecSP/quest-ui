@@ -49,7 +49,6 @@ export class LoginSuccessComponent implements OnInit, OnDestroy{
     this.authService.login(userData).subscribe({
       next: res => {
         if (res.isSuccess) {
-          console.log('Login bem-sucedido');
           this.goToPage('lobby');
         }
       }, error: err => {
@@ -57,7 +56,6 @@ export class LoginSuccessComponent implements OnInit, OnDestroy{
           this.authService.signUp(userData).subscribe({
             next: resp => {
               if (resp.isSuccess) {
-                console.log('Cadastro e login bem-sucedido');
                 this.goToPage('lobby');
               } else {
                 this.errorMessage = 'Erro ao criar conta.';

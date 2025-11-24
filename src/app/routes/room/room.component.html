@@ -53,6 +53,8 @@
     </app-question-section>
   </div>
 
+  <pre> CHOOSEN CARD ROOM {{ choosenCard | json }} </pre>
+
   <app-card-selection
     *ngIf="showCardSection"
     [disabled]="disableCardsSection"
@@ -60,14 +62,10 @@
     [availableCards]="availableCards"
     [opponentCards]="oponnentAvailableCards"
     (pickRequested)="onCardPickRequested($event)"
-    [autoPickValue]="autoPickedValue"
+    [choosenCard]="choosenCard"
     class="cards-containers"
   ></app-card-selection>
 
-  <pre> {{ autoPickedValue | json }} </pre>
-
-  <pre> {{ availableCards }} </pre>
-  <pre> {{  oponnentAvailableCards }} </pre>
 
   <app-power-tray
     [leftPowers]="player1Powers"
