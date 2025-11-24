@@ -366,7 +366,7 @@ export class RoomComponent implements OnInit {
         this.roomService.answerQuestion(null, this.roomId)
       }
       this.answeredQuestion = false;
-    })
+    });
   }
 
   handleAnswerResult(message: any) {
@@ -382,7 +382,9 @@ export class RoomComponent implements OnInit {
   }
 
   handlePowerUsed(activePlayer: string, message: string, tipo: TipoPoder) {
-    this.player1Powers[tipo] = (this.player1Powers[tipo] || 1) - 1;
+    if(!this.isMyTurn) {
+      this.player1Powers[tipo] = (this.player1Powers[tipo] || 1) - 1;
+    }
 
     switch (tipo) {
       case TipoPoder.FREEZE_QUESTIONS:

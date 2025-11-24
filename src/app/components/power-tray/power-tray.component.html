@@ -1,6 +1,6 @@
 <div class="power-tray" [class.disabled]="disabled">
 
-  <div class="side left-side">
+  <div class="side left-side" style="margin: 0 auto !important;">
     <button class="power-btn" *ngFor="let p of powerList"
       [class.disabled]="isMyTurn  || disabled" (click)="use(p)">
       <img [src]="icons[p]" />
