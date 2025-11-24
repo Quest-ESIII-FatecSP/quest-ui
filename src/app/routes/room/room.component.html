@@ -6,11 +6,17 @@
     <span class="points" id="player1-points">{{ player1.pontuacao }} pts</span>
   </div>
 
+  <div class="turn-indicator" [class.my-turn]="isMyTurn" [class.opponent-turn]="!isMyTurn">
+    <span *ngIf="isMyTurn">🎮 Seu Turno</span>
+    <span *ngIf="!isMyTurn">⏳ Turno do Adversário</span>
+  </div>
+
   <div class="timer-area">
     <div class="timer-container">
       <svg width="60" height="60">
         <circle cx="30" cy="30" r="27" stroke="#333" />
-        <circle id="timer-circle" class="timer-circle" cx="30" cy="30" r="27" stroke="#00FF00" stroke-dasharray="170" stroke-dashoffset="0" />
+        <circle id="timer-circle" class="timer-circle" cx="30" cy="30" r="27" stroke="#00FF00" stroke-dasharray="170"
+          stroke-dashoffset="0" />
       </svg>
       <div id="timer-text" class="timer-text">{{ roomTimeLeft }}</div>
     </div>
@@ -28,39 +34,32 @@
 
 <div id="game-area">
   <div id="roleta-area" style="display:flex;flex-direction:column;align-items:center;gap:12px;margin-top:-40px;"
-       *ngIf="showWheelSection">
+    *ngIf="showWheelSection">
     <div class="fw-modal-like" style="overflow:visible;position:relative;">
-      <app-quest-wheel [locked]="roletaTravada"
-                       (spinStart)="roletaComecouSpin($event)"
-                       (spinEnd)="onSpinEnd($event)"
-                       [targetIndex]="shouldSpin">
+      <app-quest-wheel [locked]="roletaTravada" (spinStart)="roletaComecouSpin($event)" (spinEnd)="onSpinEnd($event)"
+        [targetIndex]="shouldSpin">
       </app-quest-wheel>
     </div>
   </div>
 
-
   <div style="width: 800px;" *ngIf="showQuestionSection">
-    <app-question-section class="full-width"
-                          [question]="question"
-                          [categoryName]="selectedTheme"
-                          [isMyTurn]="true"
-                          [reveal]="false"
-                          (answerSelected)="onAnswerSelected($event)"
-    >
+    <app-question-section class="full-width" [question]="question" [categoryName]="selectedTheme" [isMyTurn]="true"
+      [reveal]="false" (answerSelected)="onAnswerSelected($event)">
     </app-question-section>
   </div>
 
-  <app-card-selection
-    *ngIf="showCardSection"
-    [leftCards]="leftCards"
-    [rightCards]="rightCards"
-    [activeSide]="isMyTurn ? 'left' : 'right'"
-    [leftTitle]="'Suas Cartas'"
-    [rightTitle]="'Cartas do Oponente'"
-    [availableCards]="availableCards"
-    (pickRequested)="onCardPickRequested($event)"
-    class="cards-containers"
-  ></app-card-selection>
+  <app-card-selection *ngIf="showCardSection" [leftCards]="leftCards" [rightCards]="rightCards"
+    [activeSide]="isMyTurn ? 'left' : 'right'" [leftTitle]="'Suas Cartas'" [rightTitle]="'Cartas do Oponente'"
+    [availableCards]="availableCards" (pickRequested)="onCardPickRequested($event)"
+    class="cards-containers"></app-card-selection>
+
+  <app-power-tray
+    [leftPowers]="player1Powers"
+    [rightPowers]="player2Powers"
+    [isMyTurn]="isMyTurn"
+    [disabled]="cannotUsePowers"
+    (powerUsed)="checkUsedPower($event)"
+  ></app-power-tray>
 
 
 </div>
@@ -73,4 +72,8 @@
     <h2 id="themeTitle">{{ themeForWheel?.label || 'Tema' }}</h2>
     <p class="theme-sub">Categoria sorteada</p>
   </div>
+</div>
+
+<div class="jumpscare-overlay" *ngIf="showJumpscare">
+  <img [src]="jumpscareImage" class="jumpscare-img" />
 </div>

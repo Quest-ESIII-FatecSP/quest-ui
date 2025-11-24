@@ -84,8 +84,9 @@ export class CardSelectionComponent {
   }
 
   isPicked(side: Side, card: Card) {
-    return this.pickedCardId !== null && (this.pickedSide === side && this.pickedCardId === card?.id
-      || !this.availableCards.includes(card?.value));
+    return this.pickedCardId !== null && (this.pickedSide === side && this.pickedCardId === card?.id);
+
+      // || !this.availableCards.includes(card?.value))
   }
 
   pick(side: Side, card: Card) {
