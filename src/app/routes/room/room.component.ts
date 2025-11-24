@@ -271,6 +271,7 @@ export class RoomComponent implements OnInit {
     this.showQuestionSection = false;
     this.showWheelSection = true;
     this.shouldSpin = !this.shouldSpin;
+    this.disableQuestionSection = false
   }
 
   handleAwaitingThemeConfirmation(message: IMessage) {
@@ -279,8 +280,6 @@ export class RoomComponent implements OnInit {
     this.themeForWheel = this.allThemes.find(value => value.label === this.selectedTheme) ?? null;
 
     const players: IPlayerAwaitingTheme[] = JSON.parse(message.body)['players'];
-
-    console.log(JSON.stringify(players, null, 2));
 
     players.forEach(p => {
       if (p.id == this.stompService.userID) {
@@ -362,7 +361,7 @@ export class RoomComponent implements OnInit {
         this.disableQuestionSection = true
         this.roomService.answerQuestion(null, this.roomId)
       }
-      this.answeredQuestion = false
+      this.answeredQuestion = false;
     })
   }
 
