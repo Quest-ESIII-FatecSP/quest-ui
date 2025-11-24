@@ -21,8 +21,7 @@
     'correct': getAlternativeState(alt.answerID) === 'correct',
     'wrong': getAlternativeState(alt.answerID) === 'wrong'
   }"
-      (click)="onSelectAlternative(alt)"
-    >
+      (click)="onSelectAlternative(alt)">
       {{ alt.answerText }}
     </button>
   </div>

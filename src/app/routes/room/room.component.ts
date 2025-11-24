@@ -56,7 +56,9 @@ export class RoomComponent implements OnInit {
   player1: IPlayer = { pontuacao: 0   };
   otherPlayer: IPlayer = { pontuacao: 0   };
   displayTopBar: boolean = false;
-  roomTimeLeft = 15
+  roomTimeLeft = 0
+  disableCardsSection: boolean = false;
+  disableQuestionSection: boolean = false;
 
   roletaComecouSpin(event: any) {
     this.roletaTravada = true;
@@ -64,7 +66,7 @@ export class RoomComponent implements OnInit {
 
   themeModalOpen = false;
   // opcional: tempo para fechar automaticamente (ms)
-  autoCloseMs = 3000;
+  autoCloseMs = 5000;
   categoriaSelecionada: WheelSector | null = null;
   private autoCloseTimer: any = null;
 
@@ -78,19 +80,19 @@ export class RoomComponent implements OnInit {
     this.roomId = this.route.snapshot.paramMap.get('id') ?? '';
     this.findUserData();
     this.stompRoomSubscription();
-    this.startTimer();
   }
 
-  startTimer(time?: number) {
-    if (time) {
-      this.roomTimeLeft = time;
-    }
+  startTimer(seconds: number, onFinish: () => void) {
+    this.roomTimeLeft = seconds;
 
     const interval = setInterval(() => {
       if (this.roomTimeLeft > 0) {
         this.roomTimeLeft--;
       } else {
         clearInterval(interval);
+        if (onFinish){
+          onFinish()
+        }
       }
     }, 1000);
   }
@@ -259,6 +261,10 @@ export class RoomComponent implements OnInit {
 
   handleAwaitingScoreCard(activePlayer: string, message: IMessage) {
     this.availableCards = JSON.parse(message.body) as number[];
+    this.startTimer(5, () => {
+      this.disableCardsSection = true;
+      console.log('disableChegou aqui')
+    })
     console.log(this.availableCards)
   }
 
@@ -270,6 +276,10 @@ export class RoomComponent implements OnInit {
     this.question = JSON.parse(message.body);
     console.log(this.question)
     this.showQuestionSection = true
+    this.startTimer(15, () => {
+      this.disableQuestionSection = true
+    })
+
   }
 
   handleAnswerResult(message: any) {

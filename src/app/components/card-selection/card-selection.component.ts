@@ -84,28 +84,18 @@ export class CardSelectionComponent {
   }
 
   isPicked(side: Side, card: Card) {
-    return this.pickedCardId !== null && (this.pickedSide === side && this.pickedCardId === card?.id
-      || !this.availableCards.includes(card?.value));
+    return this.pickedCardId !== null && this.pickedSide === side && this.pickedCardId === card?.id;
+      // || !this.availableCards.includes(card?.value));
   }
 
   pick(side: Side, card: Card) {
     if (this.isDisabled(side, card)) return;
-    // visual update
-    console.log(side)
-    console.log(card)
     this.pickedSide = side;
     this.pickedCardId = card.id;
 
     // emit request to parent -> parent will call backend; parent should confirm back
     this.pickRequested.emit({ side, cardId: card.id, value: card.value });
 
-    // optional auto-clear
-    this.clearAutoTimer();
-    if (this.autoClearMs && this.autoClearMs > 0) {
-      this.autoClearTimer = setTimeout(() => {
-        this.reset();
-      }, this.autoClearMs);
-    }
   }
 
   // Parent can call this to visually force the pick (e.g. when backend broadcasts confirmation)

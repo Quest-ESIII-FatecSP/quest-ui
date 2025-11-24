@@ -45,23 +45,21 @@
                           [categoryName]="selectedTheme"
                           [isMyTurn]="true"
                           [reveal]="false"
-                          (answerSelected)="onAnswerSelected($event)"
-    >
+                          [disableAlternatives]="disableQuestionSection"
+                          (answerSelected)="onAnswerSelected($event)">
     </app-question-section>
   </div>
 
   <app-card-selection
     *ngIf="showCardSection"
+    [disabled]="disableCardsSection"
     [leftCards]="leftCards"
     [rightCards]="rightCards"
     [activeSide]="isMyTurn ? 'left' : 'right'"
-    [leftTitle]="'Suas Cartas'"
-    [rightTitle]="'Cartas do Oponente'"
     [availableCards]="availableCards"
     (pickRequested)="onCardPickRequested($event)"
     class="cards-containers"
   ></app-card-selection>
-
 
 </div>
 
