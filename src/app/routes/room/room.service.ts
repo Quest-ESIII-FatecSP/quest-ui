@@ -18,7 +18,7 @@ export class RoomService {
         "user-id": this.stompService.userID,
         "action-type": actionType // USE_POWER, CHOOSE_SCORE_CARD, ANSWER_QUESTION
       }
-    })
+    });
   }
 
   answerQuestion(choosenAnswerID: string | null, idSala: string) {

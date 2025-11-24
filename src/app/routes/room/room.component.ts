@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from "@angular/router";
 import { THEMES } from "@shared/constants/theme.constants";
 import { IMessage } from "@stomp/stompjs";
-import { Card, CardSelectionComponent } from '../../components/card-selection/card-selection.component';
+import { CardSelectionComponent } from '../../components/card-selection/card-selection.component';
 import { QuestWheelComponent } from '../../components/quest-wheel/quest-wheel.component';
 import { TipoPoder } from '../../enum/TipoPoder.enum';
 import { IPlayer } from "../../model/IPlayer";
@@ -138,7 +138,6 @@ export class RoomComponent implements OnInit {
           this.player1.email = email;
           this.player1.tipo = tipo ?? TipoJogadorEnum.CONVIDADO;
         }
-
       }
     });
   }
@@ -240,6 +239,7 @@ export class RoomComponent implements OnInit {
         this.handleAwaitingAnswer(message);
         break;
       case "ANSWER_RESULT":
+        this.cannotUsePowers = true;
         this.handleAnswerResult(message);
         break;
       case "ENABLE_POWERS":
