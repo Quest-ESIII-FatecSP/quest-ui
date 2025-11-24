@@ -193,12 +193,6 @@ export class RoomComponent implements OnInit {
     { id: 'R1', value: 1 }, { id: 'R2', value: 2 }, { id: 'R3', value: 3 }, { id: 'R4', value: 4 }, { id: 'R5', value: 5 }
   ];
 
-  startCardSelectionFor(category: any, wheelPoints?: number) {
-    this.categoriaSelecionada = category;
-    this.isMyTurn = true; // ajuste conforme a lógica real
-    // garantir que o componente tenha sido mostrado, o jogador escolhe então onCardChosen será chamado
-  }
-
   onCardPickRequested(card: { side: Side; cardId: string; value: number }) {
     if (!this.availableCards.includes(card.value)) return
 
@@ -274,6 +268,7 @@ export class RoomComponent implements OnInit {
     this.showQuestionSection = false;
     this.showWheelSection = true;
     this.shouldSpin = !this.shouldSpin;
+    this.disableQuestionSection = false
   }
 
   handleAwaitingThemeConfirmation(message: IMessage) {
@@ -282,8 +277,6 @@ export class RoomComponent implements OnInit {
     this.themeForWheel = this.allThemes.find(value => value.label === this.selectedTheme) ?? null;
 
     const players: IPlayerAwaitingTheme[] = JSON.parse(message.body)['players'];
-
-    console.log(JSON.stringify(players, null, 2));
 
     players.forEach(p => {
       if (p.id == this.stompService.userID) {
@@ -348,7 +341,7 @@ export class RoomComponent implements OnInit {
         this.disableQuestionSection = true
         this.roomService.answerQuestion(null, this.roomId)
       }
-      this.answeredQuestion = false
+      this.answeredQuestion = false;
     })
   }
 

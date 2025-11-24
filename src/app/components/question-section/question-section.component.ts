@@ -1,10 +1,5 @@
-import {Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges} from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {IAnswer, IQuestion} from "../../model/IQuestion";
-
-export interface QuestionAlternative {
-  id: string;
-  text: string;
-}
 
 @Component({
   selector: 'app-question-section',
@@ -20,34 +15,33 @@ export class QuestionSectionComponent implements OnInit {
   @Output() answerSelected = new EventEmitter<number>();
 
   selectedAnswerID: number | null = null;
-  correctanswerID: number | null = null;
+  correctAnswerID: number | null = null;
 
   ngOnInit(): void {
-    this.correctanswerID = this.question?.answers.find(ans => ans.rightAnswer)?.answerID || null;
-    console.log(this.correctanswerID)
+    this.correctAnswerID = this.question?.answers.find(ans => ans.rightAnswer)?.answerID || null;
+    console.log(this.question)
+    console.log(this.correctAnswerID)
   }
 
   onSelectAlternative(alt: IAnswer): void {
     if (!this.isMyTurn) return;
-    if (this.reveal) return;
     this.selectedAnswerID = alt.answerID
     this.answerSelected.emit(alt.answerID);
   }
 
   /** Verifica se alternativas devem estar desabilitadas */
   isDisabled(): boolean {
-    if (!this.isMyTurn || this.reveal || this.disableAlternatives) return true;
-    return false;
+    return !this.isMyTurn || this.disableAlternatives;
   }
 
   getAlternativeState(id: number): '' | 'correct' | 'wrong' {
     if (!this.selectedAnswerID && !this.disableAlternatives) return '';
 
     if (this.disableAlternatives){
-      if (id === this.correctanswerID) return 'correct';
+      if (id === this.correctAnswerID) return 'correct';
       return 'wrong';
     }
-    const isCorrect = id === this.correctanswerID;
+    const isCorrect = id === this.correctAnswerID;
     const isPlayerChoice = id === this.selectedAnswerID;
 
     if (isCorrect) return 'correct';
