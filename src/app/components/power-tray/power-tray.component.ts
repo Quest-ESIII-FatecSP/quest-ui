@@ -11,7 +11,6 @@ export class PowerTrayComponent {
 
   readonly powerList: TipoPoder[] = [
     TipoPoder.FREEZE_QUESTIONS,
-    TipoPoder.MOUSE_ESCAPE,
     TipoPoder.JUMP_SCARE,
     TipoPoder.VOWEL_X
   ];
