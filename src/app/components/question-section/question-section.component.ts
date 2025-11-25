@@ -13,6 +13,7 @@ export class QuestionSectionComponent implements OnInit {
   @Input() categoryName: string | null = null;
   @Input() disableAlternatives: boolean = false;
   @Output() answerSelected = new EventEmitter<number>();
+  @Input() freezedQuestions: boolean = false;
 
   selectedAnswerID: number | null = null;
   correctAnswerID: number | null = null;
@@ -31,7 +32,7 @@ export class QuestionSectionComponent implements OnInit {
 
   /** Verifica se alternativas devem estar desabilitadas */
   isDisabled(): boolean {
-    return !this.isMyTurn || this.disableAlternatives;
+    return !this.isMyTurn || this.disableAlternatives || this.freezedQuestions;
   }
 
   getAlternativeState(id: number): '' | 'correct' | 'wrong' {
