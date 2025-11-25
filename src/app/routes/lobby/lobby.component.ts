@@ -614,7 +614,7 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
           const tipoCmp = (a.tipo || '').localeCompare(b.tipo || '');
           if (tipoCmp !== 0) return tipoCmp;
           const pa = (a.preco ?? 0);
-          const pb = (b.preco ?? 0);
+          const pb = (b.preco ?? 0);   
           return pa - pb;
         });
 
@@ -622,6 +622,8 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
           if (item.tipo === TipoItemEnum.avatar) {
             return !this.avataresInventario.some(av => av.id === item.id);
           }
+
+          if(item.tipo === TipoItemEnum.poder && item.id == 2) return false;
 
           return true;
         })
