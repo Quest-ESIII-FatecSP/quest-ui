@@ -202,7 +202,7 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
       if (tipoEvento == "ROOM_CREATED" && !this.createdOwnRoom) {
         this.createdOwnRoom = true
         this.roomInfos = JSON.parse(message.body);
-        // this.stompRoomSubscription();
+        this.stompRoomSubscription();
 
         const userID = message.headers["user-id"];
 
