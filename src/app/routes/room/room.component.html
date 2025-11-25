@@ -64,11 +64,6 @@
     class="cards-containers"
   ></app-card-selection>
 
-  <pre> {{ autoPickedValue | json }} </pre>
-
-  <pre> {{ availableCards }} </pre>
-  <pre> {{  oponnentAvailableCards }} </pre>
-
   <app-power-tray
     [leftPowers]="player1Powers"
     [rightPowers]="player2Powers"
@@ -76,7 +71,6 @@
     [disabled]="cannotUsePowers"
     (powerUsed)="checkUsedPower($event)"
   ></app-power-tray>
-
 
 </div>
 

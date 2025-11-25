@@ -94,6 +94,7 @@ export class RoomComponent implements OnInit {
   autoCloseMs = 5000;
   categoriaSelecionada: WheelSector | null = null;
   private autoCloseTimer: any = null;
+  roomIntervalId: any = null;
 
   useFreezeQuestions() { this.roomService.usePower('FREEZE_QUESTIONS', this.roomId) }
   useStealQuestion() { this.roomService.usePower('STEAL_QUESTION', this.roomId) }
@@ -103,53 +104,46 @@ export class RoomComponent implements OnInit {
 
   ngOnInit() {
     this.roomId = this.route.snapshot.paramMap.get('id') ?? '';
-    // this.findUserData();
     this.stompRoomSubscription();
   }
 
-  startTimer(seconds: number, onFinish: () => void) {
+  startTimer(seconds: number, onFinish?: () => void) {
+    // limpa timer anterior, se houver
+    if (this.roomIntervalId != null) {
+      clearTimeout(this.roomIntervalId);
+      this.roomIntervalId = null;
+    }
+
     this.roomTimeLeft = seconds;
+    const start = Date.now();
+    const end = start + seconds * 1000;
 
-    const interval = setInterval(() => {
-      if (this.roomTimeLeft > 0) {
-        this.roomTimeLeft--;
+    const tick = () => {
+      const remaining = Math.ceil((end - Date.now()) / 1000);
+      this.roomTimeLeft = Math.max(0, remaining);
+
+      if (remaining <= 0) {
+        this.roomIntervalId = null;
+        if (onFinish) onFinish();
       } else {
-        clearInterval(interval);
-        if (onFinish){
-          onFinish()
-        }
+        // atualiza com frequência suficiente para manter a contagem estável
+        this.roomIntervalId = window.setTimeout(tick, 250);
       }
-    }, 1000);
-  }
+    };
 
-  findUserData(): void {
-    this.jogadorService.ObterDadosJogador().subscribe({
-      next: (data) => {
-        const { avatar, email, moeda, username, tipo } = data;
-
-        if (tipo == TipoJogadorEnum.CONVIDADO) {
-          this.player1.tipo = TipoJogadorEnum.CONVIDADO;
-          this.player1.username = "Convidado";
-          this.player1.avatar = 'assets/img/Variedades F.png'
-        } else {
-          this.player1.username = username;
-          this.player1.avatar = avatar;
-          this.player1.moeda = moeda;
-          this.player1.email = email;
-          this.player1.tipo = tipo ?? TipoJogadorEnum.CONVIDADO;
-        }
-      }
-    });
+    tick();
   }
 
   stompRoomSubscription() {
     const finalRoomCode = this.route.snapshot.paramMap.get('id');
 
     this.stompService.subscribe(`/room/${finalRoomCode}`, (message) => {
-      console.log(message)
       const eventType = message.headers["event"];
-      console.log(message.headers["event"])
       this.isMyTurn = message.headers["active-player-id"] === this.stompService.userID
+
+      if (this.isMyTurn){
+        console.log(eventType)
+      }
       this.handleEventType(eventType, '', message)
     });
   }
@@ -358,6 +352,7 @@ export class RoomComponent implements OnInit {
     this.showQuestionSection = true
     this.startTimer(15, () => {
       if (!this.answeredQuestion){
+        console.log('nao era pra ta aqui')
         this.disableQuestionSection = true
         this.roomService.answerQuestion(null, this.roomId)
       }
@@ -366,6 +361,8 @@ export class RoomComponent implements OnInit {
   }
 
   handleAnswerResult(message: any) {
+    this.disableQuestionSection = false
+
     const result = JSON.parse(message.body);
 
     const pontuacao: Map<string, number> = new Map(Object.entries(result.scorePerPlayer));

@@ -39,6 +39,7 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
   stompRoomSubscriptioinRef: StompSubscription | null = null;
   stompLobbySubscriptioinRef: StompSubscription | null = null;
   stopRoomSub = false
+  createdOwnRoom = false
 
   player1 = {
     username: 'Jogador 1',
@@ -198,8 +199,8 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
   stompLobbySubscription() {
     this.stompService.subscribe('/lobby', (message) => {
       const tipoEvento = message.headers["event"];
-      console.log(tipoEvento)
-      if (tipoEvento == "ROOM_CREATED") {
+      if (tipoEvento == "ROOM_CREATED" && !this.createdOwnRoom) {
+        this.createdOwnRoom = true
         this.roomInfos = JSON.parse(message.body);
         this.stompRoomSubscription();
 
@@ -285,7 +286,7 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
       alert('Por favor, preencha o nome e a senha da sala.');
       return;
     }
-
+    this.createdOwnRoom = false
     this.stompService.publish({ destination: `/createRoom/${nome}` });
     this.player1.active = true
     // fecha modal
