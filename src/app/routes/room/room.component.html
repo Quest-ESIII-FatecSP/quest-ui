@@ -60,9 +60,10 @@
     [availableCards]="availableCards"
     [opponentCards]="oponnentAvailableCards"
     (pickRequested)="onCardPickRequested($event)"
-    [autoPickValue]="autoPickedValue"
+    [choosenCard]="choosenCard"
     class="cards-containers"
   ></app-card-selection>
+
 
   <app-power-tray
     [leftPowers]="player1Powers"

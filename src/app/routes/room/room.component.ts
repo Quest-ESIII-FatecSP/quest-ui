@@ -42,7 +42,7 @@ export class RoomComponent implements OnInit {
 
   @ViewChild(QuestWheelComponent) wheel?: QuestWheelComponent;
 
-  autoPickedValue: number | null = null;
+  choosenCard: number | null = null;
   showJumpscare = false;
   jumpscareImage = '';
   roomId = '';
@@ -149,7 +149,6 @@ export class RoomComponent implements OnInit {
   }
 
   onSpinEnd(result: { index: number; sector: WheelSector }) {
-    console.log('spin ended', result);
     this.categoriaSelecionada = result.sector;
     this.openThemeModal();
     this.roletaTravada = false;
@@ -187,12 +186,22 @@ export class RoomComponent implements OnInit {
     // garantir que o componente tenha sido mostrado, o jogador escolhe então onCardChosen será chamado
   }
 
+  refreshAvailableCards() {
+    if (this.isMyTurn) {
+      this.availableCards = this.availableCards.filter(c => c !== this.choosenCard);
+    } else {
+      this.oponnentAvailableCards = this.oponnentAvailableCards.filter(c => c !== this.choosenCard);
+    }
+  }
+
   onCardPickRequested(card: number) {
+    console.log("onCardPickRequested:", card);
     if (!this.availableCards?.includes(card)) return
-
-    console.log("Card pick requested:", card);
-
+    this.disableCardsSection = true;
+    this.choosenCard = card;
     this.roomService.choseScoreCard(card.toString(), this.roomId);
+
+    this.refreshAvailableCards();
   }
 
   checkUsedPower(power: TipoPoder) {
@@ -305,8 +314,6 @@ export class RoomComponent implements OnInit {
     });
 
     this.displayTopBar = true;
-
-    console.log(this.themeForWheel);
   }
 
   handleAwaitingScoreCardAnimation() {
@@ -319,7 +326,7 @@ export class RoomComponent implements OnInit {
 
   handleAwaitingScoreCard(activePlayer: string, message: IMessage) {
     const payload = JSON.parse(message.body).availableScoreCards as number[];
-    if(this.isMyTurn) {
+    if (this.isMyTurn) {
       this.availableCards = payload
     } else {
       this.oponnentAvailableCards = payload
@@ -330,7 +337,7 @@ export class RoomComponent implements OnInit {
     // console.log("Available cards updated:", this.availableCards);
 
     this.startTimer(5, () => {
-      this.disableCardsSection = true;
+      // this.disableCardsSection = true;
     });
 
     // console.log(`available cards: `, this.availableCards);
@@ -338,26 +345,22 @@ export class RoomComponent implements OnInit {
 
   handleAwaitingAnswerAnimation(activePlayer: string, message: any) {
     const payload: { autoSelected: boolean, chosenScoreCard: number } = JSON.parse(message.body);
+    this.disableCardsSection = true;
+    this.choosenCard = payload.chosenScoreCard;
 
-    if(this.isMyTurn) {
-      this.autoPickedValue = payload.chosenScoreCard;
-    }
-
-    console.log("Auto picked value:", this.autoPickedValue);
+    this.refreshAvailableCards();
   }
 
   handleAwaitingAnswer(message: IMessage) {
     this.question = JSON.parse(message.body);
-    console.log(this.question)
     this.showQuestionSection = true
     this.startTimer(15, () => {
-      if (!this.answeredQuestion){
-        console.log('nao era pra ta aqui')
+      if (!this.answeredQuestion) {
         this.disableQuestionSection = true
         this.roomService.answerQuestion(null, this.roomId)
       }
       this.answeredQuestion = false;
-    })
+    });
   }
 
   handleAnswerResult(message: any) {
@@ -375,9 +378,11 @@ export class RoomComponent implements OnInit {
   }
 
   handlePowerUsed(activePlayer: string, message: string, tipo: TipoPoder) {
-    this.player1Powers[tipo] = (this.player1Powers[tipo] || 1) - 1;
+    if(!this.isMyTurn) {
+      this.player1Powers[tipo] = (this.player1Powers[tipo] || 1) - 1;
+    }
 
-    switch(tipo) {
+    switch (tipo) {
       case TipoPoder.FREEZE_QUESTIONS:
         break;
       case TipoPoder.MOUSE_ESCAPE:
@@ -391,7 +396,7 @@ export class RoomComponent implements OnInit {
   }
 
   triggerJumpscare() {
-    if(!this.isMyTurn) return;
+    if (!this.isMyTurn) return;
 
     const images = [
       'assets/jumpscare/jump1.jpg',
@@ -428,10 +433,10 @@ export class RoomComponent implements OnInit {
     const finalScore: Map<string, number> = new Map(Object.entries(response.scorePerPlayer));
 
     let winner;
-    if (this.player1.id === response['winnerPlayerID']){
-      winner = {...this.player1};
+    if (this.player1.id === response['winnerPlayerID']) {
+      winner = { ...this.player1 };
     } else {
-      winner = {...this.otherPlayer};
+      winner = { ...this.otherPlayer };
     }
     alert(`Parabéns, ${winner.username}! Você venceu o jogo com ${finalScore.get(winner.id!)} pontos!`);
   }
