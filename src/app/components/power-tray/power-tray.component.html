@@ -1,0 +1,25 @@
+<div class="power-tray" [class.disabled]="disabled">
+
+  <div class="side left-side" style="margin: 0 auto !important;">
+    <button class="power-btn" *ngFor="let p of powerList"
+      [class.disabled]="isMyTurn  || disabled" (click)="use(p)">
+      <img [src]="icons[p]" />
+      <span class="count">{{ leftPowers[p] }}</span>
+    </button>
+  </div>
+
+  <!-- <div class="center-area">
+    <button class="power-btn steal disabled">
+      <img [src]="icons[5]" />
+    </button>
+  </div> -->
+
+  <!-- <div class="side right-side">
+    <button class="power-btn" *ngFor="let p of powerList"
+      [class.disabled]="isMyTurn || rightPowers[p] <= 0 || disabled" (click)="use(p, 'right')">
+      <img [src]="icons[p]" />
+      <span class="count" *ngIf="rightPowers[p] > 0">{{ rightPowers[p] }}</span>
+    </button>
+  </div> -->
+
+</div>

@@ -72,7 +72,7 @@
     cursor: default;
   }
 
-  .correct {
+  &.correct {
     background-color: #1eff1e !important;
     color: #000;
     animation: blink-green 0.8s ease-in-out infinite;

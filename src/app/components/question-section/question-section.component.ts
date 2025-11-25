@@ -1,11 +1,6 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {IAnswer, IQuestion} from "../../model/IQuestion";
 
-export interface QuestionAlternative {
-  id: string;
-  text: string;
-}
-
 @Component({
   selector: 'app-question-section',
   templateUrl: './question-section.component.html',
@@ -16,39 +11,41 @@ export class QuestionSectionComponent implements OnInit {
   @Input() isMyTurn: boolean = true;
   @Input() reveal: boolean = false;
   @Input() categoryName: string | null = null;
+  @Input() disableAlternatives: boolean = false;
   @Output() answerSelected = new EventEmitter<number>();
 
-  correctanswerID: number | null = null;
-  playeranswerID: number | null = null
-  localClickedId: number | null = null;
+  selectedAnswerID: number | null = null;
+  correctAnswerID: number | null = null;
 
   ngOnInit(): void {
+    this.correctAnswerID = this.question?.answers.find(ans => ans.rightAnswer)?.answerID || null;
     console.log(this.question)
-    this.correctanswerID = this.question?.answers.find(ans => ans.rightAnswer)?.answerID || null;
-    console.log(this.correctanswerID)
+    console.log(this.correctAnswerID)
   }
 
   onSelectAlternative(alt: IAnswer): void {
     if (!this.isMyTurn) return;
-    if (this.reveal) return;
-    this.getAlternativeState(alt.answerID)
+    this.selectedAnswerID = alt.answerID
     this.answerSelected.emit(alt.answerID);
   }
 
   /** Verifica se alternativas devem estar desabilitadas */
   isDisabled(): boolean {
-    if (!this.isMyTurn) return true;
-    if (this.reveal) return true;
-    return false;
+    return !this.isMyTurn || this.disableAlternatives;
   }
 
-  getAlternativeState(id: number): 'neutral' | 'correct' | 'wrong' {
+  getAlternativeState(id: number): '' | 'correct' | 'wrong' {
+    if (!this.selectedAnswerID && !this.disableAlternatives) return '';
 
-    const isCorrect = id === this.correctanswerID;
-    const isPlayerChoice = id === this.playeranswerID;
+    if (this.disableAlternatives){
+      if (id === this.correctAnswerID) return 'correct';
+      return 'wrong';
+    }
+    const isCorrect = id === this.correctAnswerID;
+    const isPlayerChoice = id === this.selectedAnswerID;
 
     if (isCorrect) return 'correct';
     if (isPlayerChoice && !isCorrect) return 'wrong';
-    return 'correct';
+    return '';
   }
 }

@@ -27,13 +27,10 @@ export class StompService {
 
   subscribe(broker: string, callback: (message: Message) => void): StompSubscription | null {
     if (this.client.connected) {
-      console.log('foi no connected')
       const sub = this.client.subscribe(broker, callback);
       this.subscribeRequests.push({ broker, callback, subscription: sub });
       return sub;
     } else {
-      console.log('foi no push')
-
       this.subscribeRequests.push({ broker, callback, subscription: undefined });
       return null;
     }
@@ -63,7 +60,6 @@ export class StompService {
   }
 
   publish(params: IPublishParams): void {
-    console.log(params)
     if (params.headers) {
       params.headers["user-id"] = this.userID;
     } else {
@@ -71,7 +67,6 @@ export class StompService {
     }
 
     if (this.client.connected) {
-      console.log("publicando mensagem")
       this.client.publish(params);
     }
   }}

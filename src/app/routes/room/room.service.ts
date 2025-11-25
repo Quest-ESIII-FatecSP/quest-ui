@@ -18,10 +18,10 @@ export class RoomService {
         "user-id": this.stompService.userID,
         "action-type": actionType // USE_POWER, CHOOSE_SCORE_CARD, ANSWER_QUESTION
       }
-    })
+    });
   }
 
-  answerQuestion(choosenAnswerID: string, idSala: string) {
+  answerQuestion(choosenAnswerID: string | null, idSala: string) {
     if (!idSala) return;
     const body = JSON.stringify({
       choosenAnswerID

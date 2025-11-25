@@ -39,6 +39,7 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
   stompRoomSubscriptioinRef: StompSubscription | null = null;
   stompLobbySubscriptioinRef: StompSubscription | null = null;
   stopRoomSub = false
+  createdOwnRoom = false
 
   player1 = {
     username: 'Jogador 1',
@@ -187,7 +188,7 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.stompRoomSubscriptioinRef = this.stompService.subscribe(`/room/${finalRoomCode}`, (message) => {
       if (this.stopRoomSub) return
-      console.log(message.headers["event"])
+      console.log(message.headers["event"]);
       this.player2 = { ...this.player2, active: true, status: 'Conectado' }
       this.EnterText = 'Entrando na Sala...'
       this.router.navigate(['/room/', finalRoomCode])
@@ -198,15 +199,14 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
   stompLobbySubscription() {
     this.stompService.subscribe('/lobby', (message) => {
       const tipoEvento = message.headers["event"];
-      console.log(tipoEvento)
-      if (tipoEvento == "ROOM_CREATED") {
+      if (tipoEvento == "ROOM_CREATED" && !this.createdOwnRoom) {
+        this.createdOwnRoom = true
         this.roomInfos = JSON.parse(message.body);
         this.stompRoomSubscription();
 
         const userID = message.headers["user-id"];
 
         if (this.isSalaEmCriacao && userID == this.stompService.userID) {
-          console.log("navegando para sala")
           // this.router.navigate(['/sala', nomeSala])
         }
         // this.salas.push(nomeSala);
@@ -260,7 +260,7 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       });
     } catch (e) {
-      console.log(e);
+      this.toastr.error('Erro ao atualizar avatar.');
     } finally {
       this.blockUI.stop();
       this.closeBootstrapModal('avatarModal');
@@ -285,7 +285,7 @@ export class LobbyComponent implements OnInit, AfterViewInit, OnDestroy {
       alert('Por favor, preencha o nome e a senha da sala.');
       return;
     }
-
+    this.createdOwnRoom = false
     this.stompService.publish({ destination: `/createRoom/${nome}` });
     this.player1.active = true
     // fecha modal

@@ -5,7 +5,7 @@
   </div>
 
   <div class="turn-label">
-    Agora é sua vez, responda:
+   {{ isMyTurn ? 'Agora é sua vez, responda:' : 'Vez do oponente, aguarde...' }}
   </div>
 
   <div class="question-title">
@@ -21,8 +21,7 @@
     'correct': getAlternativeState(alt.answerID) === 'correct',
     'wrong': getAlternativeState(alt.answerID) === 'wrong'
   }"
-      (click)="onSelectAlternative(alt)"
-    >
+      (click)="onSelectAlternative(alt)">
       {{ alt.answerText }}
     </button>
   </div>
