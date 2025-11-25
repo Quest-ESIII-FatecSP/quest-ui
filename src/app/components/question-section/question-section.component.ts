@@ -19,12 +19,13 @@ export class QuestionSectionComponent implements OnInit {
   correctAnswerID: number | null = null;
 
   ngOnInit(): void {
-    this.correctAnswerID = this.question?.answers.find(ans => ans.rightAnswer)?.answerID || null;
+    this.correctAnswerID = this.question?.answers.find(ans => ans.rightAnswer)?.answerID ?? null;
     console.log(this.question)
     console.log(this.correctAnswerID)
   }
 
   onSelectAlternative(alt: IAnswer): void {
+    console.log(this.isMyTurn)
     if (!this.isMyTurn) return;
     this.selectedAnswerID = alt.answerID
     this.answerSelected.emit(alt.answerID);
