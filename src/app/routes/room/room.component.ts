@@ -44,6 +44,9 @@ export class RoomComponent implements OnInit {
 
   @ViewChild(QuestWheelComponent) wheel?: QuestWheelComponent;
 
+  private _originalQuestionBackup: IQuestion | null = null;
+  private _vowelXTimer: any = null;
+  private _vowelXToken = 0;
   choosenCard: number | null = null;
   showJumpscare = false;
   jumpscareImage = '';
@@ -361,7 +364,10 @@ export class RoomComponent implements OnInit {
 
   handleAwaitingAnswer(message: IMessage) {
     this.question = JSON.parse(message.body);
-    this.showQuestionSection = true
+
+
+
+    this.showQuestionSection = true;
     this.startTimer(15, () => {
       if (!this.answeredQuestion) {
         this.disableQuestionSection = true
@@ -370,6 +376,8 @@ export class RoomComponent implements OnInit {
       this.answeredQuestion = false;
     });
   }
+
+
 
   handleAnswerResult(message: any) {
     this.disableQuestionSection = false
@@ -399,8 +407,56 @@ export class RoomComponent implements OnInit {
         this.triggerJumpscare();
         break;
       case TipoPoder.VOWEL_X:
+        this.triggerVowelX();
         break;
     }
+  }
+
+  triggerVowelX(durationMs: number = 5000) {
+    if (!this.question) return;
+
+    if (this._vowelXTimer) {
+      clearTimeout(this._vowelXTimer);
+      this._vowelXTimer = null;
+    }
+
+    this._originalQuestionBackup = JSON.parse(JSON.stringify(this.question));
+
+    const token = ++this._vowelXToken;
+
+    const maskStrings = (obj: any): any => {
+      if (obj == null) return obj;
+      if (typeof obj === 'string') {
+        return obj.replace(/[aeiouAEIOU0-9]/g, 'X');
+      }
+      if (Array.isArray(obj)) {
+        return obj.map(maskStrings);
+      }
+      if (typeof obj === 'object') {
+        const out: any = {};
+        for (const k of Object.keys(obj)) {
+          out[k] = maskStrings(obj[k]);
+        }
+        return out;
+      }
+      return obj;
+    };
+
+    // aplica máscara (não altera o backup)
+    this.question = maskStrings(this._originalQuestionBackup);
+
+    // programa restauração
+    this._vowelXTimer = setTimeout(() => {
+      // se token mudou, significa que uma nova máscara foi aplicada depois desta — não restaurar
+      if (token !== this._vowelXToken) return;
+
+      // restaura backup (deep clone para evitar referências)
+      if (this._originalQuestionBackup) {
+        this.question = JSON.parse(JSON.stringify(this._originalQuestionBackup));
+      }
+      this._originalQuestionBackup = null;
+      this._vowelXTimer = null;
+    }, durationMs);
   }
 
   triggerJumpscare() {
