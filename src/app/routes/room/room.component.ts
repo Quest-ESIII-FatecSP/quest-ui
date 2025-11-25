@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { ActivatedRoute } from "@angular/router";
+import { ActivatedRoute, Router } from "@angular/router";
 import { THEMES } from "@shared/constants/theme.constants";
 import { IMessage } from "@stomp/stompjs";
 import { CardSelectionComponent } from '../../components/card-selection/card-selection.component';
@@ -35,10 +35,12 @@ declare global {
   styleUrls: ['./room.component.scss']
 })
 export class RoomComponent implements OnInit {
-  constructor(private roomService: RoomService,
+  constructor(
+    private roomService: RoomService,
     private route: ActivatedRoute,
     private stompService: StompService,
-    private jogadorService: JogadorService) { }
+    private jogadorService: JogadorService,
+    private router: Router) { }
 
   @ViewChild(QuestWheelComponent) wheel?: QuestWheelComponent;
 
@@ -60,6 +62,12 @@ export class RoomComponent implements OnInit {
   themeForWheel: WheelSector | null = null;
   player1: IPlayer = { pontuacao: 0 };
   otherPlayer: IPlayer = { pontuacao: 0 };
+  showGameFinishModal = false;
+  showGameDrawModal = false;
+  winner: IPlayer | null = null;
+  winnerScore = 0;
+  redirectCountdown = 10;
+  private redirectTimer: any = null;
 
   player1Powers: Partial<Record<TipoPoder, number>> = {
     [TipoPoder.FREEZE_QUESTIONS]: 0,
@@ -427,19 +435,61 @@ export class RoomComponent implements OnInit {
     }, 1400);
   }
 
-  // colocar em um modal dps
+
   handleFinishGame(message: IMessage) {
     const response = JSON.parse(message.body);
     const finalScore: Map<string, number> = new Map(Object.entries(response.scorePerPlayer));
 
     let winner;
     if (this.player1.id === response['winnerPlayerID']) {
-      winner = { ...this.player1 };
-    } else {
-      winner = { ...this.otherPlayer };
+      this.winner = {...this.player1};
+
+      this.showGameFinishModal = true;
+      this.winnerScore = finalScore.get(this.winner.id!) || 0;
+
+    } else if (this.otherPlayer.id === response['winnerPlayerID']) {
+      this.winner = {...this.otherPlayer};
+
+      this.showGameFinishModal = true;
+      this.winnerScore = finalScore.get(this.winner.id!) || 0;
+
     }
-    alert(`Parabéns, ${winner.username}! Você venceu o jogo com ${finalScore.get(winner.id!)} pontos!`);
+    else {
+      this.showGameDrawModal= true;
+    }
+
+    this.startRedirectCountdown();
   }
 
+  startRedirectCountdown() {
+    this.redirectCountdown = 10;
+    this.redirectTimer = setInterval(() => {
+      this.redirectCountdown--;
+      if (this.redirectCountdown <= 0) {
+        this.clearRedirectTimer();
+        this.goToLobby();
+      }
+    }, 1000);
+  }
 
+  clearRedirectTimer() {
+    if (this.redirectTimer) {
+      clearInterval(this.redirectTimer);
+      this.redirectTimer = null;
+    }
+  }
+
+  closeGameFinishModal() {
+    this.clearRedirectTimer(); // <-- NOVO
+    this.showGameFinishModal = false;
+  }
+
+  goToLobby() {
+    this.clearRedirectTimer(); // <-- NOVO
+    this.router.navigate(['/lobby']);
+  }
+
+  ngOnDestroy() {
+    this.clearRedirectTimer();
+  }
 }

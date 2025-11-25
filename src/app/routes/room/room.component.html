@@ -88,3 +88,56 @@
 <div class="jumpscare-overlay" *ngIf="showJumpscare">
   <img [src]="jumpscareImage" class="jumpscare-img" />
 </div>
+
+
+<div *ngIf="showGameFinishModal" class="game-finish-modal-overlay">
+  <div class="game-finish-modal">
+    <div class="modal-content">
+      <div class="avatar-section">
+        <img
+          [src]="winner?.avatar"
+          [alt]="winner?.username"
+          class="winner-avatar"
+        />
+      </div>
+
+      <div class="info-section">
+        <h2 class="modal-title">Fim da Partida</h2>
+        <p class="winner-info">
+          <span class="label">Vencedor:</span>
+          <span class="winner-name">{{ winner?.username }}</span>
+        </p>
+        <p class="score-info">
+          <span class="label">Pontos:</span>
+          <span class="score-value">{{ winnerScore }}</span>
+        </p>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-lobby" (click)="goToLobby()">
+          Voltar ao Lobby ({{ redirectCountdown }}s)
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="showGameDrawModal" class="game-finish-modal-overlay">
+  <div class="game-finish-modal">
+    <div class="modal-content">
+
+      <div class="info-section">
+        <h2 class="modal-title">Fim da Partida</h2>
+        <p class="winner-info">
+          <span class="label">Empate</span>
+        </p>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-lobby" (click)="goToLobby()">
+          Voltar ao Lobby ({{ redirectCountdown }}s)
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
