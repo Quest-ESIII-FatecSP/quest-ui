@@ -77,8 +77,6 @@ export class CardSelectionComponent implements OnChanges {
   public pick(cardNumber: number) {
     const card = this.leftCards.find(c => c.value === cardNumber)!;
 
-    alert("Picking card: " + cardNumber);
-
     if (card.used || card.disabled || !this.isMyTurn) return;
 
     this.leftCards = this.leftCards.map(c => ({
