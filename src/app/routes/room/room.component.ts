@@ -92,7 +92,8 @@ export class RoomComponent implements OnInit {
   roomTimeLeft = 0
   disableCardsSection: boolean = false;
   disableQuestionSection: boolean = false;
-  answeredQuestion: boolean = false
+  answeredQuestion: boolean = false;
+  freezedQuestions: boolean = false;
 
   roletaComecouSpin(event: any) {
     this.roletaTravada = true;
@@ -400,6 +401,12 @@ export class RoomComponent implements OnInit {
 
     switch (tipo) {
       case TipoPoder.FREEZE_QUESTIONS:
+      if (this.isMyTurn) {
+        this.freezedQuestions = true;
+        setTimeout(() => {
+          this.freezedQuestions = false;
+        }, 5000);
+      }
         break;
       case TipoPoder.MOUSE_ESCAPE:
         break;
